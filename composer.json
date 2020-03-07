@@ -1,0 +1,26 @@
+{
+    "name": "vice/vice",
+    "description": "A very simple framework",
+    "type": "library",
+    "minimum-stability": "dev",
+    "require": {
+        "php": "^7.1",
+        "slim/slim": "^4.0",
+        "slim/psr7": "dev-master"
+    },
+    "autoload": {
+        "psr-4": {
+            "Vice\\": "src/Vice/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Vice\\": "tests/Vice/"
+        }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "~7.0",
+        "mockery/mockery": "^1.2",
+        "php-di/php-di": "^6.0.0"
+    }
+}
