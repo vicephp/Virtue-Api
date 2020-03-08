@@ -14,9 +14,8 @@ class RouteRunner implements HandlesServerRequests
     /** @var RouteCollectorInterface */
     private $routeCollector;
 
-    public function __construct(
-        RouteCollectorInterface $routeCollector
-    ) {
+    public function __construct(RouteCollectorInterface $routeCollector)
+    {
         $this->routeCollector = $routeCollector;
     }
 

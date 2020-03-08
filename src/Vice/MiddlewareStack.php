@@ -7,6 +7,7 @@ use Psr\Http\Message\ServerRequestInterface as ServerRequest;
 use Psr\Http\Server\MiddlewareInterface as ServerMiddleware;
 use Psr\Http\Server\RequestHandlerInterface as HandlesServerRequests;
 use Slim\Interfaces\MiddlewareDispatcherInterface;
+use Vice\Middleware\RequestHandler;
 
 class MiddlewareStack implements MiddlewareDispatcherInterface
 {
@@ -55,32 +56,6 @@ class MiddlewareStack implements MiddlewareDispatcherInterface
 
     private function handlerWithNextMiddleware($index = 0)
     {
-        if (!isset($this->stack[$index])) {
-            return $this->kernel;
-        }
-
-        $middleware = $this->stack[$index];
-
-        $next = $this->handlerWithNextMiddleware($index + 1);
-
-        return new class (
-            $middleware,
-            $next
-        ) implements HandlesServerRequests {
-            /** @var ServerMiddleware */
-            private $middleware;
-            private $next;
-
-            public function __construct(ServerMiddleware $middleware, HandlesServerRequests $next)
-            {
-                $this->middleware = $middleware;
-                $this->next = $next;
-            }
-
-            public function handle(ServerRequest $request): Response
-            {
-                return $this->middleware->process($request, $this->next);
-            }
-        };
+        return isset($this->stack[$index]) ? new RequestHandler($this->stack[$index], $this->handlerWithNextMiddleware($index + 1)) : $this->kernel;
     }
 }
