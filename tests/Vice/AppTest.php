@@ -60,7 +60,7 @@ class AppTest extends TestCase
                 },
                 RouteRunner::class => function (Locator $locator) {
                     $responseFactory = $locator->get(ResponseFactory::class);
-                    return new Testing\RouteRunnerStub(
+                    return new Testing\RequestHandlerStub(
                         $responseFactory->createResponse()
                     );
                 },

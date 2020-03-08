@@ -4,15 +4,17 @@ namespace Vice;
 
 use Fig\Http\Message\StatusCodeInterface as StatusCode;
 use Mockery\Adapter\Phpunit\MockeryTestCase;
-use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Server\MiddlewareInterface;
-use Psr\Http\Server\RequestHandlerInterface;
+use Psr\Http\Message\ServerRequestInterface as ServerRequest;
+use Psr\Http\Server\MiddlewareInterface as ServerMiddleware;
+use Psr\Http\Server\RequestHandlerInterface as HandlesServerRequests;
 use Slim\Psr7\Response;
+use Vice\Testing\RequestHandlerStub;
 
 class MiddlewareStackTest extends MockeryTestCase
 {
-    protected function mockMiddleware(callable $handle) {
-        $middleware = \Mockery::mock(MiddlewareInterface::class);
+    protected function mockMiddleware(callable $handle): ServerMiddleware
+    {
+        $middleware = \Mockery::mock(ServerMiddleware::class);
         $middleware->shouldReceive('process')->andReturnUsing($handle);
 
         return $middleware;
@@ -21,26 +23,21 @@ class MiddlewareStackTest extends MockeryTestCase
     public function testStack()
     {
         $set400 = $this->mockMiddleware(
-            function(ServerRequestInterface $request, RequestHandlerInterface $next) {
+            function(ServerRequest $request, HandlesServerRequests $next) {
                 return $next->handle($request)->withStatus(StatusCode::STATUS_BAD_REQUEST);
             }
         );
         $set301 = $this->mockMiddleware(
-            function(ServerRequestInterface $request, RequestHandlerInterface $next) {
+            function(ServerRequest $request, HandlesServerRequests $next) {
                 return $next->handle($request)->withStatus(StatusCode::STATUS_MOVED_PERMANENTLY);
             }
         );
 
         $stack = new MiddlewareStack();
-        $stack->seedMiddlewareStack($kernel = \Mockery::mock(RequestHandlerInterface::class));
+        $stack->seedMiddlewareStack(new RequestHandlerStub(new Response()));
         $stack->add($set400);
         $stack->add($set301);
-        $kernel->shouldReceive('handle')->andReturnUsing(
-            function (ServerRequestInterface $request) {
-                return new Response();
-            }
-        );
-        $response = $stack->handle(\Mockery::mock(ServerRequestInterface::class));
+        $response = $stack->handle(\Mockery::mock(ServerRequest::class));
         $this->assertEquals(400, $response->getStatusCode());
         $this->assertNotEquals(301, $response->getStatusCode());
     }

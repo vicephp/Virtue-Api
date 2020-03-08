@@ -6,7 +6,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as ServerResponse;
 use Psr\Http\Server\RequestHandlerInterface as HandlesServerRequests;
 
-class RouteRunnerStub implements HandlesServerRequests
+class RequestHandlerStub implements HandlesServerRequests
 {
     /** @var Response */
     private $response;
