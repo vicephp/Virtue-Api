@@ -2,12 +2,12 @@
 
 namespace Vice;
 
-use Psr\Container\ContainerInterface as Container;
-use Psr\Http\Message\ResponseFactoryInterface;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
+use Psr\Container\ContainerInterface as Locator;
+use Psr\Http\Message\ResponseFactoryInterface as ResponseFactory;
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as ServerRequest;
 use Psr\Http\Server\MiddlewareInterface;
-use Psr\Http\Server\RequestHandlerInterface;
+use Psr\Http\Server\RequestHandlerInterface as HandlesServerRequests;
 use Slim\CallableResolver;
 use Slim\Interfaces\MiddlewareDispatcherInterface;
 use Slim\Interfaces\RouteCollectorInterface;
@@ -16,36 +16,25 @@ use Slim\Middleware\BodyParsingMiddleware;
 use Slim\Middleware\ErrorMiddleware;
 use Slim\Middleware\RoutingMiddleware;
 use Slim\ResponseEmitter;
-use Slim\Routing\RouteCollectorProxy;
-use Vice\Routing\RouteRunner;
+use Vice\Routing\RouteCollectorProxy;
 
-class App extends RouteCollectorProxy implements RequestHandlerInterface
+class App extends RouteCollectorProxy implements HandlesServerRequests
 {
     /** @var string */
     public const VERSION = '0.0.0';
-
     /** @var MiddlewareDispatcherInterface */
     protected $middlewareStack;
+    /** @var Locator */
+    private $services;
 
-    public function __construct(Container $container) {
+    public function __construct(Locator $services) {
         parent::__construct(
-            $container->get(ResponseFactoryInterface::class),
-            $container->get(CallableResolver::class),
-            $container,
-            $container->get(RouteCollectorInterface::class)
+            $services->get(ResponseFactory::class),
+            $services->get(CallableResolver::class),
+            $services->get(RouteCollectorInterface::class)
         );
-        $this->middlewareStack = $container->get(MiddlewareDispatcherInterface::class);
-        $this->middlewareStack->seedMiddlewareStack(
-            new RouteRunner($container->get(RouteResolverInterface::class), $this->routeCollector->getRouteParser(), $this)
-        );
-    }
-
-    /**
-     * @return MiddlewareDispatcherInterface
-     */
-    public function getMiddlewareDispatcher(): MiddlewareDispatcherInterface
-    {
-        return $this->middlewareStack;
+        $this->services = $services;
+        $this->middlewareStack = $services->get(MiddlewareDispatcherInterface::class);
     }
 
     /**
@@ -80,8 +69,8 @@ class App extends RouteCollectorProxy implements RequestHandlerInterface
     public function addRoutingMiddleware(): RoutingMiddleware
     {
         $routingMiddleware = new RoutingMiddleware(
-            $this->container->get(RouteResolverInterface::class),
-            $this->container->get(RouteCollectorInterface::class)->getRouteParser()
+            $this->services->get(RouteResolverInterface::class),
+            $this->services->get(RouteCollectorInterface::class)->getRouteParser()
         );
 
         $this->addMiddleware($routingMiddleware);
@@ -104,8 +93,8 @@ class App extends RouteCollectorProxy implements RequestHandlerInterface
         bool $logErrorDetails
     ): ErrorMiddleware {
         $errorMiddleware = new ErrorMiddleware(
-            $this->container->get(CallableResolver::class),
-            $this->container->get(ResponseFactoryInterface::class),
+            $this->services->get(CallableResolver::class),
+            $this->services->get(ResponseFactory::class),
             $displayErrorDetails,
             $logErrors,
             $logErrorDetails
@@ -136,13 +125,13 @@ class App extends RouteCollectorProxy implements RequestHandlerInterface
      * This method traverses the application middleware stack and then sends the
      * resultant Response object to the HTTP client.
      *
-     * @param ServerRequestInterface|null $request
+     * @param ServerRequest|null $request
      * @return void
      */
-    public function run(?ServerRequestInterface $request = null): void
+    public function run(?ServerRequest $request = null): void
     {
         if (!$request) {
-            $request = $this->container->get(ServerRequestInterface::class);
+            $request = $this->services->get(ServerRequest::class);
         }
 
         $response = $this->handle($request);
@@ -156,10 +145,10 @@ class App extends RouteCollectorProxy implements RequestHandlerInterface
      * This method traverses the application middleware stack and then returns the
      * resultant Response object.
      *
-     * @param ServerRequestInterface $request
-     * @return ResponseInterface
+     * @param ServerRequest $request
+     * @return Response
      */
-    public function handle(ServerRequestInterface $request): ResponseInterface
+    public function handle(ServerRequest $request): Response
     {
         $response = $this->middlewareStack->handle($request);
 
@@ -172,7 +161,7 @@ class App extends RouteCollectorProxy implements RequestHandlerInterface
          */
         $method = strtoupper($request->getMethod());
         if ($method === 'HEAD') {
-            $emptyBody = $this->responseFactory->createResponse()->getBody();
+            $emptyBody = $this->services->get(ResponseFactory::class)->createResponse()->getBody();
             return $response->withBody($emptyBody);
         }
 

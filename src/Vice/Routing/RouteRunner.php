@@ -2,71 +2,34 @@
 
 namespace Vice\Routing;
 
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Server\RequestHandlerInterface;
-use Slim\Exception\HttpMethodNotAllowedException;
-use Slim\Exception\HttpNotFoundException;
-use Slim\Interfaces\RouteCollectorProxyInterface;
-use Slim\Interfaces\RouteParserInterface;
-use Slim\Interfaces\RouteResolverInterface;
-use Slim\Middleware\RoutingMiddleware;
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as ServerRequest;
+use Psr\Http\Server\RequestHandlerInterface as HandlesServerRequests;
+use Slim\Interfaces\RouteCollectorInterface;
 use Slim\Routing\Route;
 use Slim\Routing\RouteContext;
 
-class RouteRunner implements RequestHandlerInterface
+class RouteRunner implements HandlesServerRequests
 {
-    /** @var RouteResolverInterface */
-    private $routeResolver;
-    /** @var RouteParserInterface */
-    private $routeParser;
-    /** @var RouteCollectorProxyInterface|null */
-    private $routeCollectorProxy;
+    /** @var RouteCollectorInterface */
+    private $routeCollector;
 
-    /**
-     * @param RouteResolverInterface            $routeResolver
-     * @param RouteParserInterface              $routeParser
-     * @param RouteCollectorProxyInterface|null $routeCollectorProxy
-     */
     public function __construct(
-        RouteResolverInterface $routeResolver,
-        RouteParserInterface $routeParser,
-        ?RouteCollectorProxyInterface $routeCollectorProxy = null
+        RouteCollectorInterface $routeCollector
     ) {
-        $this->routeResolver = $routeResolver;
-        $this->routeParser = $routeParser;
-        $this->routeCollectorProxy = $routeCollectorProxy;
+        $this->routeCollector = $routeCollector;
     }
 
-    /**
-     * This request handler is instantiated automatically in App::__construct()
-     * It is at the very tip of the middleware queue meaning it will be executed
-     * last and it detects whether or not routing has been performed in the user
-     * defined middleware stack. In the event that the user did not perform routing
-     * it is done here
-     *
-     * @param ServerRequestInterface $request
-     * @return ResponseInterface
-     * @throws HttpNotFoundException
-     * @throws HttpMethodNotAllowedException
-     */
-    public function handle(ServerRequestInterface $request): ResponseInterface
+    public function handle(ServerRequest $request): Response
     {
-        // If routing hasn't been done, then do it now so we can dispatch
         if ($request->getAttribute(RouteContext::ROUTING_RESULTS) === null) {
-            $routingMiddleware = new RoutingMiddleware($this->routeResolver, $this->routeParser);
-            $request = $routingMiddleware->performRouting($request);
+            throw new \RuntimeException('Routing results not found. Did you add middleware for routing.');
         }
 
-        if ($this->routeCollectorProxy !== null) {
-            $request = $request->withAttribute(
-                RouteContext::BASE_PATH,
-                $this->routeCollectorProxy->getBasePath()
-            );
-        }
-
+        $request = $request->withAttribute(RouteContext::BASE_PATH, $this->routeCollector->getBasePath());
         /** @var Route $route */
         $route = $request->getAttribute(RouteContext::ROUTE);
+
         return $route->run($request);
     }
 }
