@@ -3,6 +3,7 @@
     "type": "library",
     "description": "A very simple framework",
     "keywords": ["framework","micro","api","router"],
+    "license": "MIT",
     "minimum-stability": "dev",
     "require": {
         "php": "^7.1",
