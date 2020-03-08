@@ -5,7 +5,8 @@ namespace Vice;
 use DI\ContainerBuilder;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface as Locator;
-use Psr\Http\Message\ResponseFactoryInterface;
+use Psr\Http\Message\ResponseFactoryInterface as ResponseFactory;
+use Psr\Http\Message\ServerRequestInterface as ServerRequest;
 use Slim\Factory\ServerRequestCreatorFactory;
 use Slim\Interfaces\CallableResolverInterface;
 use Slim\Interfaces\MiddlewareDispatcherInterface;
@@ -31,7 +32,7 @@ class AppTest extends TestCase
                 App::class => function (Locator $locator) {
                     return new App($locator);
                 },
-                ResponseFactoryInterface::class => function () {
+                ResponseFactory::class => function () {
                     return \Slim\Factory\AppFactory::determineResponseFactory();
                 },
                 CallableResolverInterface::class => function (Locator $locator) {
@@ -39,7 +40,7 @@ class AppTest extends TestCase
                 },
                 RouteCollectorInterface::class => function (Locator $locator) {
                     return new RouteCollector(
-                        $locator->get(ResponseFactoryInterface::class),
+                        $locator->get(ResponseFactory::class),
                         $locator->get(CallableResolverInterface::class),
                         $locator
                     );
@@ -58,25 +59,23 @@ class AppTest extends TestCase
                     );
                 },
                 RouteRunner::class => function (Locator $locator) {
-                    $responseFactory = $locator->get(ResponseFactoryInterface::class);
+                    $responseFactory = $locator->get(ResponseFactory::class);
                     return new Testing\RouteRunnerStub(
                         $responseFactory->createResponse()
                     );
                 },
-                \Psr\Http\Message\ServerRequestInterface::class => ServerRequestCreatorFactory::create()->createServerRequestFromGlobals()
+                ServerRequest::class => ServerRequestCreatorFactory::create()->createServerRequestFromGlobals()
             ]
         );
     }
 
     public function testRun()
     {
-        $app = $this->container->build()->get(App::class);
-        $app->addRoutingMiddleware();
-        try {
-            $app->run();
-        } catch (\Slim\Exception\HttpNotFoundException $notFound) {
-            $this->assertEquals('', $notFound->getRequest()->getUri()->getPath());
-        }
+        $services = $this->container->build();
+        $app = $services->get(App::class);
+        $response = $app->handle($services->get(ServerRequest::class));
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertEquals('OK', $response->getReasonPhrase());
     }
 
     public function testAddRoutingMiddleware()
