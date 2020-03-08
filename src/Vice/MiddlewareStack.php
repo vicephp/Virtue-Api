@@ -2,17 +2,17 @@
 
 namespace Vice;
 
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Server\MiddlewareInterface;
-use Psr\Http\Server\RequestHandlerInterface;
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as ServerRequest;
+use Psr\Http\Server\MiddlewareInterface as ServerMiddleware;
+use Psr\Http\Server\RequestHandlerInterface as HandlesServerRequests;
 use Slim\Interfaces\MiddlewareDispatcherInterface;
 
 class MiddlewareStack implements MiddlewareDispatcherInterface
 {
-    /** @var MiddlewareInterface[] */
+    /** @var ServerMiddleware[] */
     private $stack = [];
-    /** @var RequestHandlerInterface */
+    /** @var HandlesServerRequests */
     private $kernel;
 
     public function __construct(array $middlewares = [])
@@ -29,32 +29,26 @@ class MiddlewareStack implements MiddlewareDispatcherInterface
         return $this;
     }
 
-    public function addMiddleware(MiddlewareInterface $middleware): MiddlewareDispatcherInterface
+    public function addMiddleware(ServerMiddleware $middleware): MiddlewareDispatcherInterface
     {
         $this->stack[] = $middleware;
 
         return $this;
     }
 
-    public function prependMiddleware(RequestHandlerInterface $middleware): self
+    public function prependMiddleware(ServerMiddleware $middleware): self
     {
         array_unshift($this->stack, $middleware);
 
         return $this;
     }
 
-    public function seedMiddlewareStack(RequestHandlerInterface $kernel): void
+    public function seedMiddlewareStack(HandlesServerRequests $kernel): void
     {
         $this->kernel = $kernel;
     }
 
-    /**
-     * Invoke the middleware stack
-     *
-     * @param  ServerRequestInterface $request
-     * @return ResponseInterface
-     */
-    public function handle(ServerRequestInterface $request): ResponseInterface
+    public function handle(ServerRequest $request): Response
     {
         return $this->handlerWithNextMiddleware()->handle($request);
     }
@@ -72,18 +66,18 @@ class MiddlewareStack implements MiddlewareDispatcherInterface
         return new class (
             $middleware,
             $next
-        ) implements RequestHandlerInterface {
-            /** @var MiddlewareInterface */
+        ) implements HandlesServerRequests {
+            /** @var ServerMiddleware */
             private $middleware;
             private $next;
 
-            public function __construct($middleware, $next)
+            public function __construct(ServerMiddleware $middleware, HandlesServerRequests $next)
             {
                 $this->middleware = $middleware;
                 $this->next = $next;
             }
 
-            public function handle(ServerRequestInterface $request): ResponseInterface
+            public function handle(ServerRequest $request): Response
             {
                 return $this->middleware->process($request, $this->next);
             }

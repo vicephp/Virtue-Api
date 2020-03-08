@@ -8,6 +8,11 @@
         "slim/slim": "^4.0",
         "slim/psr7": "dev-master"
     },
+    "require-dev": {
+        "phpunit/phpunit": "~7.0",
+        "mockery/mockery": "^1.2",
+        "php-di/php-di": "^6.0.0"
+    },
     "autoload": {
         "psr-4": {
             "Vice\\": "src/Vice/"
@@ -17,10 +22,5 @@
         "psr-4": {
             "Vice\\": "tests/Vice/"
         }
-    },
-    "require-dev": {
-        "phpunit/phpunit": "~7.0",
-        "mockery/mockery": "^1.2",
-        "php-di/php-di": "^6.0.0"
     }
 }

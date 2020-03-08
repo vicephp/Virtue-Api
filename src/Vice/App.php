@@ -2,7 +2,7 @@
 
 namespace Vice;
 
-use Psr\Container\ContainerInterface;
+use Psr\Container\ContainerInterface as Container;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -27,7 +27,7 @@ class App extends RouteCollectorProxy implements RequestHandlerInterface
     /** @var MiddlewareDispatcherInterface */
     protected $middlewareStack;
 
-    public function __construct(ContainerInterface $container) {
+    public function __construct(Container $container) {
         parent::__construct(
             $container->get(ResponseFactoryInterface::class),
             $container->get(CallableResolver::class),
