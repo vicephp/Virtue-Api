@@ -98,7 +98,7 @@ class AppTest extends TestCase
     {
         $services = $this->container->build();
         $app = $services->get(App::class);
-        $app->addRoutingMiddleware();
+        $app->add(FastRouteMiddleware::class);
         $app->get('/run', function ($request, $response, $args) {
             return $response;
         });
@@ -123,7 +123,7 @@ class AppTest extends TestCase
         $stack = $services->get(MiddlewareDispatcherInterface::class);
         /** @var App $app */
         $app = $services->get(App::class);
-        $app->addRoutingMiddleware();
+        $app->add(FastRouteMiddleware::class);
 
         $this->assertEquals(true, $stack->contains(FastRouteMiddleware::class));
     }
@@ -142,7 +142,7 @@ class AppTest extends TestCase
         $stack = $services->get(MiddlewareDispatcherInterface::class);
 
         $app = $services->get(App::class);
-        $app->addErrorMiddleware();
+        $app->add(ErrorMiddleware::class);
 
         $this->assertEquals(true, $stack->contains(ErrorMiddleware::class));
     }
@@ -171,7 +171,7 @@ class AppTest extends TestCase
         );
         $services = $this->container->build();
         $app = $services->get(App::class);
-        $app->addRoutingMiddleware();
+        $app->add(FastRouteMiddleware::class);
 //        $app->group('/foo', function (RouteCollectorProxy $group) use ($set301) {
 //            $group->get('/bar', function ($request, $response, $args) {
 //
