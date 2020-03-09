@@ -16,15 +16,22 @@ class MiddlewareStack implements MiddlewareDispatcherInterface
     /** @var HandlesServerRequests */
     private $kernel;
 
-    public function __construct(array $middlewares = [])
+    public function __construct(array $stack = [])
     {
-        foreach ($middlewares as $middleware) {
-            $this->add($middleware);
+        foreach ($stack as $middleware) {
+            $this->addMiddleware($middleware);
         }
     }
 
+    /**
+     * @deprecated
+     * @param callable|ServerMiddleware|string $middleware
+     * @return MiddlewareDispatcherInterface
+     */
     public function add($middleware): MiddlewareDispatcherInterface
     {
+        trigger_error(sprintf("The %s method is deprecated and will be removed.", __METHOD__), E_USER_DEPRECATED);
+
         $this->stack[] = $middleware;
 
         return $this;
@@ -32,16 +39,19 @@ class MiddlewareStack implements MiddlewareDispatcherInterface
 
     public function addMiddleware(ServerMiddleware $middleware): MiddlewareDispatcherInterface
     {
-        $this->stack[] = $middleware;
+        $this->append($middleware);
 
         return $this;
     }
 
-    public function prependMiddleware(ServerMiddleware $middleware): self
+    public function append(ServerMiddleware $middleware): void
+    {
+        $this->stack[] = $middleware;
+    }
+
+    public function prepend(ServerMiddleware $middleware): void
     {
         array_unshift($this->stack, $middleware);
-
-        return $this;
     }
 
     public function seedMiddlewareStack(HandlesServerRequests $kernel): void
@@ -51,11 +61,11 @@ class MiddlewareStack implements MiddlewareDispatcherInterface
 
     public function handle(ServerRequest $request): Response
     {
-        return $this->handlerWithNextMiddleware()->handle($request);
+        return $this->nextMiddleware()->handle($request);
     }
 
-    private function handlerWithNextMiddleware($index = 0)
+    private function nextMiddleware($index = 0): HandlesServerRequests
     {
-        return isset($this->stack[$index]) ? new RequestHandler($this->stack[$index], $this->handlerWithNextMiddleware($index + 1)) : $this->kernel;
+        return isset($this->stack[$index]) ? new RequestHandler($this->stack[$index], $this->nextMiddleware($index + 1)) : $this->kernel;
     }
 }

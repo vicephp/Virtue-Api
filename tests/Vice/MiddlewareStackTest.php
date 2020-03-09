@@ -35,8 +35,8 @@ class MiddlewareStackTest extends MockeryTestCase
 
         $stack = new MiddlewareStack();
         $stack->seedMiddlewareStack(new RequestHandlerStub(new Response()));
-        $stack->add($set400);
-        $stack->add($set301);
+        $stack->append($set400);
+        $stack->append($set301);
         $response = $stack->handle(\Mockery::mock(ServerRequest::class));
         $this->assertEquals(400, $response->getStatusCode());
         $this->assertNotEquals(301, $response->getStatusCode());

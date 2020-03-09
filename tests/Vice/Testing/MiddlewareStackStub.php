@@ -4,7 +4,7 @@ namespace Vice\Testing;
 
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as ServerResponse;
-use Psr\Http\Server\MiddlewareInterface;
+use Psr\Http\Server\MiddlewareInterface as ServerMiddleware;
 use Psr\Http\Server\RequestHandlerInterface as HandlesServerRequests;
 use Slim\Interfaces\MiddlewareDispatcherInterface;
 
@@ -22,7 +22,7 @@ class MiddlewareStackStub implements MiddlewareDispatcherInterface
         return $this;
     }
 
-    public function addMiddleware(MiddlewareInterface $middleware): MiddlewareDispatcherInterface
+    public function addMiddleware(ServerMiddleware $middleware): MiddlewareDispatcherInterface
     {
         $this->stack[] = $middleware;
 
@@ -37,6 +37,16 @@ class MiddlewareStackStub implements MiddlewareDispatcherInterface
     public function handle(ServerResponse $request): Response
     {
         return $this->kernel->handle($request);
+    }
+
+    public function append(ServerMiddleware $middleware): void
+    {
+        $this->stack[] = $middleware;
+    }
+
+    public function prepend(ServerMiddleware $middleware): void
+    {
+        array_unshift($this->stack, $middleware);
     }
 
     public function contains(string $className, $times = 1)
