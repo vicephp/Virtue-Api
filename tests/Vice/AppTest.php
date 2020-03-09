@@ -65,12 +65,11 @@ class AppTest extends TestCase
                         $locator->get(DispatcherInterface::class)
                     );
                 },
-                FastRoute\RouteCollector::class => function (Locator $locator) {
-                    return new FastRoute\RouteCollector(
+                FastRoute\RouteCollector::class =>
+                    new FastRoute\RouteCollector(
                         new FastRoute\RouteParser\Std(),
                         new FastRoute\DataGenerator\GroupCountBased()
-                    );
-                },
+                    ),
                 FastRouteMiddleware::class => function (Locator $locator) {
                     return new FastRouteMiddleware(
                         $locator->get(RouteCollectorInterface::class),
