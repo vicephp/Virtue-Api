@@ -3,6 +3,7 @@
 namespace Vice;
 
 use DI\ContainerBuilder;
+use FastRoute;
 use Fig\Http\Message\StatusCodeInterface as StatusCode;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface as Locator;
@@ -15,10 +16,10 @@ use Slim\Interfaces\CallableResolverInterface;
 use Slim\Interfaces\DispatcherInterface;
 use Slim\Interfaces\MiddlewareDispatcherInterface;
 use Slim\Interfaces\RouteCollectorInterface;
-use Slim\Interfaces\RouteParserInterface;
 use Slim\Interfaces\RouteResolverInterface;
 use Slim\Middleware\ErrorMiddleware;
 use Slim\Routing\RouteCollector;
+use Slim\Routing\RouteContext;
 use Slim\Routing\RouteResolver;
 use Vice\Middleware\FastRouteMiddleware;
 use Vice\Routing\RouteRunner;
@@ -64,17 +65,16 @@ class AppTest extends TestCase
                         $locator->get(DispatcherInterface::class)
                     );
                 },
-                RouteParserInterface::class => function (Locator $locator) {
-                    return $locator->get(RouteCollectorInterface::class)->getRouteParser();
+                FastRoute\RouteCollector::class => function (Locator $locator) {
+                    return new FastRoute\RouteCollector(
+                        new FastRoute\RouteParser\Std(),
+                        new FastRoute\DataGenerator\GroupCountBased()
+                    );
                 },
                 FastRouteMiddleware::class => function (Locator $locator) {
                     return new FastRouteMiddleware(
                         $locator->get(RouteCollectorInterface::class),
-                        new \FastRoute\RouteCollector(
-                            new \FastRoute\RouteParser\Std(),
-                            new \FastRoute\DataGenerator\GroupCountBased()
-                        ),
-                        $locator->get(RouteParserInterface::class)
+                        $locator->get(FastRoute\RouteCollector::class)
                     );
                 },
                 ErrorMiddleware::class => function (Locator $locator) {
@@ -147,14 +147,44 @@ class AppTest extends TestCase
         $this->assertEquals(true, $stack->contains(ErrorMiddleware::class));
     }
 
+    public function testFastRouter()
+    {
+        $this->container->addDefinitions(
+            [
+                RouteRunner::class => function (Locator $services) {
+                    return new Testing\RequestHandlerStub(
+                        $services->get(ResponseFactory::class)->createResponse()
+                    );
+                },
+            ]
+        );
+        $services = $this->container->build();
+        $app = $services->get(App::class);
+        $app->add(FastRouteMiddleware::class);
+        $path = '/run';
+        $app->get($path, function ($request, $response, $args) {
+            return $response;
+        });
+
+        $request = $services->get(ServerRequest::class);
+        $request = $request->withUri($request->getUri()->withPath($path));
+        $app->run($request);
+        /** @var Testing\RequestHandlerStub $handler */
+        $handler = $services->get(RouteRunner::class);
+        $context = RouteContext::fromRequest($handler->last());
+        $this->assertNotNull($context->getBasePath());
+        $this->assertNotNull($context->getRoute());
+        $this->assertNotNull($context->getRouteParser());
+        $this->assertNotNull($context->getRoutingResults());
+    }
+
     public function testRouteGroups()
     {
         $this->container->addDefinitions(
             [
-                RouteRunner::class => function (Locator $locator) {
-                    $responseFactory = $locator->get(ResponseFactory::class);
+                RouteRunner::class => function (Locator $services) {
                     return new Testing\RequestHandlerStub(
-                        $responseFactory->createResponse()
+                        $services->get(ResponseFactory::class)->createResponse()
                     );
                 },
             ]

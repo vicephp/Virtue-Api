@@ -5,51 +5,47 @@ namespace Vice\Middleware;
 use FastRoute;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as ServerRequest;
-use Psr\Http\Server\MiddlewareInterface;
-use Psr\Http\Server\RequestHandlerInterface;
+use Psr\Http\Server\MiddlewareInterface as ServerMiddleware;
+use Psr\Http\Server\RequestHandlerInterface as HandlesServerRequests;
 use RuntimeException;
 use Slim\Exception\HttpMethodNotAllowedException;
 use Slim\Exception\HttpNotFoundException;
 use Slim\Interfaces\DispatcherInterface;
 use Slim\Interfaces\RouteCollectorInterface;
-use Slim\Interfaces\RouteParserInterface;
 use Slim\Routing\FastRouteDispatcher;
 use Slim\Routing\RouteContext;
 use Slim\Routing\RoutingResults;
 
-class FastRouteMiddleware implements MiddlewareInterface, DispatcherInterface
+class FastRouteMiddleware implements ServerMiddleware, DispatcherInterface
 {
     /** @var RouteCollectorInterface */
     private $routeCollector;
     /** @var FastRoute\RouteCollector */
     private $fastRouteCollector;
-    /** @var RouteParserInterface */
-    private $routeParser;
 
     public function __construct(
         RouteCollectorInterface $routeCollector,
-        FastRoute\RouteCollector $fastRouteCollector,
-        RouteParserInterface $routeParser
+        FastRoute\RouteCollector $fastRouteCollector
     ) {
         $this->routeCollector = $routeCollector;
         $this->fastRouteCollector = $fastRouteCollector;
-        $this->routeParser = $routeParser;
     }
 
     /**
      * @param ServerRequest  $request
-     * @param RequestHandlerInterface $handler
+     * @param HandlesServerRequests $handler
      * @return Response
      *
      * @throws HttpNotFoundException
      * @throws HttpMethodNotAllowedException
      * @throws RuntimeException
      */
-    public function process(ServerRequest $request, RequestHandlerInterface $handler): Response
+    public function process(ServerRequest $request, HandlesServerRequests $handler): Response
     {
-        $request = $request->withAttribute(RouteContext::ROUTE_PARSER, $this->routeParser);
+        $request = $request->withAttribute(RouteContext::ROUTE_PARSER, $this->routeCollector->getRouteParser());
         $request = $request->withAttribute(RouteContext::BASE_PATH, $this->routeCollector->getBasePath());
         $request = $this->performRouting($request);
+
         return $handler->handle($request);
     }
 
