@@ -79,32 +79,8 @@ class App extends RouteCollectorProxy implements HandlesServerRequests
         $responseEmitter->emit($response);
     }
 
-    /**
-     * Handle a request
-     *
-     * This method traverses the application middleware stack and then returns the
-     * resultant Response object.
-     *
-     * @param ServerRequest $request
-     * @return Response
-     */
     public function handle(ServerRequest $request): Response
     {
-        $response = $this->middlewareStack->handle($request);
-
-        /**
-         * This is to be in compliance with RFC 2616, Section 9.
-         * If the incoming request method is HEAD, we need to ensure that the response body
-         * is empty as the request may fall back on a GET route handler due to FastRoute's
-         * routing logic which could potentially append content to the response body
-         * https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.4
-         */
-        $method = strtoupper($request->getMethod());
-        if ($method === 'HEAD') {
-            $emptyBody = $this->services->get(ResponseFactory::class)->createResponse()->getBody();
-            return $response->withBody($emptyBody);
-        }
-
-        return $response;
+        return $this->middlewareStack->handle($request);
     }
 }
