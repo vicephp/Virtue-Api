@@ -24,11 +24,13 @@ class RouteCollectorProxy implements RouteCollectorProxyInterface
     public function __construct(
         ResponseFactory $responseFactory,
         CallableResolverInterface $callableResolver,
-        RouteCollectorInterface $routeCollector
+        RouteCollectorInterface $routeCollector,
+        ?string $groupPattern = ''
     ) {
         $this->responseFactory = $responseFactory;
         $this->callableResolver = $callableResolver;
         $this->routeCollector = $routeCollector;
+        $this->groupPattern = $groupPattern;
     }
 
     /**
@@ -36,6 +38,7 @@ class RouteCollectorProxy implements RouteCollectorProxyInterface
      */
     public function getResponseFactory(): ResponseFactory
     {
+        trigger_error(sprintf("The %s method is deprecated and will be removed.", __METHOD__), E_USER_DEPRECATED);
         return $this->responseFactory;
     }
 
@@ -44,6 +47,7 @@ class RouteCollectorProxy implements RouteCollectorProxyInterface
      */
     public function getCallableResolver(): CallableResolverInterface
     {
+        trigger_error(sprintf("The %s method is deprecated and will be removed.", __METHOD__), E_USER_DEPRECATED);
         return $this->callableResolver;
     }
 
@@ -52,6 +56,7 @@ class RouteCollectorProxy implements RouteCollectorProxyInterface
      */
     public function getContainer(): ?ContainerInterface
     {
+        trigger_error(sprintf("The %s method is deprecated and will be removed.", __METHOD__), E_USER_DEPRECATED);
         return null;
     }
 
@@ -60,6 +65,7 @@ class RouteCollectorProxy implements RouteCollectorProxyInterface
      */
     public function getRouteCollector(): RouteCollectorInterface
     {
+        trigger_error(sprintf("The %s method is deprecated and will be removed.", __METHOD__), E_USER_DEPRECATED);
         return $this->routeCollector;
     }
 
@@ -142,9 +148,7 @@ class RouteCollectorProxy implements RouteCollectorProxyInterface
      */
     public function map(array $methods, string $pattern, $callable): RouteInterface
     {
-        $pattern = $this->groupPattern . $pattern;
-
-        return $this->routeCollector->map($methods, $pattern, $callable);
+        return $this->routeCollector->map($methods, "{$this->groupPattern}{$pattern}", $callable);
     }
 
     /**
@@ -152,9 +156,7 @@ class RouteCollectorProxy implements RouteCollectorProxyInterface
      */
     public function group(string $pattern, $callable): RouteGroupInterface
     {
-        $pattern = $this->groupPattern . $pattern;
-
-        return $this->routeCollector->group($pattern, $callable);
+        return $this->routeCollector->group("{$this->groupPattern}{$pattern}", $callable);
     }
 
     /**

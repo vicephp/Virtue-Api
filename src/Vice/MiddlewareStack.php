@@ -16,8 +16,9 @@ class MiddlewareStack implements MiddlewareDispatcherInterface
     /** @var HandlesServerRequests */
     private $kernel;
 
-    public function __construct(array $stack = [])
+    public function __construct(HandlesServerRequests $kernel, array $stack = [])
     {
+        $this->seedMiddlewareStack($kernel);
         foreach ($stack as $middleware) {
             $this->addMiddleware($middleware);
         }

@@ -13,8 +13,8 @@ use Slim\Interfaces\MiddlewareDispatcherInterface;
 use Slim\Interfaces\RouteCollectorInterface;
 use Slim\Middleware\BodyParsingMiddleware;
 use Slim\Middleware\ErrorMiddleware;
-use Slim\Middleware\RoutingMiddleware;
 use Slim\ResponseEmitter;
+use Vice\Middleware\FastRouteMiddleware;
 use Vice\Routing\RouteCollectorProxy;
 
 class App extends RouteCollectorProxy implements HandlesServerRequests
@@ -43,7 +43,7 @@ class App extends RouteCollectorProxy implements HandlesServerRequests
 
     public function addRoutingMiddleware(): void
     {
-        $this->addMiddleware($this->services->get(RoutingMiddleware::class));
+        $this->addMiddleware($this->services->get(FastRouteMiddleware::class));
     }
 
     public function addErrorMiddleware(): void
