@@ -20,7 +20,7 @@ class MiddlewareStackTest extends MockeryTestCase
         return $middleware;
     }
 
-    public function testStack()
+    public function testMiddlewareAdded()
     {
         $set400 = $this->mockMiddleware(
             function(ServerRequest $request, HandlesServerRequests $next) {
@@ -37,6 +37,28 @@ class MiddlewareStackTest extends MockeryTestCase
         $stack->seedMiddlewareStack(new RequestHandlerStub(new Response()));
         $stack->add($set400);
         $stack->add($set301);
+        $response = $stack->handle(\Mockery::mock(ServerRequest::class));
+        $this->assertEquals(400, $response->getStatusCode());
+        $this->assertNotEquals(301, $response->getStatusCode());
+
+
+    }
+
+    public function testMiddlewareInConstructor()
+    {
+        $set400 = $this->mockMiddleware(
+            function(ServerRequest $request, HandlesServerRequests $next) {
+                return $next->handle($request)->withStatus(StatusCode::STATUS_BAD_REQUEST);
+            }
+        );
+        $set301 = $this->mockMiddleware(
+            function(ServerRequest $request, HandlesServerRequests $next) {
+                return $next->handle($request)->withStatus(StatusCode::STATUS_MOVED_PERMANENTLY);
+            }
+        );
+
+        $stack = new MiddlewareStack([$set400, $set301]);
+        $stack->seedMiddlewareStack(new RequestHandlerStub(new Response()));
         $response = $stack->handle(\Mockery::mock(ServerRequest::class));
         $this->assertEquals(400, $response->getStatusCode());
         $this->assertNotEquals(301, $response->getStatusCode());

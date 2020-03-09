@@ -17,7 +17,9 @@ class MiddlewareStackStub implements MiddlewareDispatcherInterface
 
     public function add($middleware): MiddlewareDispatcherInterface
     {
-        // TODO: Implement add() method.
+        $this->stack[] = $middleware;
+
+        return $this;
     }
 
     public function addMiddleware(MiddlewareInterface $middleware): MiddlewareDispatcherInterface
