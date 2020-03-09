@@ -3,20 +3,25 @@
 namespace Vice;
 
 use DI\ContainerBuilder;
+use FastRoute\RouteCollector as FastRouteCollector;
+use FastRoute\RouteParser\Std;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface as Locator;
 use Psr\Http\Message\ResponseFactoryInterface as ResponseFactory;
 use Psr\Http\Message\ServerRequestInterface as ServerRequest;
 use Slim\Factory\ServerRequestCreatorFactory;
 use Slim\Interfaces\CallableResolverInterface;
+use Slim\Interfaces\DispatcherInterface;
 use Slim\Interfaces\MiddlewareDispatcherInterface;
 use Slim\Interfaces\RouteCollectorInterface;
 use Slim\Interfaces\RouteParserInterface;
 use Slim\Interfaces\RouteResolverInterface;
 use Slim\Middleware\ErrorMiddleware;
 use Slim\Middleware\RoutingMiddleware;
+use Slim\Routing\FastRouteDispatcher;
 use Slim\Routing\RouteCollector;
-use Slim\Routing\RouteResolver;
+use Vice\Routing\Dispatcher;
+use Vice\Routing\RouteResolver;
 use Vice\Routing\RouteRunner;
 use Vice\Testing\MiddlewareStackStub;
 
@@ -68,7 +73,8 @@ class AppTest extends TestCase
                 },
                 RouteResolverInterface::class => function (Locator $locator) {
                     return new RouteResolver(
-                        $locator->get(RouteCollectorInterface::class)
+                        $locator->get(RouteCollectorInterface::class),
+                        $locator->get(DispatcherInterface::class)
                     );
                 },
                 RouteRunner::class => function (Locator $locator) {
@@ -77,7 +83,28 @@ class AppTest extends TestCase
                         $responseFactory->createResponse()
                     );
                 },
-                ServerRequest::class => ServerRequestCreatorFactory::create()->createServerRequestFromGlobals()
+                ServerRequest::class => ServerRequestCreatorFactory::create()->createServerRequestFromGlobals(),
+                FastRouteDispatcher::class => function (Locator $locator) {
+                    $routeDefinitionCallback = function (FastRouteCollector $r) use ($locator) {
+                        $basePath = $locator->get(RouteCollectorInterface::class)->getBasePath();
+                        foreach ($locator->get(RouteCollectorInterface::class)->getRoutes() as $route) {
+                            $r->addRoute($route->getMethods(), $basePath . $route->getPattern(), $route->getIdentifier());
+                        }
+                    };
+                    /** @var FastRouteDispatcher $dispatcher */
+                    $dispatcher = \FastRoute\simpleDispatcher($routeDefinitionCallback, [
+                        'dispatcher' => FastRouteDispatcher::class,
+                         'routeParser' => new Std(),
+                    ]);
+
+                    return $dispatcher;
+                },
+                DispatcherInterface::class => function (Locator $locator) {
+                    return new Dispatcher(
+                        $locator->get(RouteCollectorInterface::class),
+                        $locator->get(FastRouteDispatcher::class)
+                    );
+                },
             ]
         );
     }
