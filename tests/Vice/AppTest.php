@@ -11,6 +11,7 @@ use Slim\Factory\ServerRequestCreatorFactory;
 use Slim\Interfaces\CallableResolverInterface;
 use Slim\Interfaces\MiddlewareDispatcherInterface;
 use Slim\Interfaces\RouteCollectorInterface;
+use Slim\Interfaces\RouteParserInterface;
 use Slim\Interfaces\RouteResolverInterface;
 use Slim\Middleware\ErrorMiddleware;
 use Slim\Middleware\RoutingMiddleware;
@@ -43,6 +44,18 @@ class AppTest extends TestCase
                         $locator->get(ResponseFactory::class),
                         $locator->get(CallableResolverInterface::class),
                         $locator
+                    );
+                },
+                RouteParserInterface::class => function (Locator $locator) {
+                    return $locator->get(RouteCollectorInterface::class)->getRouteParser();
+                },
+                ErrorMiddleware::class => function (Locator $locator) {
+                    return new ErrorMiddleware(
+                        $locator->get(CallableResolverInterface::class),
+                        $locator->get(ResponseFactory::class),
+                        false,
+                        false,
+                        false
                     );
                 },
                 MiddlewareDispatcherInterface::class => function (Locator $locator) {

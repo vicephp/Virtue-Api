@@ -11,7 +11,6 @@ use Psr\Http\Server\RequestHandlerInterface as HandlesServerRequests;
 use Slim\CallableResolver;
 use Slim\Interfaces\MiddlewareDispatcherInterface;
 use Slim\Interfaces\RouteCollectorInterface;
-use Slim\Interfaces\RouteResolverInterface;
 use Slim\Middleware\BodyParsingMiddleware;
 use Slim\Middleware\ErrorMiddleware;
 use Slim\Middleware\RoutingMiddleware;
@@ -37,71 +36,19 @@ class App extends RouteCollectorProxy implements HandlesServerRequests
         $this->middlewareStack = $services->get(MiddlewareDispatcherInterface::class);
     }
 
-    /**
-     * @param MiddlewareInterface|string|callable $middleware
-     * @return self
-     */
-//    public function add($middleware): self
-//    {
-//        $this->middlewareStack->add($middleware);
-//
-//        return $this;
-//    }
-
-    /**
-     * @param MiddlewareInterface $middleware
-     * @return self
-     */
-    public function addMiddleware(MiddlewareInterface $middleware): self
+    public function addMiddleware(MiddlewareInterface $middleware): void
     {
         $this->middlewareStack->addMiddleware($middleware);
-
-        return $this;
     }
 
-    /**
-     * Add the Slim built-in routing middleware to the app middleware stack
-     *
-     * This method can be used to control middleware order and is not required for default routing operation.
-     *
-     * @return RoutingMiddleware
-     */
-    public function addRoutingMiddleware(): RoutingMiddleware
+    public function addRoutingMiddleware(): void
     {
-        $routingMiddleware = new RoutingMiddleware(
-            $this->services->get(RouteResolverInterface::class),
-            $this->services->get(RouteCollectorInterface::class)->getRouteParser()
-        );
-
-        $this->addMiddleware($routingMiddleware);
-
-        return $routingMiddleware;
+        $this->addMiddleware($this->services->get(RoutingMiddleware::class));
     }
 
-    /**
-     * Add the Slim built-in error middleware to the app middleware stack
-     *
-     * @param bool $displayErrorDetails
-     * @param bool $logErrors
-     * @param bool $logErrorDetails
-     *
-     * @return ErrorMiddleware
-     */
-    public function addErrorMiddleware(
-        bool $displayErrorDetails,
-        bool $logErrors,
-        bool $logErrorDetails
-    ): ErrorMiddleware {
-        $errorMiddleware = new ErrorMiddleware(
-            $this->services->get(CallableResolver::class),
-            $this->services->get(ResponseFactory::class),
-            $displayErrorDetails,
-            $logErrors,
-            $logErrorDetails
-        );
-        $this->addMiddleware($errorMiddleware);
-
-        return $errorMiddleware;
+    public function addErrorMiddleware(): void
+    {
+        $this->addMiddleware($this->services->get(ErrorMiddleware::class));
     }
 
     /**
