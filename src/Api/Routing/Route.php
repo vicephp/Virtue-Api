@@ -37,7 +37,7 @@ class Route implements RequestHandlerInterface
     /** @var callable|string */
     protected $callable;
     /** @var Locator */
-    protected $services;
+    protected $kernel;
     /** @var string */
     protected $pattern;
     /** @var bool */
@@ -47,14 +47,14 @@ class Route implements RequestHandlerInterface
         array $methods,
         string $pattern,
         $callable,
-        Locator $services,
+        Locator $kernel,
         array $groups = [],
         int $identifier = 0
     ) {
         $this->methods = $methods;
         $this->pattern = $pattern;
         $this->callable = $callable;
-        $this->services = $services;
+        $this->kernel = $kernel;
         $this->groups = $groups;
         $this->identifier = "route{$identifier}";
         $this->middlewareStack = new MiddlewareStack($this);
@@ -91,7 +91,7 @@ class Route implements RequestHandlerInterface
 
     public function add($middleware): void
     {
-        $this->middlewareStack->append($this->services->get($middleware));
+        $this->middlewareStack->append($this->kernel->get($middleware));
     }
 
     public function prepare(array $arguments): void
@@ -122,9 +122,9 @@ class Route implements RequestHandlerInterface
 
     public function handle(ServerRequest $request): Response
     {
-        $callableResolver = $this->services->get(AdvancedCallableResolverInterface::class);
+        $callableResolver = $this->kernel->get(AdvancedCallableResolverInterface::class);
         $callable = $callableResolver->resolveRoute($this->callable);
-        $strategy = $this->services->get(InvocationStrategyInterface::class);
+        $strategy = $this->kernel->get(InvocationStrategyInterface::class);
 
         if (
             is_array($callable)
@@ -134,7 +134,7 @@ class Route implements RequestHandlerInterface
             $strategy = new RequestHandler();
         }
 
-        $response = $this->services->get(Response::class);
+        $response = $this->kernel->get(Response::class);
         return $strategy($callable, $request, $response, $this->arguments);
     }
 }

@@ -14,7 +14,7 @@ use function array_pop;
 class RouteCollector
 {
     /** @var Locator */
-    protected $services;
+    protected $kernel;
     /** @var RouteParser */
     protected $routeParser;
     /** @var AdvancedCallableResolverInterface */
@@ -28,11 +28,9 @@ class RouteCollector
     /** @var int */
     protected $routeCounter = 0;
 
-    public function __construct(
-        Locator $services
-    ) {
-        $this->services = $services;
-        $this->callableResolver = $services->get(AdvancedCallableResolverInterface::class);
+    public function __construct(Locator $kernel) {
+        $this->kernel = $kernel;
+        $this->callableResolver = $kernel->get(AdvancedCallableResolverInterface::class);
         $this->routeParser = $routeParser ?? new RouteParser($this);
     }
 
@@ -79,11 +77,11 @@ class RouteCollector
     public function group(string $pattern, $callable): RouteGroup
     {
         $routeCollectorProxy = new Api(
-            $this->services,
+            $this->kernel,
             $this,
             $pattern
         );
-        $routeGroup = new RouteGroup($pattern, $callable, $this->services, $routeCollectorProxy);
+        $routeGroup = new RouteGroup($pattern, $callable, $this->kernel, $routeCollectorProxy);
         $this->routeGroups[] = $routeGroup;
 
         $routeGroup->collectRoutes();
@@ -107,7 +105,7 @@ class RouteCollector
             $methods,
             $pattern,
             $callable,
-            $this->services,
+            $this->kernel,
             $this->routeGroups,
             $this->routeCounter
         );

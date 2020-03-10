@@ -17,7 +17,6 @@ use Slim\Handlers\Strategies\RequestResponse;
 use Slim\Interfaces\AdvancedCallableResolverInterface;
 use Slim\Interfaces\CallableResolverInterface;
 use Slim\Interfaces\InvocationStrategyInterface;
-use Slim\Interfaces\MiddlewareDispatcherInterface;
 use Slim\Middleware\ErrorMiddleware;
 use Virtue\Api\Middleware\FastRouteMiddleware;
 use Virtue\Api\Middleware\MiddlewareStack;
@@ -45,47 +44,48 @@ class AppTest extends TestCase
         $this->container = new \DI\ContainerBuilder();
         $this->container->addDefinitions(
             [
-                App::class => function (Locator $services) {
-                    return new App($services);
+                App::class => function (Locator $kernel) {
+                    return new App($kernel);
                 },
                 InvocationStrategyInterface::class => new RequestResponse(),
-                AdvancedCallableResolverInterface::class => function (Locator $services) {
-                    return new \Slim\CallableResolver($services);
+                AdvancedCallableResolverInterface::class => function (Locator $kernel) {
+                    // Here we should pass a different Locator than the kernel
+                    return new \Slim\CallableResolver($kernel);
                 },
                 ResponseFactory::class => function () {
                     return \Slim\Factory\AppFactory::determineResponseFactory();
                 },
-                ResponseInterface::class => function (Locator $services) {
-                    return $services->get(ResponseFactory::class)->createResponse();
+                ResponseInterface::class => function (Locator $kernel) {
+                    return $kernel->get(ResponseFactory::class)->createResponse();
                 },
-                CallableResolverInterface::class => function (Locator $services) {
-                    return new \Slim\CallableResolver($services);
+                CallableResolverInterface::class => function (Locator $kernel) {
+                    return new \Slim\CallableResolver($kernel);
                 },
-                RouteCollector::class => function (Locator $services) {
-                    return new RouteCollector($services);
+                RouteCollector::class => function (Locator $kernel) {
+                    return new RouteCollector($kernel);
                 },
                 FastRoute\RouteCollector::class =>
                     new FastRoute\RouteCollector(
                         new FastRoute\RouteParser\Std(),
                         new FastRoute\DataGenerator\GroupCountBased()
                     ),
-                FastRouteMiddleware::class => function (Locator $services) {
+                FastRouteMiddleware::class => function (Locator $kernel) {
                     return new FastRouteMiddleware(
-                        $services->get(RouteCollector::class),
-                        $services->get(FastRoute\RouteCollector::class)
+                        $kernel->get(RouteCollector::class),
+                        $kernel->get(FastRoute\RouteCollector::class)
                     );
                 },
-                ErrorMiddleware::class => function (Locator $services) {
+                ErrorMiddleware::class => function (Locator $kernel) {
                     return new ErrorMiddleware(
-                        $services->get(CallableResolverInterface::class),
-                        $services->get(ResponseFactory::class),
+                        $kernel->get(CallableResolverInterface::class),
+                        $kernel->get(ResponseFactory::class),
                         false,
                         false,
                         false
                     );
                 },
-                MiddlewareStack::class => function (Locator $services) {
-                    return new MiddlewareStack($services->get(RouteRunner::class));
+                MiddlewareStack::class => function (Locator $kernel) {
+                    return new MiddlewareStack($kernel->get(RouteRunner::class));
                 },
                 ServerRequest::class => ServerRequestCreatorFactory::create()->createServerRequestFromGlobals(),
             ]
@@ -94,13 +94,13 @@ class AppTest extends TestCase
 
     public function testRun()
     {
-        $services = $this->container->build();
-        $app = $services->get(App::class);
+        $kernel = $this->container->build();
+        $app = $kernel->get(App::class);
         $app->add(FastRouteMiddleware::class);
         $app->get('/run', function ($request, $response, $args) {
             return $response;
         });
-        $request = $services->get(ServerRequest::class);
+        $request = $kernel->get(ServerRequest::class);
         $request = $request->withUri($request->getUri()->withPath('/run'));
         $response = $app->handle($request);
         $this->assertEquals(200, $response->getStatusCode());
@@ -111,23 +111,23 @@ class AppTest extends TestCase
     {
         $this->container->addDefinitions(
             [
-                RouteRunner::class => function (Locator $services) {
+                RouteRunner::class => function (Locator $kernel) {
                     return new Testing\RequestHandlerStub(
-                        $services->get(ResponseFactory::class)->createResponse()
+                        $kernel->get(ResponseFactory::class)->createResponse()
                     );
                 },
-                MiddlewareStack::class => function (Locator $services) {
+                MiddlewareStack::class => function (Locator $kernel) {
                     return new Testing\MiddlewareStackStub(
-                        $services->get(RouteRunner::class)
+                        $kernel->get(RouteRunner::class)
                     );
                 },
             ]
         );
-        $services = $this->container->build();
+        $kernel = $this->container->build();
         /** @var MiddlewareStackStub $stack */
-        $stack = $services->get(MiddlewareStack::class);
+        $stack = $kernel->get(MiddlewareStack::class);
         /** @var App $app */
-        $app = $services->get(App::class);
+        $app = $kernel->get(App::class);
         $app->add(FastRouteMiddleware::class);
 
         $this->assertEquals(1, $stack->contains(FastRouteMiddleware::class));
@@ -137,23 +137,23 @@ class AppTest extends TestCase
     {
         $this->container->addDefinitions(
             [
-                RouteRunner::class => function (Locator $services) {
+                RouteRunner::class => function (Locator $kernel) {
                     return new Testing\RequestHandlerStub(
-                        $services->get(ResponseFactory::class)->createResponse()
+                        $kernel->get(ResponseFactory::class)->createResponse()
                     );
                 },
-                MiddlewareStack::class => function (Locator $services) {
+                MiddlewareStack::class => function (Locator $kernel) {
                     return new Testing\MiddlewareStackStub(
-                        $services->get(RouteRunner::class)
+                        $kernel->get(RouteRunner::class)
                     );
                 },
             ]
         );
-        $services = $this->container->build();
+        $kernel = $this->container->build();
         /** @var MiddlewareStackStub $stack */
-        $stack = $services->get(MiddlewareStack::class);
+        $stack = $kernel->get(MiddlewareStack::class);
 
-        $app = $services->get(App::class);
+        $app = $kernel->get(App::class);
         $app->add(ErrorMiddleware::class);
 
         $this->assertEquals(1, $stack->contains(ErrorMiddleware::class));
@@ -163,26 +163,26 @@ class AppTest extends TestCase
     {
         $this->container->addDefinitions(
             [
-                RouteRunner::class => function (Locator $services) {
+                RouteRunner::class => function (Locator $kernel) {
                     return new Testing\RequestHandlerStub(
-                        $services->get(ResponseFactory::class)->createResponse()
+                        $kernel->get(ResponseFactory::class)->createResponse()
                     );
                 },
             ]
         );
-        $services = $this->container->build();
-        $app = $services->get(App::class);
+        $kernel = $this->container->build();
+        $app = $kernel->get(App::class);
         $app->add(FastRouteMiddleware::class);
         $path = '/run';
         $app->get($path, function ($request, $response, $args) {
             return $response;
         });
 
-        $request = $services->get(ServerRequest::class);
+        $request = $kernel->get(ServerRequest::class);
         $request = $request->withUri($request->getUri()->withPath($path));
         $app->run($request);
         /** @var Testing\RequestHandlerStub $handler */
-        $handler = $services->get(RouteRunner::class);
+        $handler = $kernel->get(RouteRunner::class);
         $context = RouteContext::fromRequest($handler->last());
         $this->assertNotNull($context->getBasePath());
         $this->assertNotNull($context->getRoute());
@@ -207,15 +207,15 @@ class AppTest extends TestCase
             ]
         );
 
-        $services = $this->container->build();
-        $app = $services->get(App::class);
+        $kernel = $this->container->build();
+        $app = $kernel->get(App::class);
         $app->add(FastRouteMiddleware::class);
         $app->group('/foo', function (Api $group) {
             $group->get('/bar', function ($request, $response, $args) {
                 return $response;
             })->add('set301');
         })->add('set400');
-        $request = $services->get(ServerRequest::class);
+        $request = $kernel->get(ServerRequest::class);
         $request = $request->withUri($request->getUri()->withPath('/foo/bar'));
 
         $response = $app->handle($request);
@@ -239,15 +239,15 @@ class AppTest extends TestCase
                 )
             ]
         );
-        $services = $this->container->build();
-        $app = $services->get(App::class);
+        $kernel = $this->container->build();
+        $app = $kernel->get(App::class);
         $app->add(FastRouteMiddleware::class);
         $app->group('/foo', function (Api $group) {
             $group->get('/bar', function ($request, $response, $args) {
                 return $response;
             })->add('set301');
         });
-        $request = $services->get(ServerRequest::class);
+        $request = $kernel->get(ServerRequest::class);
         $request = $request->withUri($request->getUri()->withPath('/foo/bar'));
 
         $response = $app->handle($request);

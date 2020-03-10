@@ -15,11 +15,11 @@ class Api
     private $groupPattern = '';
 
     public function __construct(
-        Locator $services,
+        Locator $kernel,
         RouteCollector $routeCollector,
         ?string $groupPattern = ''
     ) {
-        $this->services = $services;
+        $this->services = $kernel;
         $this->routeCollector = $routeCollector;
         $this->groupPattern = $groupPattern;
     }

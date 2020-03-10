@@ -18,20 +18,20 @@ class App extends Api implements HandlesServerRequests
     /** @var MiddlewareStack */
     protected $middlewareStack;
     /** @var Locator */
-    private $services;
+    private $kernel;
 
-    public function __construct(Locator $services) {
+    public function __construct(Locator $kernel) {
         parent::__construct(
-            $services,
-            $services->get(RouteCollector::class)
+            $kernel,
+            $kernel->get(RouteCollector::class)
         );
-        $this->services = $services;
-        $this->middlewareStack = $services->get(MiddlewareStack::class);
+        $this->kernel = $kernel;
+        $this->middlewareStack = $kernel->get(MiddlewareStack::class);
     }
 
     public function add(string $middleware): void
     {
-        $this->middlewareStack->append($this->services->get($middleware));
+        $this->middlewareStack->append($this->kernel->get($middleware));
     }
 
     /**
@@ -46,7 +46,7 @@ class App extends Api implements HandlesServerRequests
     public function run(?ServerRequest $request = null): void
     {
         if (!$request) {
-            $request = $this->services->get(ServerRequest::class);
+            $request = $this->kernel->get(ServerRequest::class);
         }
 
         $response = $this->handle($request);

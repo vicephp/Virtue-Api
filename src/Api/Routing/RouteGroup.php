@@ -13,7 +13,7 @@ class RouteGroup
     /** @var callable|string */
     private $callable;
     /** @var Locator */
-    private $services;
+    private $kernel;
     /** @var Api */
     private $api;
     /** @var MiddlewareInterface[] */
@@ -22,18 +22,18 @@ class RouteGroup
     public function __construct(
         string $pattern,
         $callable,
-        Locator $services,
+        Locator $kernel,
         Api $api
     ) {
         $this->pattern = $pattern;
         $this->callable = $callable;
-        $this->services = $services;
+        $this->kernel = $kernel;
         $this->api = $api;
     }
 
     public function collectRoutes(): void
     {
-        $callableResolver = $this->services->get(AdvancedCallableResolverInterface::class);
+        $callableResolver = $this->kernel->get(AdvancedCallableResolverInterface::class);
         $callable = $callableResolver->resolveRoute($this->callable);
 
         $callable($this->api);
@@ -41,7 +41,7 @@ class RouteGroup
 
     public function add(string $middleware): void
     {
-        $this->middleware[] = $this->services->get($middleware);
+        $this->middleware[] = $this->kernel->get($middleware);
     }
 
     public function appendMiddlewareToDispatcher(MiddlewareStack $stack): void
