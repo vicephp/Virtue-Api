@@ -4,7 +4,6 @@ namespace Vice\Routing;
 use Psr\Container\ContainerInterface as Locator;
 use Psr\Http\Server\MiddlewareInterface;
 use Slim\Interfaces\AdvancedCallableResolverInterface;
-use Slim\Interfaces\CallableResolverInterface;
 use Slim\Interfaces\MiddlewareDispatcherInterface;
 
 class RouteGroup
@@ -15,8 +14,6 @@ class RouteGroup
     private $callable;
     /** @var Locator */
     private $services;
-    /** @var CallableResolverInterface */
-    private $callableResolver;
     /** @var RouteCollectorProxy */
     private $routeCollectorProxy;
     /** @var MiddlewareInterface[] */
@@ -26,23 +23,19 @@ class RouteGroup
         string $pattern,
         $callable,
         Locator $services,
-        CallableResolverInterface $callableResolver,
         RouteCollectorProxy $routeCollectorProxy
     ) {
         $this->pattern = $pattern;
         $this->callable = $callable;
         $this->services = $services;
-        $this->callableResolver = $callableResolver;
         $this->routeCollectorProxy = $routeCollectorProxy;
     }
 
     public function collectRoutes(): void
     {
-        if ($this->callableResolver instanceof AdvancedCallableResolverInterface) {
-            $callable = $this->callableResolver->resolveRoute($this->callable);
-        } else {
-            $callable = $this->callableResolver->resolve($this->callable);
-        }
+        $callableResolver = $this->services->get(AdvancedCallableResolverInterface::class);
+        $callable = $callableResolver->resolveRoute($this->callable);
+
         $callable($this->routeCollectorProxy);
     }
 

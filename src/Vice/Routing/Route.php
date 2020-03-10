@@ -33,8 +33,6 @@ class Route implements RouteInterface, RequestHandlerInterface
     protected $name;
     /** @var RouteGroupInterface[] */
     protected $groups;
-    /**  @var InvocationStrategyInterface */
-    protected $invocationStrategy;
     /** @var array */
     protected $arguments = [];
     /** @var array */
@@ -57,8 +55,6 @@ class Route implements RouteInterface, RequestHandlerInterface
         string $pattern,
         $callable,
         Locator $services,
-        CallableResolverInterface $callableResolver,
-        ?InvocationStrategyInterface $invocationStrategy = null,
         array $groups = [],
         int $identifier = 0
     ) {
@@ -66,8 +62,6 @@ class Route implements RouteInterface, RequestHandlerInterface
         $this->pattern = $pattern;
         $this->callable = $callable;
         $this->services = $services;
-        $this->callableResolver = $callableResolver;
-        $this->invocationStrategy = $invocationStrategy ?? new RequestResponse();
         $this->groups = $groups;
         $this->identifier = "route{$identifier}";
         $this->middlewareStack = new MiddlewareStack($this);
@@ -79,7 +73,7 @@ class Route implements RouteInterface, RequestHandlerInterface
     public function getInvocationStrategy(): InvocationStrategyInterface
     {
         trigger_error(sprintf("The %s method is deprecated and will be removed.", __METHOD__), E_USER_DEPRECATED);
-        return $this->invocationStrategy;
+        return $this->services->get(InvocationStrategyInterface::class);
     }
 
     /**
@@ -270,12 +264,9 @@ class Route implements RouteInterface, RequestHandlerInterface
      */
     public function handle(ServerRequest $request): Response
     {
-        if ($this->callableResolver instanceof AdvancedCallableResolverInterface) {
-            $callable = $this->callableResolver->resolveRoute($this->callable);
-        } else {
-            $callable = $this->callableResolver->resolve($this->callable);
-        }
-        $strategy = $this->invocationStrategy;
+        $callableResolver = $this->services->get(AdvancedCallableResolverInterface::class);
+        $callable = $callableResolver->resolveRoute($this->callable);
+        $strategy = $this->services->get(InvocationStrategyInterface::class);
 
         if (
             is_array($callable)

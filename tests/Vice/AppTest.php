@@ -5,6 +5,7 @@ namespace Vice;
 use DI\ContainerBuilder;
 use FastRoute;
 use Fig\Http\Message\StatusCodeInterface as StatusCode;
+use Invoker\CallableResolver;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface as Locator;
 use Psr\Http\Message\ResponseFactoryInterface as ResponseFactory;
@@ -13,8 +14,11 @@ use Psr\Http\Message\ServerRequestInterface as ServerRequest;
 use Psr\Http\Server\MiddlewareInterface as ServerMiddleware;
 use Psr\Http\Server\RequestHandlerInterface as HandlesServerRequests;
 use Slim\Factory\ServerRequestCreatorFactory;
+use Slim\Handlers\Strategies\RequestResponse;
+use Slim\Interfaces\AdvancedCallableResolverInterface;
 use Slim\Interfaces\CallableResolverInterface;
 use Slim\Interfaces\DispatcherInterface;
+use Slim\Interfaces\InvocationStrategyInterface;
 use Slim\Interfaces\MiddlewareDispatcherInterface;
 use Slim\Interfaces\RouteCollectorInterface;
 use Slim\Interfaces\RouteCollectorProxyInterface;
@@ -48,6 +52,10 @@ class AppTest extends TestCase
             [
                 App::class => function (Locator $services) {
                     return new App($services);
+                },
+                InvocationStrategyInterface::class => new RequestResponse(),
+                AdvancedCallableResolverInterface::class => function (Locator $services) {
+                    return new \Slim\CallableResolver($services);
                 },
                 ResponseFactory::class => function () {
                     return \Slim\Factory\AppFactory::determineResponseFactory();

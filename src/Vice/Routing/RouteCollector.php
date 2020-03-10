@@ -97,8 +97,7 @@ class RouteCollector
             $this,
             $pattern
         );
-
-        $routeGroup = new RouteGroup($pattern, $callable, $this->services, $this->callableResolver, $routeCollectorProxy);
+        $routeGroup = new RouteGroup($pattern, $callable, $this->services, $routeCollectorProxy);
         $this->routeGroups[] = $routeGroup;
 
         $routeGroup->collectRoutes();
@@ -123,8 +122,6 @@ class RouteCollector
             $pattern,
             $callable,
             $this->services,
-            $this->callableResolver,
-            $this->defaultInvocationStrategy,
             $this->routeGroups,
             $this->routeCounter
         );
