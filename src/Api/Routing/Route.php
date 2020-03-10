@@ -8,13 +8,11 @@ use Psr\Http\Message\ServerRequestInterface as ServerRequest;
 use Psr\Http\Server\RequestHandlerInterface;
 use Slim\Handlers\Strategies\RequestHandler;
 use Slim\Interfaces\AdvancedCallableResolverInterface;
-use Slim\Interfaces\CallableResolverInterface;
 use Slim\Interfaces\InvocationStrategyInterface;
 use Slim\Interfaces\RequestHandlerInvocationStrategyInterface;
 use Slim\Interfaces\RouteGroupInterface;
 use Slim\MiddlewareDispatcher;
 use Virtue\Api\Middleware\MiddlewareStack;
-use function array_key_exists;
 use function array_replace;
 use function class_implements;
 use function in_array;
@@ -38,8 +36,6 @@ class Route implements RequestHandlerInterface
     protected $middlewareStack;
     /** @var callable|string */
     protected $callable;
-    /** @var CallableResolverInterface */
-    protected $callableResolver;
     /** @var Locator */
     protected $services;
     /** @var string */
@@ -67,15 +63,6 @@ class Route implements RequestHandlerInterface
     /**
      * {@inheritdoc}
      */
-    public function getInvocationStrategy(): InvocationStrategyInterface
-    {
-        trigger_error(sprintf("The %s method is deprecated and will be removed.", __METHOD__), E_USER_DEPRECATED);
-        return $this->services->get(InvocationStrategyInterface::class);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function getMethods(): array
     {
         return $this->methods;
@@ -92,14 +79,6 @@ class Route implements RequestHandlerInterface
     /**
      * {@inheritdoc}
      */
-    public function getCallable()
-    {
-        return $this->callable;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function getName(): ?string
     {
         return $this->name;
@@ -108,28 +87,6 @@ class Route implements RequestHandlerInterface
     public function getIdentifier(): string
     {
         return $this->identifier;
-    }
-
-    /**
-     * @deprecated
-     * {@inheritdoc}
-     */
-    public function getArgument(string $name, ?string $default = null): ?string
-    {
-        trigger_error(sprintf("The %s method is deprecated and will be removed.", __METHOD__), E_USER_DEPRECATED);
-        if (array_key_exists($name, $this->arguments)) {
-            return $this->arguments[$name];
-        }
-        return $default;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getArguments(): array
-    {
-        trigger_error(sprintf("The %s method is deprecated and will be removed.", __METHOD__), E_USER_DEPRECATED);
-        return $this->arguments;
     }
 
     public function add($middleware): void

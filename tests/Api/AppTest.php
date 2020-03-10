@@ -84,7 +84,7 @@ class AppTest extends TestCase
                         false
                     );
                 },
-                MiddlewareDispatcherInterface::class => function (Locator $services) {
+                MiddlewareStack::class => function (Locator $services) {
                     return new MiddlewareStack($services->get(RouteRunner::class));
                 },
                 ServerRequest::class => ServerRequestCreatorFactory::create()->createServerRequestFromGlobals(),
@@ -116,7 +116,7 @@ class AppTest extends TestCase
                         $services->get(ResponseFactory::class)->createResponse()
                     );
                 },
-                MiddlewareDispatcherInterface::class => function (Locator $services) {
+                MiddlewareStack::class => function (Locator $services) {
                     return new Testing\MiddlewareStackStub(
                         $services->get(RouteRunner::class)
                     );
@@ -125,7 +125,7 @@ class AppTest extends TestCase
         );
         $services = $this->container->build();
         /** @var MiddlewareStackStub $stack */
-        $stack = $services->get(MiddlewareDispatcherInterface::class);
+        $stack = $services->get(MiddlewareStack::class);
         /** @var App $app */
         $app = $services->get(App::class);
         $app->add(FastRouteMiddleware::class);
@@ -142,7 +142,7 @@ class AppTest extends TestCase
                         $services->get(ResponseFactory::class)->createResponse()
                     );
                 },
-                MiddlewareDispatcherInterface::class => function (Locator $services) {
+                MiddlewareStack::class => function (Locator $services) {
                     return new Testing\MiddlewareStackStub(
                         $services->get(RouteRunner::class)
                     );
@@ -151,7 +151,7 @@ class AppTest extends TestCase
         );
         $services = $this->container->build();
         /** @var MiddlewareStackStub $stack */
-        $stack = $services->get(MiddlewareDispatcherInterface::class);
+        $stack = $services->get(MiddlewareStack::class);
 
         $app = $services->get(App::class);
         $app->add(ErrorMiddleware::class);

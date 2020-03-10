@@ -5,8 +5,6 @@ namespace Virtue\Api\Routing;
 use Psr\Container\ContainerInterface as Locator;
 use RuntimeException;
 use Slim\Interfaces\AdvancedCallableResolverInterface;
-use Slim\Interfaces\CallableResolverInterface;
-use Slim\Interfaces\InvocationStrategyInterface;
 use function array_pop;
 
 /**
@@ -19,10 +17,8 @@ class RouteCollector
     protected $services;
     /** @var RouteParser */
     protected $routeParser;
-    /** @var CallableResolverInterface */
+    /** @var AdvancedCallableResolverInterface */
     protected $callableResolver;
-    /** @var InvocationStrategyInterface */
-    protected $defaultInvocationStrategy;
     /** @var string */
     protected $basePath = '';
     /** @var Route[] */
@@ -35,9 +31,8 @@ class RouteCollector
     public function __construct(
         Locator $services
     ) {
-        $this->callableResolver = $services->get(AdvancedCallableResolverInterface::class);
         $this->services = $services;
-        $this->defaultInvocationStrategy = $services->get(InvocationStrategyInterface::class);
+        $this->callableResolver = $services->get(AdvancedCallableResolverInterface::class);
         $this->routeParser = $routeParser ?? new RouteParser($this);
     }
 

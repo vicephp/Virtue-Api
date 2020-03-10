@@ -2,9 +2,9 @@
 
 namespace Virtue\Api\Middleware;
 
+use PHPUnit\Framework\TestCase;
 use Slim\Factory\ServerRequestCreatorFactory;
 use Virtue\Api\Http\RequestMethod;
-use PHPUnit\Framework\TestCase;
 use Virtue\Api\Testing\RequestHandlerStub;
 
 class HeadRequestMiddlewareTest extends TestCase

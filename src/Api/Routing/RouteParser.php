@@ -6,7 +6,6 @@ use FastRoute\RouteParser\Std;
 use InvalidArgumentException;
 use Psr\Http\Message\UriInterface;
 use Slim\Interfaces\RouteParserInterface;
-
 use function array_key_exists;
 use function array_reverse;
 use function http_build_query;

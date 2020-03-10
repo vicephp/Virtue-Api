@@ -6,8 +6,8 @@ use Psr\Container\ContainerInterface as Locator;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as ServerRequest;
 use Psr\Http\Server\RequestHandlerInterface as HandlesServerRequests;
-use Slim\Interfaces\MiddlewareDispatcherInterface;
 use Slim\ResponseEmitter;
+use Virtue\Api\Middleware\MiddlewareStack;
 use Virtue\Api\Routing\Api;
 use Virtue\Api\Routing\RouteCollector;
 
@@ -15,7 +15,7 @@ class App extends Api implements HandlesServerRequests
 {
     /** @var string */
     public const VERSION = '0.0.0';
-    /** @var MiddlewareDispatcherInterface */
+    /** @var MiddlewareStack */
     protected $middlewareStack;
     /** @var Locator */
     private $services;
@@ -26,7 +26,7 @@ class App extends Api implements HandlesServerRequests
             $services->get(RouteCollector::class)
         );
         $this->services = $services;
-        $this->middlewareStack = $services->get(MiddlewareDispatcherInterface::class);
+        $this->middlewareStack = $services->get(MiddlewareStack::class);
     }
 
     public function add(string $middleware): void
