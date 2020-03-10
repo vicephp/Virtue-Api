@@ -5,7 +5,7 @@ use Psr\Container\ContainerInterface as Locator;
 use Psr\Http\Server\MiddlewareInterface;
 use Slim\Interfaces\AdvancedCallableResolverInterface;
 use Slim\Interfaces\CallableResolverInterface;
-use Slim\MiddlewareDispatcher;
+use Slim\Interfaces\MiddlewareDispatcherInterface;
 
 class RouteGroup
 {
@@ -56,7 +56,7 @@ class RouteGroup
         $this->middleware[] = $middleware;
     }
 
-    public function appendMiddlewareToDispatcher(MiddlewareDispatcher $dispatcher): void
+    public function appendMiddlewareToDispatcher(MiddlewareDispatcherInterface $dispatcher): void
     {
         foreach ($this->middleware as $middleware) {
             $dispatcher->addMiddleware($middleware);
