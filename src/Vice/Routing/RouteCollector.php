@@ -9,7 +9,6 @@ use Slim\Handlers\Strategies\RequestResponse;
 use Slim\Interfaces\CallableResolverInterface;
 use Slim\Interfaces\InvocationStrategyInterface;
 use function array_pop;
-use function sprintf;
 
 /**
  * RouteCollector is used to collect routes and route groups
@@ -50,85 +49,21 @@ class RouteCollector
         $this->routeParser = $routeParser ?? new RouteParser($this);
     }
 
-    /**
-     * @return RouteParser
-     */
     public function getRouteParser(): RouteParser
     {
         return $this->routeParser;
     }
 
-    /**
-     * Get default route invocation strategy
-     *
-     * @return InvocationStrategyInterface
-     */
-    public function getDefaultInvocationStrategy(): InvocationStrategyInterface
-    {
-        return $this->defaultInvocationStrategy;
-    }
-
-    /**
-     * @param InvocationStrategyInterface $strategy
-     * @return self
-     */
-    public function setDefaultInvocationStrategy(InvocationStrategyInterface $strategy): RouteCollectorInterface
-    {
-        trigger_error(sprintf("The %s method is deprecated and will be removed.", __METHOD__), E_USER_DEPRECATED);
-        return $this;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getCacheFile(): ?string
-    {
-        trigger_error(sprintf("The %s method is deprecated and will be removed.", __METHOD__), E_USER_DEPRECATED);
-        return $this->cacheFile;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function setCacheFile(string $cacheFile): RouteCollectorInterface
-    {
-        trigger_error(sprintf("The %s method is deprecated and will be removed.", __METHOD__), E_USER_DEPRECATED);
-        return $this;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function getBasePath(): string
     {
         return $this->basePath;
     }
 
-    /**
-     * Set the base path used in urlFor()
-     *
-     * @param string $basePath
-     *
-     * @return self
-     */
-    public function setBasePath(string $basePath): RouteCollectorInterface
-    {
-        $this->basePath = $basePath;
-
-        return $this;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function getRoutes(): array
     {
         return $this->routes;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function removeNamedRoute(string $name): RouteCollector
     {
         $route = $this->getNamedRoute($name);
@@ -136,9 +71,6 @@ class RouteCollector
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getNamedRoute(string $name): Route
     {
         foreach ($this->routes as $route) {
@@ -149,9 +81,6 @@ class RouteCollector
         throw new RuntimeException('Named route does not exist for name: ' . $name);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function lookupRoute(string $identifier): Route
     {
         if (!isset($this->routes[$identifier])) {
@@ -160,9 +89,6 @@ class RouteCollector
         return $this->routes[$identifier];
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function group(string $pattern, $callable): RouteGroup
     {
         $routeCollectorProxy = new RouteCollectorProxy(
@@ -181,9 +107,6 @@ class RouteCollector
         return $routeGroup;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function map(array $methods, string $pattern, $handler): Route
     {
         $route = $this->createRoute($methods, $pattern, $handler);
@@ -193,9 +116,6 @@ class RouteCollector
         return $route;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function createRoute(array $methods, string $pattern, $callable): Route
     {
         return new Route(

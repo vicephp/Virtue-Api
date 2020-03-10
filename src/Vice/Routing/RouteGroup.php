@@ -36,10 +36,7 @@ class RouteGroup
         $this->routeCollectorProxy = $routeCollectorProxy;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function collectRoutes(): RouteGroup
+    public function collectRoutes(): void
     {
         if ($this->callableResolver instanceof AdvancedCallableResolverInterface) {
             $callable = $this->callableResolver->resolveRoute($this->callable);
@@ -47,44 +44,25 @@ class RouteGroup
             $callable = $this->callableResolver->resolve($this->callable);
         }
         $callable($this->routeCollectorProxy);
-
-        return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function add($middleware): RouteGroup
+    public function add(string $middleware): void
     {
         $this->middleware[] = $this->services->get($middleware);
-
-        return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function addMiddleware(MiddlewareInterface $middleware): RouteGroup
+    public function addMiddleware(MiddlewareInterface $middleware): void
     {
         $this->middleware[] = $middleware;
-        return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function appendMiddlewareToDispatcher(MiddlewareDispatcher $dispatcher): RouteGroup
+    public function appendMiddlewareToDispatcher(MiddlewareDispatcher $dispatcher): void
     {
         foreach ($this->middleware as $middleware) {
             $dispatcher->addMiddleware($middleware);
         }
-
-        return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getPattern(): string
     {
         return $this->pattern;

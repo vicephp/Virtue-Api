@@ -40,7 +40,7 @@ class Route implements RouteInterface, RequestHandlerInterface
     /** @var array */
     protected $savedArguments = [];
     /** @var MiddlewareDispatcher */
-    protected $middlewareDispatcher;
+    protected $middlewareStack;
     /** @var callable|string */
     protected $callable;
     /** @var CallableResolverInterface */
@@ -70,7 +70,7 @@ class Route implements RouteInterface, RequestHandlerInterface
         $this->invocationStrategy = $invocationStrategy ?? new RequestResponse();
         $this->groups = $groups;
         $this->identifier = "route{$identifier}";
-        $this->middlewareDispatcher = new MiddlewareStack($this);
+        $this->middlewareStack = new MiddlewareStack($this);
     }
 
     /**
@@ -201,7 +201,7 @@ class Route implements RouteInterface, RequestHandlerInterface
      */
     public function add($middleware): RouteInterface
     {
-        $this->middlewareDispatcher->addMiddleware($this->services->get($middleware));
+        $this->middlewareStack->addMiddleware($this->services->get($middleware));
 
         return $this;
     }
@@ -211,7 +211,7 @@ class Route implements RouteInterface, RequestHandlerInterface
      */
     public function addMiddleware(ServerMiddleware $middleware): RouteInterface
     {
-        $this->middlewareDispatcher->addMiddleware($middleware);
+        $this->middlewareStack->addMiddleware($middleware);
         return $this;
     }
 
@@ -247,7 +247,7 @@ class Route implements RouteInterface, RequestHandlerInterface
             $this->appendGroupMiddlewareToRoute();
         }
 
-        return $this->middlewareDispatcher->handle($request);
+        return $this->middlewareStack->handle($request);
     }
 
     /**
@@ -255,11 +255,11 @@ class Route implements RouteInterface, RequestHandlerInterface
      */
     protected function appendGroupMiddlewareToRoute(): void
     {
-        $this->middlewareDispatcher = new MiddlewareStack($this->middlewareDispatcher);
+        $this->middlewareStack = new MiddlewareStack($this->middlewareStack);
 
         /** @var RouteGroupInterface $group */
         foreach ($this->groups as $group) {
-            $group->appendMiddlewareToDispatcher($this->middlewareDispatcher);
+            $group->appendMiddlewareToDispatcher($this->middlewareStack);
         }
 
         $this->groupMiddlewareAppended = true;
