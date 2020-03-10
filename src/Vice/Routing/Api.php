@@ -5,7 +5,7 @@ namespace Vice\Routing;
 use Psr\Container\ContainerInterface as Locator;
 use Psr\Http\Message\ResponseInterface as Response;
 
-class RouteCollectorProxy
+class Api
 {
     /** @var Locator */
     private $services;

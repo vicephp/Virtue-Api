@@ -22,7 +22,7 @@ use Slim\Middleware\ErrorMiddleware;
 use Vice\Routing\RouteContext;
 use Vice\Middleware\FastRouteMiddleware;
 use Vice\Routing\RouteCollector;
-use Vice\Routing\RouteCollectorProxy;
+use Vice\Routing\Api;
 use Vice\Routing\RouteRunner;
 use Vice\Testing\MiddlewareStackStub;
 
@@ -195,7 +195,7 @@ class AppTest extends TestCase
         $services = $this->container->build();
         $app = $services->get(App::class);
         $app->add(FastRouteMiddleware::class);
-        $app->group('/foo', function (RouteCollectorProxy $group) {
+        $app->group('/foo', function (Api $group) {
             $group->get('/bar', function ($request, $response, $args) {
                 return $response;
             })->add('set301');
@@ -227,7 +227,7 @@ class AppTest extends TestCase
         $services = $this->container->build();
         $app = $services->get(App::class);
         $app->add(FastRouteMiddleware::class);
-        $app->group('/foo', function (RouteCollectorProxy $group) {
+        $app->group('/foo', function (Api $group) {
             $group->get('/bar', function ($request, $response, $args) {
                 return $response;
             })->add('set301');

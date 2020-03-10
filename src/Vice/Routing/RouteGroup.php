@@ -14,7 +14,7 @@ class RouteGroup
     private $callable;
     /** @var Locator */
     private $services;
-    /** @var RouteCollectorProxy */
+    /** @var Api */
     private $routeCollectorProxy;
     /** @var MiddlewareInterface[] */
     private $middleware = [];
@@ -23,7 +23,7 @@ class RouteGroup
         string $pattern,
         $callable,
         Locator $services,
-        RouteCollectorProxy $routeCollectorProxy
+        Api $routeCollectorProxy
     ) {
         $this->pattern = $pattern;
         $this->callable = $callable;

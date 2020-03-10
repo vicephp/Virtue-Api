@@ -83,7 +83,7 @@ class RouteCollector
 
     public function group(string $pattern, $callable): RouteGroup
     {
-        $routeCollectorProxy = new RouteCollectorProxy(
+        $routeCollectorProxy = new Api(
             $this->services,
             $this,
             $pattern

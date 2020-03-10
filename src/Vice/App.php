@@ -11,9 +11,9 @@ use Slim\Interfaces\MiddlewareDispatcherInterface;
 use Slim\Middleware\BodyParsingMiddleware;
 use Slim\ResponseEmitter;
 use Vice\Routing\RouteCollector;
-use Vice\Routing\RouteCollectorProxy;
+use Vice\Routing\Api;
 
-class App extends RouteCollectorProxy implements HandlesServerRequests
+class App extends Api implements HandlesServerRequests
 {
     /** @var string */
     public const VERSION = '0.0.0';
