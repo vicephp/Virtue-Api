@@ -1,6 +1,6 @@
 <?php
 
-namespace Vice\Routing;
+namespace Virtue\Api\Routing;
 
 use Psr\Container\ContainerInterface as Locator;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -13,7 +13,7 @@ use Slim\Interfaces\InvocationStrategyInterface;
 use Slim\Interfaces\RequestHandlerInvocationStrategyInterface;
 use Slim\Interfaces\RouteGroupInterface;
 use Slim\MiddlewareDispatcher;
-use Vice\Middleware\MiddlewareStack;
+use Virtue\Api\Middleware\MiddlewareStack;
 use function array_key_exists;
 use function array_replace;
 use function class_implements;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Vice\Handlers\InvokeHandler;
+namespace Virtue\Api\Handlers\InvokeHandler;
 
 use Psr\Container\ContainerInterface as Locator;
 use Psr\Http\Message\ResponseInterface;

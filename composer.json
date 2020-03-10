@@ -1,7 +1,7 @@
 {
-    "name": "vicephp/vice",
+    "name": "virtue/api",
     "type": "library",
-    "description": "A very simple framework",
+    "description": "A very simple http API",
     "keywords": ["framework","micro","api","router"],
     "license": "MIT",
     "minimum-stability": "dev",
@@ -17,12 +17,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Vice\\": "src/Vice/"
+            "Virtue\\Api\\": "src/Api/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Vice\\": "tests/Vice/"
+            "Virtue\\Api\\": "tests/Api/"
         }
     },
     "config": {

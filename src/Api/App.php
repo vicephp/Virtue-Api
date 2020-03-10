@@ -1,6 +1,6 @@
 <?php
 
-namespace Vice;
+namespace Virtue\Api;
 
 use Psr\Container\ContainerInterface as Locator;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -8,8 +8,8 @@ use Psr\Http\Message\ServerRequestInterface as ServerRequest;
 use Psr\Http\Server\RequestHandlerInterface as HandlesServerRequests;
 use Slim\Interfaces\MiddlewareDispatcherInterface;
 use Slim\ResponseEmitter;
-use Vice\Routing\Api;
-use Vice\Routing\RouteCollector;
+use Virtue\Api\Routing\Api;
+use Virtue\Api\Routing\RouteCollector;
 
 class App extends Api implements HandlesServerRequests
 {

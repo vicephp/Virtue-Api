@@ -1,6 +1,6 @@
 <?php
 
-namespace Vice\Http;
+namespace Virtue\Api\Http;
 
 interface RequestMethod
 {

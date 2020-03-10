@@ -1,6 +1,6 @@
 <?php
 
-namespace Vice\Middleware;
+namespace Virtue\Api\Middleware;
 
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as ServerRequest;

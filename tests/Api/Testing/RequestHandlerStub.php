@@ -1,6 +1,6 @@
 <?php
 
-namespace Vice\Testing;
+namespace Virtue\Api\Testing;
 
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as ServerRequest;

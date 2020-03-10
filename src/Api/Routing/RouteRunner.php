@@ -1,6 +1,6 @@
 <?php
 
-namespace Vice\Routing;
+namespace Virtue\Api\Routing;
 
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as ServerRequest;

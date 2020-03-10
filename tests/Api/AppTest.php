@@ -1,6 +1,6 @@
 <?php
 
-namespace Vice;
+namespace Virtue\Api;
 
 use DI\ContainerBuilder;
 use FastRoute;
@@ -19,13 +19,13 @@ use Slim\Interfaces\CallableResolverInterface;
 use Slim\Interfaces\InvocationStrategyInterface;
 use Slim\Interfaces\MiddlewareDispatcherInterface;
 use Slim\Middleware\ErrorMiddleware;
-use Vice\Middleware\FastRouteMiddleware;
-use Vice\Middleware\MiddlewareStack;
-use Vice\Routing\Api;
-use Vice\Routing\RouteCollector;
-use Vice\Routing\RouteContext;
-use Vice\Routing\RouteRunner;
-use Vice\Testing\MiddlewareStackStub;
+use Virtue\Api\Middleware\FastRouteMiddleware;
+use Virtue\Api\Middleware\MiddlewareStack;
+use Virtue\Api\Routing\Api;
+use Virtue\Api\Routing\RouteCollector;
+use Virtue\Api\Routing\RouteContext;
+use Virtue\Api\Routing\RouteRunner;
+use Virtue\Api\Testing\MiddlewareStackStub;
 
 class AppTest extends TestCase
 {

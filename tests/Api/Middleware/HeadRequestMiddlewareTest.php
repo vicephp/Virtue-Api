@@ -1,11 +1,11 @@
 <?php
 
-namespace Vice\Middleware;
+namespace Virtue\Api\Middleware;
 
 use Slim\Factory\ServerRequestCreatorFactory;
-use Vice\Http\RequestMethod;
+use Virtue\Api\Http\RequestMethod;
 use PHPUnit\Framework\TestCase;
-use Vice\Testing\RequestHandlerStub;
+use Virtue\Api\Testing\RequestHandlerStub;
 
 class HeadRequestMiddlewareTest extends TestCase
 {

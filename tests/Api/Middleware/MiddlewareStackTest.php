@@ -1,6 +1,6 @@
 <?php
 
-namespace Vice\Middleware;
+namespace Virtue\Api\Middleware;
 
 use Fig\Http\Message\StatusCodeInterface as StatusCode;
 use Mockery\Adapter\Phpunit\MockeryTestCase;
@@ -8,7 +8,7 @@ use Psr\Http\Message\ServerRequestInterface as ServerRequest;
 use Psr\Http\Server\MiddlewareInterface as ServerMiddleware;
 use Psr\Http\Server\RequestHandlerInterface as HandlesServerRequests;
 use Slim\Psr7\Response;
-use Vice\Testing\RequestHandlerStub;
+use Virtue\Api\Testing\RequestHandlerStub;
 
 class MiddlewareStackTest extends MockeryTestCase
 {

@@ -1,8 +1,8 @@
 <?php
 
-namespace Vice\Testing;
+namespace Virtue\Api\Testing;
 
-use Vice\Middleware\MiddlewareStack;
+use Virtue\Api\Middleware\MiddlewareStack;
 
 class MiddlewareStackStub extends MiddlewareStack
 {

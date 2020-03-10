@@ -1,6 +1,6 @@
 <?php
 
-namespace Vice\Routing;
+namespace Virtue\Api\Routing;
 
 use Psr\Container\ContainerInterface as Locator;
 use RuntimeException;

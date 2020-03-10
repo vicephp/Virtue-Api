@@ -1,6 +1,6 @@
 <?php
 
-namespace Vice\Routing;
+namespace Virtue\Api\Routing;
 
 use FastRoute\RouteParser\Std;
 use InvalidArgumentException;

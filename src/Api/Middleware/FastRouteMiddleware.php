@@ -1,6 +1,6 @@
 <?php
 
-namespace Vice\Middleware;
+namespace Virtue\Api\Middleware;
 
 use FastRoute;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -14,7 +14,7 @@ use Slim\Interfaces\DispatcherInterface;
 use Slim\Routing\FastRouteDispatcher;
 use Slim\Routing\RouteContext;
 use Slim\Routing\RoutingResults;
-use Vice\Routing\RouteCollector;
+use Virtue\Api\Routing\RouteCollector;
 
 class FastRouteMiddleware implements ServerMiddleware, DispatcherInterface
 {

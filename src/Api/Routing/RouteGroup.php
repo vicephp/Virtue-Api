@@ -1,10 +1,10 @@
 <?php
-namespace Vice\Routing;
+namespace Virtue\Api\Routing;
 
 use Psr\Container\ContainerInterface as Locator;
 use Psr\Http\Server\MiddlewareInterface;
 use Slim\Interfaces\AdvancedCallableResolverInterface;
-use Vice\Middleware\MiddlewareStack;
+use Virtue\Api\Middleware\MiddlewareStack;
 
 class RouteGroup
 {
