@@ -5,13 +5,11 @@ namespace Vice;
 use Psr\Container\ContainerInterface as Locator;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as ServerRequest;
-use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface as HandlesServerRequests;
 use Slim\Interfaces\MiddlewareDispatcherInterface;
-use Slim\Middleware\BodyParsingMiddleware;
 use Slim\ResponseEmitter;
-use Vice\Routing\RouteCollector;
 use Vice\Routing\Api;
+use Vice\Routing\RouteCollector;
 
 class App extends Api implements HandlesServerRequests
 {
@@ -31,29 +29,9 @@ class App extends Api implements HandlesServerRequests
         $this->middlewareStack = $services->get(MiddlewareDispatcherInterface::class);
     }
 
-    public function add(string $middleware)
+    public function add(string $middleware): void
     {
-        $this->addMiddleware($this->services->get($middleware));
-    }
-
-    public function addMiddleware(MiddlewareInterface $middleware): void
-    {
-        $this->middlewareStack->addMiddleware($middleware);
-    }
-
-    /**
-     * Add the Slim body parsing middleware to the app middleware stack
-     *
-     * @param callable[] $bodyParsers
-     *
-     * @return BodyParsingMiddleware
-     */
-    public function addBodyParsingMiddleware(array $bodyParsers = []): BodyParsingMiddleware
-    {
-        $bodyParsingMiddleware = new BodyParsingMiddleware($bodyParsers);
-        $this->addMiddleware($bodyParsingMiddleware);
-
-        return $bodyParsingMiddleware;
+        $this->middlewareStack->append($this->services->get($middleware));
     }
 
     /**

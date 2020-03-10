@@ -19,10 +19,11 @@ use Slim\Interfaces\CallableResolverInterface;
 use Slim\Interfaces\InvocationStrategyInterface;
 use Slim\Interfaces\MiddlewareDispatcherInterface;
 use Slim\Middleware\ErrorMiddleware;
-use Vice\Routing\RouteContext;
 use Vice\Middleware\FastRouteMiddleware;
-use Vice\Routing\RouteCollector;
+use Vice\Middleware\MiddlewareStack;
 use Vice\Routing\Api;
+use Vice\Routing\RouteCollector;
+use Vice\Routing\RouteContext;
 use Vice\Routing\RouteRunner;
 use Vice\Testing\MiddlewareStackStub;
 
@@ -110,8 +111,15 @@ class AppTest extends TestCase
     {
         $this->container->addDefinitions(
             [
-                MiddlewareDispatcherInterface::class => function () {
-                    return new Testing\MiddlewareStackStub();
+                RouteRunner::class => function (Locator $services) {
+                    return new Testing\RequestHandlerStub(
+                        $services->get(ResponseFactory::class)->createResponse()
+                    );
+                },
+                MiddlewareDispatcherInterface::class => function (Locator $services) {
+                    return new Testing\MiddlewareStackStub(
+                        $services->get(RouteRunner::class)
+                    );
                 },
             ]
         );
@@ -122,15 +130,22 @@ class AppTest extends TestCase
         $app = $services->get(App::class);
         $app->add(FastRouteMiddleware::class);
 
-        $this->assertEquals(true, $stack->contains(FastRouteMiddleware::class));
+        $this->assertEquals(1, $stack->contains(FastRouteMiddleware::class));
     }
 
     public function testAddErrorMiddleware()
     {
         $this->container->addDefinitions(
             [
-                MiddlewareDispatcherInterface::class => function () {
-                    return new Testing\MiddlewareStackStub();
+                RouteRunner::class => function (Locator $services) {
+                    return new Testing\RequestHandlerStub(
+                        $services->get(ResponseFactory::class)->createResponse()
+                    );
+                },
+                MiddlewareDispatcherInterface::class => function (Locator $services) {
+                    return new Testing\MiddlewareStackStub(
+                        $services->get(RouteRunner::class)
+                    );
                 },
             ]
         );
@@ -141,7 +156,7 @@ class AppTest extends TestCase
         $app = $services->get(App::class);
         $app->add(ErrorMiddleware::class);
 
-        $this->assertEquals(true, $stack->contains(ErrorMiddleware::class));
+        $this->assertEquals(1, $stack->contains(ErrorMiddleware::class));
     }
 
     public function testFastRouter()

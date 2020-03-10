@@ -1,6 +1,6 @@
 <?php
 
-namespace Vice;
+namespace Vice\Middleware;
 
 use Fig\Http\Message\StatusCodeInterface as StatusCode;
 use Mockery\Adapter\Phpunit\MockeryTestCase;
@@ -57,7 +57,6 @@ class MiddlewareStackTest extends MockeryTestCase
         );
 
         $stack = new MiddlewareStack(new RequestHandlerStub(new Response()), [$set400, $set301]);
-        $stack->seedMiddlewareStack(new RequestHandlerStub(new Response()));
         $response = $stack->handle(\Mockery::mock(ServerRequest::class));
         $this->assertEquals(400, $response->getStatusCode());
         $this->assertNotEquals(301, $response->getStatusCode());

@@ -90,7 +90,8 @@ class FastRouteMiddleware implements ServerMiddleware, DispatcherInterface
             case RoutingResults::FOUND:
                 $arguments = $routingResults->getRouteArguments();
                 $identifier = $routingResults->getRouteIdentifier() ?? '';
-                $route = $this->routeCollector->lookupRoute($identifier)->prepare($arguments);
+                $route = $this->routeCollector->lookupRoute($identifier);
+                $route->prepare($arguments);
                 return $request->withAttribute(RouteContext::ROUTE, $route);
 
             case RoutingResults::NOT_FOUND:

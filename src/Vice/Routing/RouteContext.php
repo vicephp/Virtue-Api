@@ -4,7 +4,6 @@ namespace Vice\Routing;
 
 use Psr\Http\Message\ServerRequestInterface as ServerRequest;
 use RuntimeException;
-use Slim\Interfaces\RouteInterface;
 use Slim\Interfaces\RouteParserInterface;
 use Slim\Routing\RoutingResults;
 
@@ -28,7 +27,7 @@ class RouteContext
 
         return new self($route, $routeParser, $routingResults, $basePath);
     }
-    /** @var RouteInterface|null */
+    /** @var Route|null */
     private $route;
     /** @var RouteParserInterface */
     private $routeParser;
@@ -38,13 +37,13 @@ class RouteContext
     private $basePath;
 
     /**
-     * @param RouteInterface|null  $route
+     * @param Route|null  $route
      * @param RouteParserInterface $routeParser
      * @param RoutingResults       $routingResults
      * @param string|null          $basePath
      */
     private function __construct(
-        ?RouteInterface $route,
+        ?Route $route,
         RouteParserInterface $routeParser,
         RoutingResults $routingResults,
         ?string $basePath = null
@@ -55,7 +54,7 @@ class RouteContext
         $this->basePath = $basePath;
     }
 
-    public function getRoute(): RouteInterface
+    public function getRoute(): Route
     {
         return $this->route;
     }

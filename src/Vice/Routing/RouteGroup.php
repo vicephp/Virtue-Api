@@ -4,7 +4,7 @@ namespace Vice\Routing;
 use Psr\Container\ContainerInterface as Locator;
 use Psr\Http\Server\MiddlewareInterface;
 use Slim\Interfaces\AdvancedCallableResolverInterface;
-use Slim\Interfaces\MiddlewareDispatcherInterface;
+use Vice\Middleware\MiddlewareStack;
 
 class RouteGroup
 {
@@ -15,7 +15,7 @@ class RouteGroup
     /** @var Locator */
     private $services;
     /** @var Api */
-    private $routeCollectorProxy;
+    private $api;
     /** @var MiddlewareInterface[] */
     private $middleware = [];
 
@@ -23,12 +23,12 @@ class RouteGroup
         string $pattern,
         $callable,
         Locator $services,
-        Api $routeCollectorProxy
+        Api $api
     ) {
         $this->pattern = $pattern;
         $this->callable = $callable;
         $this->services = $services;
-        $this->routeCollectorProxy = $routeCollectorProxy;
+        $this->api = $api;
     }
 
     public function collectRoutes(): void
@@ -36,7 +36,7 @@ class RouteGroup
         $callableResolver = $this->services->get(AdvancedCallableResolverInterface::class);
         $callable = $callableResolver->resolveRoute($this->callable);
 
-        $callable($this->routeCollectorProxy);
+        $callable($this->api);
     }
 
     public function add(string $middleware): void
@@ -44,15 +44,10 @@ class RouteGroup
         $this->middleware[] = $this->services->get($middleware);
     }
 
-    public function addMiddleware(MiddlewareInterface $middleware): void
-    {
-        $this->middleware[] = $middleware;
-    }
-
-    public function appendMiddlewareToDispatcher(MiddlewareDispatcherInterface $dispatcher): void
+    public function appendMiddlewareToDispatcher(MiddlewareStack $stack): void
     {
         foreach ($this->middleware as $middleware) {
-            $dispatcher->addMiddleware($middleware);
+            $stack->append($middleware);
         }
     }
 

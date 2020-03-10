@@ -5,25 +5,22 @@ namespace Vice\Routing;
 use Psr\Container\ContainerInterface as Locator;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as ServerRequest;
-use Psr\Http\Server\MiddlewareInterface as ServerMiddleware;
 use Psr\Http\Server\RequestHandlerInterface;
 use Slim\Handlers\Strategies\RequestHandler;
-use Slim\Handlers\Strategies\RequestResponse;
 use Slim\Interfaces\AdvancedCallableResolverInterface;
 use Slim\Interfaces\CallableResolverInterface;
 use Slim\Interfaces\InvocationStrategyInterface;
 use Slim\Interfaces\RequestHandlerInvocationStrategyInterface;
 use Slim\Interfaces\RouteGroupInterface;
-use Slim\Interfaces\RouteInterface;
 use Slim\MiddlewareDispatcher;
-use Vice\MiddlewareStack;
+use Vice\Middleware\MiddlewareStack;
 use function array_key_exists;
 use function array_replace;
 use function class_implements;
 use function in_array;
 use function is_array;
 
-class Route implements RouteInterface, RequestHandlerInterface
+class Route implements RequestHandlerInterface
 {
     /** @var string[] */
     protected $methods = [];
@@ -31,7 +28,7 @@ class Route implements RouteInterface, RequestHandlerInterface
     protected $identifier;
     /** @var null|string */
     protected $name;
-    /** @var RouteGroupInterface[] */
+    /** @var RouteGroup[] */
     protected $groups;
     /** @var array */
     protected $arguments = [];
@@ -79,15 +76,6 @@ class Route implements RouteInterface, RequestHandlerInterface
     /**
      * {@inheritdoc}
      */
-    public function setInvocationStrategy(InvocationStrategyInterface $invocationStrategy): RouteInterface
-    {
-        trigger_error(sprintf("The %s method is deprecated and will be removed.", __METHOD__), E_USER_DEPRECATED);
-        return $this;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function getMethods(): array
     {
         return $this->methods;
@@ -104,28 +92,9 @@ class Route implements RouteInterface, RequestHandlerInterface
     /**
      * {@inheritdoc}
      */
-    public function setPattern(string $pattern): RouteInterface
-    {
-        trigger_error(sprintf("The %s method is deprecated and will be removed.", __METHOD__), E_USER_DEPRECATED);
-        return $this;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function getCallable()
     {
         return $this->callable;
-    }
-
-    /**
-     * @deprecated
-     * {@inheritdoc}
-     */
-    public function setCallable($callable): RouteInterface
-    {
-        trigger_error(sprintf("The %s method is deprecated and will be removed.", __METHOD__), E_USER_DEPRECATED);
-        return $this;
     }
 
     /**
@@ -136,19 +105,6 @@ class Route implements RouteInterface, RequestHandlerInterface
         return $this->name;
     }
 
-    /**
-     * @deprecated
-     * {@inheritdoc}
-     */
-    public function setName(string $name): RouteInterface
-    {
-        trigger_error(sprintf("The %s method is deprecated and will be removed.", __METHOD__), E_USER_DEPRECATED);
-        return $this;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function getIdentifier(): string
     {
         return $this->identifier;
@@ -176,65 +132,16 @@ class Route implements RouteInterface, RequestHandlerInterface
         return $this->arguments;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function setArguments(array $arguments, bool $includeInSavedArguments = true): RouteInterface
+    public function add($middleware): void
     {
-        trigger_error(sprintf("The %s method is deprecated and will be removed.", __METHOD__), E_USER_DEPRECATED);
-        if ($includeInSavedArguments) {
-            $this->savedArguments = $arguments;
-        }
-
-        $this->arguments = $arguments;
-        return $this;
+        $this->middlewareStack->append($this->services->get($middleware));
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function add($middleware): RouteInterface
-    {
-        $this->middlewareStack->addMiddleware($this->services->get($middleware));
-
-        return $this;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function addMiddleware(ServerMiddleware $middleware): RouteInterface
-    {
-        $this->middlewareStack->addMiddleware($middleware);
-        return $this;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function prepare(array $arguments): RouteInterface
+    public function prepare(array $arguments): void
     {
         $this->arguments = array_replace($this->savedArguments, $arguments) ?? [];
-        return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function setArgument(string $name, string $value, bool $includeInSavedArguments = true): RouteInterface
-    {
-        trigger_error(sprintf("The %s method is deprecated and will be removed.", __METHOD__), E_USER_DEPRECATED);
-        if ($includeInSavedArguments) {
-            $this->savedArguments[$name] = $value;
-        }
-
-        $this->arguments[$name] = $value;
-        return $this;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function run(ServerRequest $request): Response
     {
         if (!$this->groupMiddlewareAppended) {
@@ -244,9 +151,6 @@ class Route implements RouteInterface, RequestHandlerInterface
         return $this->middlewareStack->handle($request);
     }
 
-    /**
-     * @return void
-     */
     protected function appendGroupMiddlewareToRoute(): void
     {
         $this->middlewareStack = new MiddlewareStack($this->middlewareStack);
@@ -259,9 +163,6 @@ class Route implements RouteInterface, RequestHandlerInterface
         $this->groupMiddlewareAppended = true;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function handle(ServerRequest $request): Response
     {
         $callableResolver = $this->services->get(AdvancedCallableResolverInterface::class);
