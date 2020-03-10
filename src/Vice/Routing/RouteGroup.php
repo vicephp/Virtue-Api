@@ -5,11 +5,9 @@ use Psr\Container\ContainerInterface as Locator;
 use Psr\Http\Server\MiddlewareInterface;
 use Slim\Interfaces\AdvancedCallableResolverInterface;
 use Slim\Interfaces\CallableResolverInterface;
-use Slim\Interfaces\RouteCollectorProxyInterface;
-use Slim\Interfaces\RouteGroupInterface;
 use Slim\MiddlewareDispatcher;
 
-class RouteGroup implements RouteGroupInterface
+class RouteGroup
 {
     /** @var string */
     private $pattern;
@@ -19,7 +17,7 @@ class RouteGroup implements RouteGroupInterface
     private $services;
     /** @var CallableResolverInterface */
     private $callableResolver;
-    /** @var RouteCollectorProxyInterface */
+    /** @var RouteCollectorProxy */
     private $routeCollectorProxy;
     /** @var MiddlewareInterface[] */
     private $middleware = [];
@@ -29,7 +27,7 @@ class RouteGroup implements RouteGroupInterface
         $callable,
         Locator $services,
         CallableResolverInterface $callableResolver,
-        RouteCollectorProxyInterface $routeCollectorProxy
+        RouteCollectorProxy $routeCollectorProxy
     ) {
         $this->pattern = $pattern;
         $this->callable = $callable;
@@ -41,7 +39,7 @@ class RouteGroup implements RouteGroupInterface
     /**
      * {@inheritdoc}
      */
-    public function collectRoutes(): RouteGroupInterface
+    public function collectRoutes(): RouteGroup
     {
         if ($this->callableResolver instanceof AdvancedCallableResolverInterface) {
             $callable = $this->callableResolver->resolveRoute($this->callable);
@@ -56,7 +54,7 @@ class RouteGroup implements RouteGroupInterface
     /**
      * {@inheritdoc}
      */
-    public function add($middleware): RouteGroupInterface
+    public function add($middleware): RouteGroup
     {
         $this->middleware[] = $this->services->get($middleware);
 
@@ -66,7 +64,7 @@ class RouteGroup implements RouteGroupInterface
     /**
      * {@inheritdoc}
      */
-    public function addMiddleware(MiddlewareInterface $middleware): RouteGroupInterface
+    public function addMiddleware(MiddlewareInterface $middleware): RouteGroup
     {
         $this->middleware[] = $middleware;
         return $this;
@@ -75,7 +73,7 @@ class RouteGroup implements RouteGroupInterface
     /**
      * {@inheritdoc}
      */
-    public function appendMiddlewareToDispatcher(MiddlewareDispatcher $dispatcher): RouteGroupInterface
+    public function appendMiddlewareToDispatcher(MiddlewareDispatcher $dispatcher): RouteGroup
     {
         foreach ($this->middleware as $middleware) {
             $dispatcher->addMiddleware($middleware);

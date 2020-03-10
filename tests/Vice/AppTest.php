@@ -24,6 +24,7 @@ use Slim\Routing\RouteContext;
 use Slim\Routing\RouteResolver;
 use Vice\Middleware\FastRouteMiddleware;
 use Vice\Routing\RouteCollector;
+use Vice\Routing\RouteCollectorProxy;
 use Vice\Routing\RouteRunner;
 use Vice\Testing\MiddlewareStackStub;
 
@@ -57,17 +58,11 @@ class AppTest extends TestCase
                 CallableResolverInterface::class => function (Locator $services) {
                     return new \Slim\CallableResolver($services);
                 },
-                RouteCollectorInterface::class => function (Locator $services) {
+                RouteCollector::class => function (Locator $services) {
                     return new RouteCollector(
                         $services->get(ResponseFactory::class),
                         $services->get(CallableResolverInterface::class),
                         $services
-                    );
-                },
-                RouteResolverInterface::class => function (Locator $services) {
-                    return new RouteResolver(
-                        $services->get(RouteCollectorInterface::class),
-                        $services->get(DispatcherInterface::class)
                     );
                 },
                 FastRoute\RouteCollector::class =>
@@ -77,7 +72,7 @@ class AppTest extends TestCase
                     ),
                 FastRouteMiddleware::class => function (Locator $services) {
                     return new FastRouteMiddleware(
-                        $services->get(RouteCollectorInterface::class),
+                        $services->get(RouteCollector::class),
                         $services->get(FastRoute\RouteCollector::class)
                     );
                 },
@@ -202,7 +197,7 @@ class AppTest extends TestCase
         $services = $this->container->build();
         $app = $services->get(App::class);
         $app->add(FastRouteMiddleware::class);
-        $app->group('/foo', function (RouteCollectorProxyInterface $group) {
+        $app->group('/foo', function (RouteCollectorProxy $group) {
             $group->get('/bar', function ($request, $response, $args) {
                 return $response;
             })->add('set301');
@@ -234,7 +229,7 @@ class AppTest extends TestCase
         $services = $this->container->build();
         $app = $services->get(App::class);
         $app->add(FastRouteMiddleware::class);
-        $app->group('/foo', function (RouteCollectorProxyInterface $group) {
+        $app->group('/foo', function (RouteCollectorProxy $group) {
             $group->get('/bar', function ($request, $response, $args) {
                 return $response;
             })->add('set301');

@@ -3,16 +3,15 @@
 namespace Vice;
 
 use Psr\Container\ContainerInterface as Locator;
-use Psr\Http\Message\ResponseFactoryInterface as ResponseFactory;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as ServerRequest;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface as HandlesServerRequests;
 use Slim\CallableResolver;
 use Slim\Interfaces\MiddlewareDispatcherInterface;
-use Slim\Interfaces\RouteCollectorInterface;
 use Slim\Middleware\BodyParsingMiddleware;
 use Slim\ResponseEmitter;
+use Vice\Routing\RouteCollector;
 use Vice\Routing\RouteCollectorProxy;
 
 class App extends RouteCollectorProxy implements HandlesServerRequests
@@ -28,7 +27,7 @@ class App extends RouteCollectorProxy implements HandlesServerRequests
         parent::__construct(
             $services,
             $services->get(CallableResolver::class),
-            $services->get(RouteCollectorInterface::class)
+            $services->get(RouteCollector::class)
         );
         $this->services = $services;
         $this->middlewareStack = $services->get(MiddlewareDispatcherInterface::class);

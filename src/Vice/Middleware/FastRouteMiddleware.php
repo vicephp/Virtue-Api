@@ -11,20 +11,20 @@ use RuntimeException;
 use Slim\Exception\HttpMethodNotAllowedException;
 use Slim\Exception\HttpNotFoundException;
 use Slim\Interfaces\DispatcherInterface;
-use Slim\Interfaces\RouteCollectorInterface;
 use Slim\Routing\FastRouteDispatcher;
 use Slim\Routing\RouteContext;
 use Slim\Routing\RoutingResults;
+use Vice\Routing\RouteCollector;
 
 class FastRouteMiddleware implements ServerMiddleware, DispatcherInterface
 {
-    /** @var RouteCollectorInterface */
+    /** @var RouteCollector */
     private $routeCollector;
     /** @var FastRoute\RouteCollector */
     private $fastRouteCollector;
 
     public function __construct(
-        RouteCollectorInterface $routeCollector,
+        RouteCollector $routeCollector,
         FastRoute\RouteCollector $fastRouteCollector
     ) {
         $this->routeCollector = $routeCollector;

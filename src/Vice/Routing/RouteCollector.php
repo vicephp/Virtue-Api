@@ -2,77 +2,58 @@
 
 namespace Vice\Routing;
 
-use Psr\Container\ContainerInterface;
-use Psr\Http\Message\ResponseFactoryInterface;
+use Psr\Container\ContainerInterface as Locator;
+use Psr\Http\Message\ResponseFactoryInterface as ResponseFactory;
 use RuntimeException;
 use Slim\Handlers\Strategies\RequestResponse;
 use Slim\Interfaces\CallableResolverInterface;
 use Slim\Interfaces\InvocationStrategyInterface;
-use Slim\Interfaces\RouteCollectorInterface;
-use Slim\Interfaces\RouteGroupInterface;
-use Slim\Interfaces\RouteInterface;
-use Slim\Interfaces\RouteParserInterface;
-
-use Vice\Routing\Route;
-use Vice\Routing\RouteGroup;
-use Slim\Routing\RouteParser;
 use function array_pop;
-use function dirname;
-use function file_exists;
 use function sprintf;
-use function is_readable;
-use function is_writable;
 
 /**
  * RouteCollector is used to collect routes and route groups
  * as well as generate paths and URLs relative to its environment
  */
-class RouteCollector implements RouteCollectorInterface
+class RouteCollector
 {
-    /** @var RouteParserInterface */
+    /** @var RouteParser */
     protected $routeParser;
     /** @var CallableResolverInterface */
     protected $callableResolver;
-    /** @var ContainerInterface|null */
+    /** @var Locator */
     protected $services;
     /** @var InvocationStrategyInterface */
     protected $defaultInvocationStrategy;
     /** @var string */
     protected $basePath = '';
-    /** @var RouteInterface[] */
+    /** @var Route[] */
     protected $routes = [];
     /** @var RouteGroup[] */
     protected $routeGroups = [];
     /** @var int */
     protected $routeCounter = 0;
-    /** @var ResponseFactoryInterface */
+    /** @var ResponseFactory */
     protected $responseFactory;
 
-    /**
-     * @param ResponseFactoryInterface         $responseFactory
-     * @param CallableResolverInterface        $callableResolver
-     * @param ContainerInterface          $container
-     * @param InvocationStrategyInterface $defaultInvocationStrategy
-     * @param RouteParserInterface        $routeParser
-     */
     public function __construct(
-        ResponseFactoryInterface $responseFactory,
+        ResponseFactory $responseFactory,
         CallableResolverInterface $callableResolver,
-        ContainerInterface $container = null,
+        Locator $services = null,
         InvocationStrategyInterface $defaultInvocationStrategy = null,
-        RouteParserInterface $routeParser = null
+        RouteParser $routeParser = null
     ) {
         $this->responseFactory = $responseFactory;
         $this->callableResolver = $callableResolver;
-        $this->services = $container;
+        $this->services = $services;
         $this->defaultInvocationStrategy = $defaultInvocationStrategy ?? new RequestResponse();
         $this->routeParser = $routeParser ?? new RouteParser($this);
     }
 
     /**
-     * @return RouteParserInterface
+     * @return RouteParser
      */
-    public function getRouteParser(): RouteParserInterface
+    public function getRouteParser(): RouteParser
     {
         return $this->routeParser;
     }
@@ -148,7 +129,7 @@ class RouteCollector implements RouteCollectorInterface
     /**
      * {@inheritdoc}
      */
-    public function removeNamedRoute(string $name): RouteCollectorInterface
+    public function removeNamedRoute(string $name): RouteCollector
     {
         $route = $this->getNamedRoute($name);
         unset($this->routes[$route->getIdentifier()]);
@@ -158,7 +139,7 @@ class RouteCollector implements RouteCollectorInterface
     /**
      * {@inheritdoc}
      */
-    public function getNamedRoute(string $name): RouteInterface
+    public function getNamedRoute(string $name): Route
     {
         foreach ($this->routes as $route) {
             if ($name === $route->getName()) {
@@ -171,7 +152,7 @@ class RouteCollector implements RouteCollectorInterface
     /**
      * {@inheritdoc}
      */
-    public function lookupRoute(string $identifier): RouteInterface
+    public function lookupRoute(string $identifier): Route
     {
         if (!isset($this->routes[$identifier])) {
             throw new RuntimeException('Route not found, looks like your route cache is stale.');
@@ -182,7 +163,7 @@ class RouteCollector implements RouteCollectorInterface
     /**
      * {@inheritdoc}
      */
-    public function group(string $pattern, $callable): RouteGroupInterface
+    public function group(string $pattern, $callable): RouteGroup
     {
         $routeCollectorProxy = new RouteCollectorProxy(
             $this->services,
@@ -203,7 +184,7 @@ class RouteCollector implements RouteCollectorInterface
     /**
      * {@inheritdoc}
      */
-    public function map(array $methods, string $pattern, $handler): RouteInterface
+    public function map(array $methods, string $pattern, $handler): Route
     {
         $route = $this->createRoute($methods, $pattern, $handler);
         $this->routes[$route->getIdentifier()] = $route;
@@ -215,7 +196,7 @@ class RouteCollector implements RouteCollectorInterface
     /**
      * {@inheritdoc}
      */
-    protected function createRoute(array $methods, string $pattern, $callable): RouteInterface
+    protected function createRoute(array $methods, string $pattern, $callable): Route
     {
         return new Route(
             $methods,
