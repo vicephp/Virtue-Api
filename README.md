@@ -1,8 +1,8 @@
-# Vice
+# Virtue-Api
 
 ## Premise
 
-This framework will follow [The Zen Of Python](https://www.python.org/dev/peps/pep-0020/)
+This library will follow [The Zen Of Python](https://www.python.org/dev/peps/pep-0020/)
 
 ```
 Beautiful is better than ugly.
