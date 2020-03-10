@@ -19,7 +19,7 @@ use Slim\Interfaces\CallableResolverInterface;
 use Slim\Interfaces\InvocationStrategyInterface;
 use Slim\Interfaces\MiddlewareDispatcherInterface;
 use Slim\Middleware\ErrorMiddleware;
-use Slim\Routing\RouteContext;
+use Vice\Routing\RouteContext;
 use Vice\Middleware\FastRouteMiddleware;
 use Vice\Routing\RouteCollector;
 use Vice\Routing\RouteCollectorProxy;

@@ -5,7 +5,6 @@ namespace Vice\Routing;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as ServerRequest;
 use Psr\Http\Server\RequestHandlerInterface as HandlesServerRequests;
-use Slim\Routing\RouteContext;
 
 class RouteRunner implements HandlesServerRequests
 {
