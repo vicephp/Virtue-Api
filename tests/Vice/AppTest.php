@@ -18,10 +18,11 @@ use Slim\Interfaces\MiddlewareDispatcherInterface;
 use Slim\Interfaces\RouteCollectorInterface;
 use Slim\Interfaces\RouteResolverInterface;
 use Slim\Middleware\ErrorMiddleware;
-use Slim\Routing\RouteCollector;
+use Vice\Routing\RouteCollector;
 use Slim\Routing\RouteContext;
 use Slim\Routing\RouteResolver;
 use Vice\Middleware\FastRouteMiddleware;
+use Vice\Routing\RouteCollectorProxy;
 use Vice\Routing\RouteRunner;
 use Vice\Testing\MiddlewareStackStub;
 
@@ -177,17 +178,8 @@ class AppTest extends TestCase
         $this->assertNotNull($context->getRoutingResults());
     }
 
-    public function testRouteGroups()
+    public function testRouteGroupWithGroupMiddleware()
     {
-        $this->container->addDefinitions(
-            [
-                RouteRunner::class => function (Locator $services) {
-                    return new Testing\RequestHandlerStub(
-                        $services->get(ResponseFactory::class)->createResponse()
-                    );
-                },
-            ]
-        );
         $set400 = $this->mockMiddleware(
             function (ServerRequest $request, HandlesServerRequests $next) {
                 return $next->handle($request)->withStatus(StatusCode::STATUS_BAD_REQUEST);
@@ -201,20 +193,39 @@ class AppTest extends TestCase
         $services = $this->container->build();
         $app = $services->get(App::class);
         $app->add(FastRouteMiddleware::class);
-//        $app->group('/foo', function (RouteCollectorProxy $group) use ($set301) {
-//            $group->get('/bar', function ($request, $response, $args) {
-//
-//            })->add($set301);
-//        })->add($set400);
-        $app->get('/foo/bar', function ($request, $response, $args) {
+        $app->group('/foo', function (RouteCollectorProxy $group) use ($set301) {
+            $group->get('/bar', function ($request, $response, $args) {
+                return $response;
+            })->add($set301);
+        })->add($set400);
+        $request = $services->get(ServerRequest::class);
+        $request = $request->withUri($request->getUri()->withPath('/foo/bar'));
 
+        $response = $app->handle($request);
+        $this->assertEquals(400, $response->getStatusCode());
+        $this->assertEquals('Bad Request', $response->getReasonPhrase());
+    }
+
+    public function testRouteGroupWithRouteMiddleware()
+    {
+        $set301 = $this->mockMiddleware(
+            function (ServerRequest $request, HandlesServerRequests $next) {
+                return $next->handle($request)->withStatus(StatusCode::STATUS_MOVED_PERMANENTLY);
+            }
+        );
+        $services = $this->container->build();
+        $app = $services->get(App::class);
+        $app->add(FastRouteMiddleware::class);
+        $app->group('/foo', function (RouteCollectorProxy $group) use ($set301) {
+            $group->get('/bar', function ($request, $response, $args) {
+                return $response;
+            })->add($set301);
         });
         $request = $services->get(ServerRequest::class);
         $request = $request->withUri($request->getUri()->withPath('/foo/bar'));
 
-        $this->assertTrue(true);
-//        $response = $app->handle($request);
-//        $this->assertEquals(200, $response->getStatusCode());
-//        $this->assertEquals('OK', $response->getReasonPhrase());
+        $response = $app->handle($request);
+        $this->assertEquals(301, $response->getStatusCode());
+        $this->assertEquals('Moved Permanently', $response->getReasonPhrase());
     }
 }
