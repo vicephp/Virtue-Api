@@ -8,6 +8,7 @@ use Fig\Http\Message\StatusCodeInterface as StatusCode;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface as Locator;
 use Psr\Http\Message\ResponseFactoryInterface as ResponseFactory;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface as ServerRequest;
 use Psr\Http\Server\MiddlewareInterface as ServerMiddleware;
 use Psr\Http\Server\RequestHandlerInterface as HandlesServerRequests;
@@ -16,13 +17,13 @@ use Slim\Interfaces\CallableResolverInterface;
 use Slim\Interfaces\DispatcherInterface;
 use Slim\Interfaces\MiddlewareDispatcherInterface;
 use Slim\Interfaces\RouteCollectorInterface;
+use Slim\Interfaces\RouteCollectorProxyInterface;
 use Slim\Interfaces\RouteResolverInterface;
 use Slim\Middleware\ErrorMiddleware;
-use Vice\Routing\RouteCollector;
 use Slim\Routing\RouteContext;
 use Slim\Routing\RouteResolver;
 use Vice\Middleware\FastRouteMiddleware;
-use Vice\Routing\RouteCollectorProxy;
+use Vice\Routing\RouteCollector;
 use Vice\Routing\RouteRunner;
 use Vice\Testing\MiddlewareStackStub;
 
@@ -44,26 +45,29 @@ class AppTest extends TestCase
         $this->container = new \DI\ContainerBuilder();
         $this->container->addDefinitions(
             [
-                App::class => function (Locator $locator) {
-                    return new App($locator);
+                App::class => function (Locator $services) {
+                    return new App($services);
                 },
                 ResponseFactory::class => function () {
                     return \Slim\Factory\AppFactory::determineResponseFactory();
                 },
-                CallableResolverInterface::class => function (Locator $locator) {
-                    return new \Slim\CallableResolver($locator);
+                ResponseInterface::class => function (Locator $services) {
+                    return $services->get(ResponseFactory::class)->createResponse();
                 },
-                RouteCollectorInterface::class => function (Locator $locator) {
+                CallableResolverInterface::class => function (Locator $services) {
+                    return new \Slim\CallableResolver($services);
+                },
+                RouteCollectorInterface::class => function (Locator $services) {
                     return new RouteCollector(
-                        $locator->get(ResponseFactory::class),
-                        $locator->get(CallableResolverInterface::class),
-                        $locator
+                        $services->get(ResponseFactory::class),
+                        $services->get(CallableResolverInterface::class),
+                        $services
                     );
                 },
-                RouteResolverInterface::class => function (Locator $locator) {
+                RouteResolverInterface::class => function (Locator $services) {
                     return new RouteResolver(
-                        $locator->get(RouteCollectorInterface::class),
-                        $locator->get(DispatcherInterface::class)
+                        $services->get(RouteCollectorInterface::class),
+                        $services->get(DispatcherInterface::class)
                     );
                 },
                 FastRoute\RouteCollector::class =>
@@ -71,23 +75,23 @@ class AppTest extends TestCase
                         new FastRoute\RouteParser\Std(),
                         new FastRoute\DataGenerator\GroupCountBased()
                     ),
-                FastRouteMiddleware::class => function (Locator $locator) {
+                FastRouteMiddleware::class => function (Locator $services) {
                     return new FastRouteMiddleware(
-                        $locator->get(RouteCollectorInterface::class),
-                        $locator->get(FastRoute\RouteCollector::class)
+                        $services->get(RouteCollectorInterface::class),
+                        $services->get(FastRoute\RouteCollector::class)
                     );
                 },
-                ErrorMiddleware::class => function (Locator $locator) {
+                ErrorMiddleware::class => function (Locator $services) {
                     return new ErrorMiddleware(
-                        $locator->get(CallableResolverInterface::class),
-                        $locator->get(ResponseFactory::class),
+                        $services->get(CallableResolverInterface::class),
+                        $services->get(ResponseFactory::class),
                         false,
                         false,
                         false
                     );
                 },
-                MiddlewareDispatcherInterface::class => function (Locator $locator) {
-                    return new MiddlewareStack($locator->get(RouteRunner::class));
+                MiddlewareDispatcherInterface::class => function (Locator $services) {
+                    return new MiddlewareStack($services->get(RouteRunner::class));
                 },
                 ServerRequest::class => ServerRequestCreatorFactory::create()->createServerRequestFromGlobals(),
             ]
@@ -180,24 +184,29 @@ class AppTest extends TestCase
 
     public function testRouteGroupWithGroupMiddleware()
     {
-        $set400 = $this->mockMiddleware(
-            function (ServerRequest $request, HandlesServerRequests $next) {
-                return $next->handle($request)->withStatus(StatusCode::STATUS_BAD_REQUEST);
-            }
+        $this->container->addDefinitions(
+            [
+                'set400' => $this->mockMiddleware(
+                    function (ServerRequest $request, HandlesServerRequests $next) {
+                        return $next->handle($request)->withStatus(StatusCode::STATUS_BAD_REQUEST);
+                    }
+                ),
+                'set301' => $this->mockMiddleware(
+                    function (ServerRequest $request, HandlesServerRequests $next) {
+                        return $next->handle($request)->withStatus(StatusCode::STATUS_MOVED_PERMANENTLY);
+                    }
+                )
+            ]
         );
-        $set301 = $this->mockMiddleware(
-            function (ServerRequest $request, HandlesServerRequests $next) {
-                return $next->handle($request)->withStatus(StatusCode::STATUS_MOVED_PERMANENTLY);
-            }
-        );
+
         $services = $this->container->build();
         $app = $services->get(App::class);
         $app->add(FastRouteMiddleware::class);
-        $app->group('/foo', function (RouteCollectorProxy $group) use ($set301) {
+        $app->group('/foo', function (RouteCollectorProxyInterface $group) {
             $group->get('/bar', function ($request, $response, $args) {
                 return $response;
-            })->add($set301);
-        })->add($set400);
+            })->add('set301');
+        })->add('set400');
         $request = $services->get(ServerRequest::class);
         $request = $request->withUri($request->getUri()->withPath('/foo/bar'));
 
@@ -208,18 +217,27 @@ class AppTest extends TestCase
 
     public function testRouteGroupWithRouteMiddleware()
     {
-        $set301 = $this->mockMiddleware(
-            function (ServerRequest $request, HandlesServerRequests $next) {
-                return $next->handle($request)->withStatus(StatusCode::STATUS_MOVED_PERMANENTLY);
-            }
+        $this->container->addDefinitions(
+            [
+                'set400' => $this->mockMiddleware(
+                    function (ServerRequest $request, HandlesServerRequests $next) {
+                        return $next->handle($request)->withStatus(StatusCode::STATUS_BAD_REQUEST);
+                    }
+                ),
+                'set301' => $this->mockMiddleware(
+                    function (ServerRequest $request, HandlesServerRequests $next) {
+                        return $next->handle($request)->withStatus(StatusCode::STATUS_MOVED_PERMANENTLY);
+                    }
+                )
+            ]
         );
         $services = $this->container->build();
         $app = $services->get(App::class);
         $app->add(FastRouteMiddleware::class);
-        $app->group('/foo', function (RouteCollectorProxy $group) use ($set301) {
+        $app->group('/foo', function (RouteCollectorProxyInterface $group) {
             $group->get('/bar', function ($request, $response, $args) {
                 return $response;
-            })->add($set301);
+            })->add('set301');
         });
         $request = $services->get(ServerRequest::class);
         $request = $request->withUri($request->getUri()->withPath('/foo/bar'));

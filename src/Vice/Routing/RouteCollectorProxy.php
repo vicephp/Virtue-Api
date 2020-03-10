@@ -2,8 +2,9 @@
 
 namespace Vice\Routing;
 
-use Psr\Container\ContainerInterface;
+use Psr\Container\ContainerInterface as Locator;
 use Psr\Http\Message\ResponseFactoryInterface as ResponseFactory;
+use Psr\Http\Message\ResponseInterface as Response;
 use Slim\Interfaces\CallableResolverInterface;
 use Slim\Interfaces\RouteCollectorInterface;
 use Slim\Interfaces\RouteCollectorProxyInterface;
@@ -12,8 +13,8 @@ use Slim\Interfaces\RouteInterface;
 
 class RouteCollectorProxy implements RouteCollectorProxyInterface
 {
-    /** @var ResponseFactory */
-    private $responseFactory;
+    /** @var Locator */
+    private $services;
     /** @var CallableResolverInterface */
     private $callableResolver;
     /** @var RouteCollectorInterface */
@@ -22,12 +23,12 @@ class RouteCollectorProxy implements RouteCollectorProxyInterface
     private $groupPattern = '';
 
     public function __construct(
-        ResponseFactory $responseFactory,
+        Locator $services,
         CallableResolverInterface $callableResolver,
         RouteCollectorInterface $routeCollector,
         ?string $groupPattern = ''
     ) {
-        $this->responseFactory = $responseFactory;
+        $this->services = $services;
         $this->callableResolver = $callableResolver;
         $this->routeCollector = $routeCollector;
         $this->groupPattern = $groupPattern;
@@ -39,7 +40,7 @@ class RouteCollectorProxy implements RouteCollectorProxyInterface
     public function getResponseFactory(): ResponseFactory
     {
         trigger_error(sprintf("The %s method is deprecated and will be removed.", __METHOD__), E_USER_DEPRECATED);
-        return $this->responseFactory;
+        return $this->services->get(ResponseFactory::class);
     }
 
     /**
@@ -54,7 +55,7 @@ class RouteCollectorProxy implements RouteCollectorProxyInterface
     /**
      * {@inheritdoc}
      */
-    public function getContainer(): ?ContainerInterface
+    public function getContainer(): ?Locator
     {
         trigger_error(sprintf("The %s method is deprecated and will be removed.", __METHOD__), E_USER_DEPRECATED);
         return null;
@@ -74,6 +75,7 @@ class RouteCollectorProxy implements RouteCollectorProxyInterface
      */
     public function getBasePath(): string
     {
+        trigger_error(sprintf("The %s method is deprecated and will be removed.", __METHOD__), E_USER_DEPRECATED);
         return $this->routeCollector->getBasePath();
     }
 
@@ -82,6 +84,7 @@ class RouteCollectorProxy implements RouteCollectorProxyInterface
      */
     public function setBasePath(string $basePath): RouteCollectorProxyInterface
     {
+        trigger_error(sprintf("The %s method is deprecated and will be removed.", __METHOD__), E_USER_DEPRECATED);
         $this->routeCollector->setBasePath($basePath);
 
         return $this;
@@ -164,11 +167,11 @@ class RouteCollectorProxy implements RouteCollectorProxyInterface
      */
     public function redirect(string $from, $to, int $status = 302): RouteInterface
     {
-        $responseFactory = $this->responseFactory;
+        $response = $this->services->get(Response::class);
+        $response->withStatus($status)->withHeader('Location', (string) $to);
 
-        $handler = function () use ($to, $status, $responseFactory) {
-            $response = $responseFactory->createResponse($status);
-            return $response->withHeader('Location', (string) $to);
+        $handler = function () use ($response) {
+            return $response;
         };
 
         return $this->get($from, $handler);

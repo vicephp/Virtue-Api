@@ -13,8 +13,8 @@ use Slim\Interfaces\RouteGroupInterface;
 use Slim\Interfaces\RouteInterface;
 use Slim\Interfaces\RouteParserInterface;
 
-use Slim\Routing\Route;
-use Slim\Routing\RouteGroup;
+use Vice\Routing\Route;
+use Vice\Routing\RouteGroup;
 use Slim\Routing\RouteParser;
 use function array_pop;
 use function dirname;
@@ -34,66 +34,37 @@ class RouteCollector implements RouteCollectorInterface
     /** @var CallableResolverInterface */
     protected $callableResolver;
     /** @var ContainerInterface|null */
-    protected $container;
+    protected $services;
     /** @var InvocationStrategyInterface */
     protected $defaultInvocationStrategy;
-    /**
-     * Base path used in pathFor()
-     *
-     * @var string
-     */
+    /** @var string */
     protected $basePath = '';
-
-    /**
-     * Path to fast route cache file. Set to null to disable route caching
-     *
-     * @var string|null
-     */
-    protected $cacheFile;
-
-    /**
-     * Routes
-     *
-     * @var RouteInterface[]
-     */
+    /** @var RouteInterface[] */
     protected $routes = [];
-
-    /**
-     * Route groups
-     *
-     * @var RouteGroup[]
-     */
+    /** @var RouteGroup[] */
     protected $routeGroups = [];
-
-    /**
-     * Route counter incrementer
-     *
-     * @var int
-     */
+    /** @var int */
     protected $routeCounter = 0;
-
-    /**
-     * @var ResponseFactoryInterface
-     */
+    /** @var ResponseFactoryInterface */
     protected $responseFactory;
 
     /**
      * @param ResponseFactoryInterface         $responseFactory
      * @param CallableResolverInterface        $callableResolver
-     * @param ContainerInterface|null          $container
-     * @param InvocationStrategyInterface|null $defaultInvocationStrategy
-     * @param RouteParserInterface|null        $routeParser
+     * @param ContainerInterface          $container
+     * @param InvocationStrategyInterface $defaultInvocationStrategy
+     * @param RouteParserInterface        $routeParser
      */
     public function __construct(
         ResponseFactoryInterface $responseFactory,
         CallableResolverInterface $callableResolver,
-        ?ContainerInterface $container = null,
-        ?InvocationStrategyInterface $defaultInvocationStrategy = null,
-        ?RouteParserInterface $routeParser = null
+        ContainerInterface $container = null,
+        InvocationStrategyInterface $defaultInvocationStrategy = null,
+        RouteParserInterface $routeParser = null
     ) {
         $this->responseFactory = $responseFactory;
         $this->callableResolver = $callableResolver;
-        $this->container = $container;
+        $this->services = $container;
         $this->defaultInvocationStrategy = $defaultInvocationStrategy ?? new RequestResponse();
         $this->routeParser = $routeParser ?? new RouteParser($this);
     }
@@ -122,7 +93,7 @@ class RouteCollector implements RouteCollectorInterface
      */
     public function setDefaultInvocationStrategy(InvocationStrategyInterface $strategy): RouteCollectorInterface
     {
-        $this->defaultInvocationStrategy = $strategy;
+        trigger_error(sprintf("The %s method is deprecated and will be removed.", __METHOD__), E_USER_DEPRECATED);
         return $this;
     }
 
@@ -141,20 +112,6 @@ class RouteCollector implements RouteCollectorInterface
     public function setCacheFile(string $cacheFile): RouteCollectorInterface
     {
         trigger_error(sprintf("The %s method is deprecated and will be removed.", __METHOD__), E_USER_DEPRECATED);
-        if (file_exists($cacheFile) && !is_readable(
-            $cacheFile)) {
-            throw new RuntimeException(
-                sprintf('Route collector cache file `%s` is not readable', $cacheFile)
-            );
-        }
-
-        if (!file_exists($cacheFile) && !is_writable(dirname($cacheFile))) {
-            throw new RuntimeException(
-                sprintf('Route collector cache file directory `%s` is not writable', dirname($cacheFile))
-            );
-        }
-
-        $this->cacheFile = $cacheFile;
         return $this;
     }
 
@@ -228,13 +185,13 @@ class RouteCollector implements RouteCollectorInterface
     public function group(string $pattern, $callable): RouteGroupInterface
     {
         $routeCollectorProxy = new RouteCollectorProxy(
-            $this->responseFactory,
+            $this->services,
             $this->callableResolver,
             $this,
             $pattern
         );
 
-        $routeGroup = new RouteGroup($pattern, $callable, $this->callableResolver, $routeCollectorProxy);
+        $routeGroup = new RouteGroup($pattern, $callable, $this->services, $this->callableResolver, $routeCollectorProxy);
         $this->routeGroups[] = $routeGroup;
 
         $routeGroup->collectRoutes();
@@ -264,9 +221,8 @@ class RouteCollector implements RouteCollectorInterface
             $methods,
             $pattern,
             $callable,
-            $this->responseFactory,
+            $this->services,
             $this->callableResolver,
-            $this->container,
             $this->defaultInvocationStrategy,
             $this->routeGroups,
             $this->routeCounter

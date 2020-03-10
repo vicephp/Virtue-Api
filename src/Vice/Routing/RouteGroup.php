@@ -1,6 +1,7 @@
 <?php
 namespace Vice\Routing;
 
+use Psr\Container\ContainerInterface as Locator;
 use Psr\Http\Server\MiddlewareInterface;
 use Slim\Interfaces\AdvancedCallableResolverInterface;
 use Slim\Interfaces\CallableResolverInterface;
@@ -10,31 +11,29 @@ use Slim\MiddlewareDispatcher;
 
 class RouteGroup implements RouteGroupInterface
 {
-    /** @var callable|string */
-    protected $callable;
-    /** @var CallableResolverInterface */
-    protected $callableResolver;
-    /** @var RouteCollectorProxyInterface */
-    protected $routeCollectorProxy;
-    /** @var MiddlewareInterface[] */
-    protected $middleware = [];
     /** @var string */
-    protected $pattern;
+    private $pattern;
+    /** @var callable|string */
+    private $callable;
+    /** @var Locator */
+    private $services;
+    /** @var CallableResolverInterface */
+    private $callableResolver;
+    /** @var RouteCollectorProxyInterface */
+    private $routeCollectorProxy;
+    /** @var MiddlewareInterface[] */
+    private $middleware = [];
 
-    /**
-     * @param string                       $pattern
-     * @param callable|string              $callable
-     * @param CallableResolverInterface    $callableResolver
-     * @param RouteCollectorProxyInterface $routeCollectorProxy
-     */
     public function __construct(
         string $pattern,
         $callable,
+        Locator $services,
         CallableResolverInterface $callableResolver,
         RouteCollectorProxyInterface $routeCollectorProxy
     ) {
         $this->pattern = $pattern;
         $this->callable = $callable;
+        $this->services = $services;
         $this->callableResolver = $callableResolver;
         $this->routeCollectorProxy = $routeCollectorProxy;
     }
@@ -50,17 +49,17 @@ class RouteGroup implements RouteGroupInterface
             $callable = $this->callableResolver->resolve($this->callable);
         }
         $callable($this->routeCollectorProxy);
+
         return $this;
     }
 
     /**
-     * @deprecated
      * {@inheritdoc}
      */
     public function add($middleware): RouteGroupInterface
     {
-        trigger_error(sprintf("The %s method is deprecated and will be removed.", __METHOD__), E_USER_DEPRECATED);
-        $this->middleware[] = $middleware;
+        $this->middleware[] = $this->services->get($middleware);
+
         return $this;
     }
 

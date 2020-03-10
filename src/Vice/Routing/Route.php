@@ -2,7 +2,7 @@
 
 namespace Vice\Routing;
 
-use Psr\Http\Message\ResponseFactoryInterface;
+use Psr\Container\ContainerInterface as Locator;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as ServerRequest;
 use Psr\Http\Server\MiddlewareInterface as ServerMiddleware;
@@ -45,8 +45,8 @@ class Route implements RouteInterface, RequestHandlerInterface
     protected $callable;
     /** @var CallableResolverInterface */
     protected $callableResolver;
-    /** @var ResponseFactoryInterface */
-    protected $responseFactory;
+    /** @var Locator */
+    protected $services;
     /** @var string */
     protected $pattern;
     /** @var bool */
@@ -56,7 +56,7 @@ class Route implements RouteInterface, RequestHandlerInterface
         array $methods,
         string $pattern,
         $callable,
-        ResponseFactoryInterface $responseFactory,
+        Locator $services,
         CallableResolverInterface $callableResolver,
         ?InvocationStrategyInterface $invocationStrategy = null,
         array $groups = [],
@@ -65,7 +65,7 @@ class Route implements RouteInterface, RequestHandlerInterface
         $this->methods = $methods;
         $this->pattern = $pattern;
         $this->callable = $callable;
-        $this->responseFactory = $responseFactory;
+        $this->services = $services;
         $this->callableResolver = $callableResolver;
         $this->invocationStrategy = $invocationStrategy ?? new RequestResponse();
         $this->groups = $groups;
@@ -201,7 +201,8 @@ class Route implements RouteInterface, RequestHandlerInterface
      */
     public function add($middleware): RouteInterface
     {
-        trigger_error(sprintf("The %s method is deprecated and will be removed.", __METHOD__), E_USER_DEPRECATED);
+        $this->middlewareDispatcher->addMiddleware($this->services->get($middleware));
+
         return $this;
     }
 
@@ -284,7 +285,7 @@ class Route implements RouteInterface, RequestHandlerInterface
             $strategy = new RequestHandler();
         }
 
-        $response = $this->responseFactory->createResponse();
+        $response = $this->services->get(Response::class);
         return $strategy($callable, $request, $response, $this->arguments);
     }
 }

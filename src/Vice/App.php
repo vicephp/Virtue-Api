@@ -26,7 +26,7 @@ class App extends RouteCollectorProxy implements HandlesServerRequests
 
     public function __construct(Locator $services) {
         parent::__construct(
-            $services->get(ResponseFactory::class),
+            $services,
             $services->get(CallableResolver::class),
             $services->get(RouteCollectorInterface::class)
         );

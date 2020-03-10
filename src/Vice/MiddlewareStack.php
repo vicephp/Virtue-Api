@@ -7,9 +7,10 @@ use Psr\Http\Message\ServerRequestInterface as ServerRequest;
 use Psr\Http\Server\MiddlewareInterface as ServerMiddleware;
 use Psr\Http\Server\RequestHandlerInterface as HandlesServerRequests;
 use Slim\Interfaces\MiddlewareDispatcherInterface;
+use Slim\MiddlewareDispatcher;
 use Vice\Middleware\RequestHandler;
 
-class MiddlewareStack implements MiddlewareDispatcherInterface
+class MiddlewareStack extends MiddlewareDispatcher
 {
     /** @var ServerMiddleware[] */
     private $stack = [];
