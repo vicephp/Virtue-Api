@@ -7,7 +7,6 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as ServerRequest;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface as HandlesServerRequests;
-use Slim\CallableResolver;
 use Slim\Interfaces\MiddlewareDispatcherInterface;
 use Slim\Middleware\BodyParsingMiddleware;
 use Slim\ResponseEmitter;
@@ -26,7 +25,6 @@ class App extends RouteCollectorProxy implements HandlesServerRequests
     public function __construct(Locator $services) {
         parent::__construct(
             $services,
-            $services->get(CallableResolver::class),
             $services->get(RouteCollector::class)
         );
         $this->services = $services;

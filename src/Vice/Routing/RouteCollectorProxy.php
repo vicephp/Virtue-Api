@@ -4,14 +4,11 @@ namespace Vice\Routing;
 
 use Psr\Container\ContainerInterface as Locator;
 use Psr\Http\Message\ResponseInterface as Response;
-use Slim\Interfaces\CallableResolverInterface;
 
 class RouteCollectorProxy
 {
     /** @var Locator */
     private $services;
-    /** @var CallableResolverInterface */
-    private $callableResolver;
     /** @var RouteCollector */
     private $routeCollector;
     /** @var string */
@@ -19,12 +16,10 @@ class RouteCollectorProxy
 
     public function __construct(
         Locator $services,
-        CallableResolverInterface $callableResolver,
         RouteCollector $routeCollector,
         ?string $groupPattern = ''
     ) {
         $this->services = $services;
-        $this->callableResolver = $callableResolver;
         $this->routeCollector = $routeCollector;
         $this->groupPattern = $groupPattern;
     }

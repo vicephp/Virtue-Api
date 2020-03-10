@@ -3,9 +3,8 @@
 namespace Vice\Routing;
 
 use Psr\Container\ContainerInterface as Locator;
-use Psr\Http\Message\ResponseFactoryInterface as ResponseFactory;
 use RuntimeException;
-use Slim\Handlers\Strategies\RequestResponse;
+use Slim\Interfaces\AdvancedCallableResolverInterface;
 use Slim\Interfaces\CallableResolverInterface;
 use Slim\Interfaces\InvocationStrategyInterface;
 use function array_pop;
@@ -16,12 +15,12 @@ use function array_pop;
  */
 class RouteCollector
 {
+    /** @var Locator */
+    protected $services;
     /** @var RouteParser */
     protected $routeParser;
     /** @var CallableResolverInterface */
     protected $callableResolver;
-    /** @var Locator */
-    protected $services;
     /** @var InvocationStrategyInterface */
     protected $defaultInvocationStrategy;
     /** @var string */
@@ -32,20 +31,13 @@ class RouteCollector
     protected $routeGroups = [];
     /** @var int */
     protected $routeCounter = 0;
-    /** @var ResponseFactory */
-    protected $responseFactory;
 
     public function __construct(
-        ResponseFactory $responseFactory,
-        CallableResolverInterface $callableResolver,
-        Locator $services = null,
-        InvocationStrategyInterface $defaultInvocationStrategy = null,
-        RouteParser $routeParser = null
+        Locator $services
     ) {
-        $this->responseFactory = $responseFactory;
-        $this->callableResolver = $callableResolver;
+        $this->callableResolver = $services->get(AdvancedCallableResolverInterface::class);
         $this->services = $services;
-        $this->defaultInvocationStrategy = $defaultInvocationStrategy ?? new RequestResponse();
+        $this->defaultInvocationStrategy = $services->get(InvocationStrategyInterface::class);
         $this->routeParser = $routeParser ?? new RouteParser($this);
     }
 
@@ -93,7 +85,6 @@ class RouteCollector
     {
         $routeCollectorProxy = new RouteCollectorProxy(
             $this->services,
-            $this->callableResolver,
             $this,
             $pattern
         );
