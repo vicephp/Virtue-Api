@@ -5,9 +5,9 @@ namespace Virtue\Api\Handlers\InvokeHandler;
 use Psr\Container\ContainerInterface as Locator;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Slim\Interfaces\InvocationStrategyInterface;
+use Slim\Interfaces\RequestHandlerInvocationStrategyInterface;
 
-class RequestResponseLocator implements InvocationStrategyInterface
+class RequestResponseLocator implements RequestHandlerInvocationStrategyInterface
 {
     /** @var Locator */
     private $services;

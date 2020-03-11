@@ -4,17 +4,12 @@ namespace Virtue\Api\Routing;
 
 use FastRoute;
 use Psr\Container\ContainerInterface as Locator;
-use RuntimeException;
 use function array_pop;
 
 class FastRouter implements RouteCollector
 {
     /** @var Locator */
     private $kernel;
-    /** @var string */
-    private $basePath = '';
-    /** @var Route[] */
-    private $routes = [];
     /** @var RouteGroup[] */
     private $routeGroups = [];
     /** @var int */
@@ -25,46 +20,6 @@ class FastRouter implements RouteCollector
     public function __construct(Locator $kernel) {
         $this->kernel = $kernel;
         $this->fastRouteCollector = $kernel->get(FastRoute\RouteCollector::class);
-    }
-
-    public function getRouteParser(): RouteParser
-    {
-        return $this->routeParser;
-    }
-
-    public function getBasePath(): string
-    {
-        return $this->basePath;
-    }
-
-    public function getRoutes(): array
-    {
-        return $this->routes;
-    }
-
-    public function removeNamedRoute(string $name): RouteCollector
-    {
-        $route = $this->getNamedRoute($name);
-        unset($this->routes[$route->getIdentifier()]);
-        return $this;
-    }
-
-    public function getNamedRoute(string $name): Route
-    {
-        foreach ($this->routes as $route) {
-            if ($name === $route->getName()) {
-                return $route;
-            }
-        }
-        throw new RuntimeException('Named route does not exist for name: ' . $name);
-    }
-
-    public function lookupRoute(string $identifier): Route
-    {
-        if (!isset($this->routes[$identifier])) {
-            throw new RuntimeException('Route not found, looks like your route cache is stale.');
-        }
-        return $this->routes[$identifier];
     }
 
     public function group(string $pattern, $callable): RouteGroup
@@ -82,18 +37,17 @@ class FastRouter implements RouteCollector
     {
         $route = $this->createRoute($methods, $pattern, $handler);
         $this->fastRouteCollector->addRoute($methods, $pattern, $route);
-        $this->routes[$route->getIdentifier()] = $route;
         $this->routeCounter++;
 
         return $route;
     }
 
-    protected function createRoute(array $methods, string $pattern, $callable): Route
+    protected function createRoute(array $methods, string $pattern, $handler): Route
     {
         return new Route(
             $methods,
             $pattern,
-            $callable,
+            $handler,
             $this->kernel,
             $this->routeGroups,
             $this->routeCounter

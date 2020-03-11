@@ -7,43 +7,25 @@ use RuntimeException;
 
 class RouteContext
 {
-    public const ROUTE = '__route__';
-    public const ROUTE_PARSER = '__routeParser__';
     public const ROUTING_RESULTS = '__routingResults__';
-    public const BASE_PATH = '__basePath__';
 
     public static function fromRequest(ServerRequest $serverRequest): self
     {
-        $route = $serverRequest->getAttribute(self::ROUTE);
         $routingResults = $serverRequest->getAttribute(self::ROUTING_RESULTS);
-        $basePath = $serverRequest->getAttribute(self::BASE_PATH);
 
-        if ($route === null || $routingResults === null) {
+        if ($routingResults === null) {
             throw new RuntimeException('Cannot create RouteContext before routing has been completed');
         }
 
-        return new self($route, $routingResults, $basePath);
+        return new self($routingResults);
     }
-    /** @var Route|null */
-    private $route;
-    /**  @var RoutingResults */
-    private $routingResults;
-    /** @var string|null */
-    private $basePath;
+    /**  @var array */
+    private $routingResults = [];
 
     private function __construct(
-        Route $route,
-        array $routingResults,
-        ?string $basePath = null
+        array $routingResults
     ) {
-        $this->route = $route;
         $this->routingResults = $routingResults;
-        $this->basePath = $basePath;
-    }
-
-    public function getRoute(): Route
-    {
-        return $this->route;
     }
 
     public function getRoutingResults(): array
@@ -51,11 +33,13 @@ class RouteContext
         return $this->routingResults;
     }
 
-    public function getBasePath(): string
+    public function getRoute(): Route
     {
-        if ($this->basePath === null) {
-            throw new RuntimeException('No base path defined.');
-        }
-        return $this->basePath;
+        return $this->routingResults[1];
+    }
+
+    public function getRouteArgs(): array
+    {
+        return $this->routingResults[2];
     }
 }

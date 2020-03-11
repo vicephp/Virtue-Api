@@ -11,14 +11,9 @@ use RuntimeException;
 use Slim\Exception\HttpMethodNotAllowedException;
 use Slim\Exception\HttpNotFoundException;
 use Slim\Routing\RouteContext;
-use Virtue\Api\Routing\Route;
-use Virtue\Api\Routing\RouteCollector;
-use Virtue\Api\Routing\RouteParser;
 
 class FastRouteMiddleware implements ServerMiddleware
 {
-    /** @var RouteCollector */
-    private $routeCollector;
     /** @var FastRoute\RouteCollector */
     private $fastRouteCollector;
 
@@ -39,16 +34,11 @@ class FastRouteMiddleware implements ServerMiddleware
      */
     public function process(ServerRequest $request, HandlesServerRequests $handler): Response
     {
-        $request = $request->withAttribute(RouteContext::ROUTE_PARSER, new RouteParser());
-        $request = $this->performRouting($request);
-
-        return $handler->handle($request);
+        return $handler->handle($this->performRouting($request));
     }
 
     public function dispatch(string $method, string $uri): array
     {
-        $uri = rawurldecode($uri);
-        $uri = ($uri === '' || $uri[0] !== '/') ? "/{$uri}" : $uri;
         $dispatcher = new FastRoute\Dispatcher\GroupCountBased($this->fastRouteCollector->getData());
         return $dispatcher->dispatch($method, $uri);
     }
@@ -69,10 +59,7 @@ class FastRouteMiddleware implements ServerMiddleware
 
         switch ($routingResults[0]) {
             case FastRoute\Dispatcher::FOUND:
-                /** @var Route $route */
-                $route = $routingResults[1];
-                $route->prepare($routingResults[2]);
-                return $request->withAttribute(RouteContext::ROUTE, $route);
+                return $request;
 
             case FastRoute\Dispatcher::NOT_FOUND:
                 throw new HttpNotFoundException($request);

@@ -12,7 +12,6 @@ use Slim\Interfaces\InvocationStrategyInterface;
 use Slim\Interfaces\RequestHandlerInvocationStrategyInterface;
 use Slim\MiddlewareDispatcher;
 use Virtue\Api\Middleware\MiddlewareStack;
-use function array_replace;
 use function class_implements;
 use function in_array;
 use function is_array;
@@ -23,18 +22,12 @@ class Route implements RequestHandlerInterface
     protected $methods = [];
     /** @var string */
     protected $identifier;
-    /** @var null|string */
-    protected $name;
     /** @var RouteGroup[] */
     protected $groups;
-    /** @var array */
-    protected $arguments = [];
-    /** @var array */
-    protected $savedArguments = [];
     /** @var MiddlewareDispatcher */
     protected $middlewareStack;
     /** @var callable|string */
-    protected $callable;
+    protected $handler;
     /** @var Locator */
     protected $kernel;
     /** @var string */
@@ -45,42 +38,28 @@ class Route implements RequestHandlerInterface
     public function __construct(
         array $methods,
         string $pattern,
-        $callable,
+        $handler,
         Locator $kernel,
         array $groups = [],
         int $identifier = 0
     ) {
         $this->methods = $methods;
         $this->pattern = $pattern;
-        $this->callable = $callable;
+        $this->handler = $handler;
         $this->kernel = $kernel;
         $this->groups = $groups;
-        $this->identifier = "route{$identifier}";
+        $this->identifier = "route::{$identifier}";
         $this->middlewareStack = new MiddlewareStack($this);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getMethods(): array
     {
         return $this->methods;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getPattern(): string
     {
         return $this->pattern;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getName(): ?string
-    {
-        return $this->name;
     }
 
     public function getIdentifier(): string
@@ -88,14 +67,9 @@ class Route implements RequestHandlerInterface
         return $this->identifier;
     }
 
-    public function add($middleware): void
+    public function add(string $middleware): void
     {
         $this->middlewareStack->append($this->kernel->get($middleware));
-    }
-
-    public function prepare(array $arguments): void
-    {
-        $this->arguments = array_replace($this->savedArguments, $arguments) ?? [];
     }
 
     public function run(ServerRequest $request): Response
@@ -122,18 +96,18 @@ class Route implements RequestHandlerInterface
     public function handle(ServerRequest $request): Response
     {
         $callableResolver = $this->kernel->get(AdvancedCallableResolverInterface::class);
-        $callable = $callableResolver->resolveRoute($this->callable);
+        $handler = $callableResolver->resolveRoute($this->handler);
         $strategy = $this->kernel->get(InvocationStrategyInterface::class);
 
         if (
-            is_array($callable)
-            && $callable[0] instanceof RequestHandlerInterface
+            is_array($handler)
+            && $handler[0] instanceof RequestHandlerInterface
             && !in_array(RequestHandlerInvocationStrategyInterface::class, class_implements($strategy))
         ) {
             $strategy = new RequestHandler();
         }
 
         $response = $this->kernel->get(Response::class);
-        return $strategy($callable, $request, $response, $this->arguments);
+        return $strategy($handler, $request, $response, RouteContext::fromRequest($request)->getRouteArgs());
     }
 }
