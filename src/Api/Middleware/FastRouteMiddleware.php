@@ -10,13 +10,12 @@ use Psr\Http\Server\RequestHandlerInterface as HandlesServerRequests;
 use RuntimeException;
 use Slim\Exception\HttpMethodNotAllowedException;
 use Slim\Exception\HttpNotFoundException;
-use Slim\Interfaces\DispatcherInterface;
-use Slim\Routing\FastRouteDispatcher;
 use Slim\Routing\RouteContext;
-use Slim\Routing\RoutingResults;
+use Virtue\Api\Routing\Route;
 use Virtue\Api\Routing\RouteCollector;
+use Virtue\Api\Routing\RouteParser;
 
-class FastRouteMiddleware implements ServerMiddleware, DispatcherInterface
+class FastRouteMiddleware implements ServerMiddleware
 {
     /** @var RouteCollector */
     private $routeCollector;
@@ -24,10 +23,8 @@ class FastRouteMiddleware implements ServerMiddleware, DispatcherInterface
     private $fastRouteCollector;
 
     public function __construct(
-        RouteCollector $routeCollector,
         FastRoute\RouteCollector $fastRouteCollector
     ) {
-        $this->routeCollector = $routeCollector;
         $this->fastRouteCollector = $fastRouteCollector;
     }
 
@@ -42,26 +39,18 @@ class FastRouteMiddleware implements ServerMiddleware, DispatcherInterface
      */
     public function process(ServerRequest $request, HandlesServerRequests $handler): Response
     {
-        $request = $request->withAttribute(RouteContext::ROUTE_PARSER, $this->routeCollector->getRouteParser());
-        $request = $request->withAttribute(RouteContext::BASE_PATH, $this->routeCollector->getBasePath());
+        $request = $request->withAttribute(RouteContext::ROUTE_PARSER, new RouteParser());
         $request = $this->performRouting($request);
 
         return $handler->handle($request);
     }
 
-    public function dispatch(string $method, string $uri): RoutingResults
+    public function dispatch(string $method, string $uri): array
     {
         $uri = rawurldecode($uri);
         $uri = ($uri === '' || $uri[0] !== '/') ? "/{$uri}" : $uri;
-        $dispatcher = new FastRouteDispatcher($this->fastRouteCollector->getData());
-        $results = $dispatcher->dispatch($method, $uri);
-        return new RoutingResults($this, $method, $uri, $results[0], $results[1], $results[2]);
-    }
-
-    public function getAllowedMethods(string $uri): array
-    {
-        $dispatcher = new FastRouteDispatcher($this->fastRouteCollector->getData());
-        return $dispatcher->getAllowedMethods($uri);
+        $dispatcher = new FastRoute\Dispatcher\GroupCountBased($this->fastRouteCollector->getData());
+        return $dispatcher->dispatch($method, $uri);
     }
 
     /**
@@ -74,32 +63,23 @@ class FastRouteMiddleware implements ServerMiddleware, DispatcherInterface
      */
     private function performRouting(ServerRequest $request): ServerRequest
     {
-        foreach ($this->routeCollector->getRoutes() as $route) {
-            $this->fastRouteCollector->addRoute(
-                $route->getMethods(),
-                "{$this->routeCollector->getBasePath()}{$route->getPattern()}",
-                $route->getIdentifier()
-            );
-        }
         $routingResults = $this->dispatch($request->getMethod(), $request->getUri()->getPath());
-        $routeStatus = $routingResults->getRouteStatus();
 
         $request = $request->withAttribute(RouteContext::ROUTING_RESULTS, $routingResults);
 
-        switch ($routeStatus) {
-            case RoutingResults::FOUND:
-                $arguments = $routingResults->getRouteArguments();
-                $identifier = $routingResults->getRouteIdentifier() ?? '';
-                $route = $this->routeCollector->lookupRoute($identifier);
-                $route->prepare($arguments);
+        switch ($routingResults[0]) {
+            case FastRoute\Dispatcher::FOUND:
+                /** @var Route $route */
+                $route = $routingResults[1];
+                $route->prepare($routingResults[2]);
                 return $request->withAttribute(RouteContext::ROUTE, $route);
 
-            case RoutingResults::NOT_FOUND:
+            case FastRoute\Dispatcher::NOT_FOUND:
                 throw new HttpNotFoundException($request);
 
-            case RoutingResults::METHOD_NOT_ALLOWED:
+            case FastRoute\Dispatcher::METHOD_NOT_ALLOWED:
                 $exception = new HttpMethodNotAllowedException($request);
-                $exception->setAllowedMethods($routingResults->getAllowedMethods());
+                $exception->setAllowedMethods($routingResults[0]);
                 throw $exception;
 
             default:

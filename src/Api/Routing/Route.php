@@ -10,7 +10,6 @@ use Slim\Handlers\Strategies\RequestHandler;
 use Slim\Interfaces\AdvancedCallableResolverInterface;
 use Slim\Interfaces\InvocationStrategyInterface;
 use Slim\Interfaces\RequestHandlerInvocationStrategyInterface;
-use Slim\Interfaces\RouteGroupInterface;
 use Slim\MiddlewareDispatcher;
 use Virtue\Api\Middleware\MiddlewareStack;
 use function array_replace;
@@ -112,7 +111,7 @@ class Route implements RequestHandlerInterface
     {
         $this->middlewareStack = new MiddlewareStack($this->middlewareStack);
 
-        /** @var RouteGroupInterface $group */
+        /** @var RouteGroup $group */
         foreach ($this->groups as $group) {
             $group->appendMiddlewareToDispatcher($this->middlewareStack);
         }

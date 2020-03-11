@@ -21,10 +21,7 @@ use Slim\Middleware\ErrorMiddleware;
 use Slim\ResponseEmitter;
 use Virtue\Api\Middleware\FastRouteMiddleware;
 use Virtue\Api\Middleware\MiddlewareStack;
-use Virtue\Api\Routing\Api;
-use Virtue\Api\Routing\RouteCollector;
-use Virtue\Api\Routing\RouteContext;
-use Virtue\Api\Routing\RouteRunner;
+use Virtue\Api\Routing;
 use Virtue\Api\Testing\MiddlewareStackStub;
 use Virtue\Api\Testing\ResponseEmitterStub;
 
@@ -63,17 +60,17 @@ class AppTest extends TestCase
                 CallableResolverInterface::class => function (Locator $kernel) {
                     return new \Slim\CallableResolver($kernel);
                 },
-                RouteCollector::class => function (Locator $kernel) {
-                    return new RouteCollector($kernel);
+                Routing\RouteCollector::class => function (Locator $kernel) {
+                    return new Routing\FastRouter($kernel);
                 },
-                FastRoute\RouteCollector::class =>
-                    new FastRoute\RouteCollector(
+                FastRoute\RouteCollector::class => function() {
+                    return new FastRoute\RouteCollector(
                         new FastRoute\RouteParser\Std(),
                         new FastRoute\DataGenerator\GroupCountBased()
-                    ),
+                    );
+                },
                 FastRouteMiddleware::class => function (Locator $kernel) {
                     return new FastRouteMiddleware(
-                        $kernel->get(RouteCollector::class),
                         $kernel->get(FastRoute\RouteCollector::class)
                     );
                 },
@@ -87,7 +84,7 @@ class AppTest extends TestCase
                     );
                 },
                 MiddlewareStack::class => function (Locator $kernel) {
-                    return new MiddlewareStack($kernel->get(RouteRunner::class));
+                    return new MiddlewareStack($kernel->get(Routing\RouteRunner::class));
                 },
                 ServerRequest::class => ServerRequestCreatorFactory::create()->createServerRequestFromGlobals(),
                 ResponseEmitter::class => function () { return new Testing\ResponseEmitterStub(); },
@@ -132,14 +129,14 @@ class AppTest extends TestCase
     {
         $this->container->addDefinitions(
             [
-                RouteRunner::class => function (Locator $kernel) {
+                Routing\RouteRunner::class => function (Locator $kernel) {
                     return new Testing\RequestHandlerStub(
                         $kernel->get(ResponseFactory::class)->createResponse()
                     );
                 },
                 MiddlewareStack::class => function (Locator $kernel) {
                     return new Testing\MiddlewareStackStub(
-                        $kernel->get(RouteRunner::class)
+                        $kernel->get(Routing\RouteRunner::class)
                     );
                 },
             ]
@@ -158,14 +155,14 @@ class AppTest extends TestCase
     {
         $this->container->addDefinitions(
             [
-                RouteRunner::class => function (Locator $kernel) {
+                Routing\RouteRunner::class => function (Locator $kernel) {
                     return new Testing\RequestHandlerStub(
                         $kernel->get(ResponseFactory::class)->createResponse()
                     );
                 },
                 MiddlewareStack::class => function (Locator $kernel) {
                     return new Testing\MiddlewareStackStub(
-                        $kernel->get(RouteRunner::class)
+                        $kernel->get(Routing\RouteRunner::class)
                     );
                 },
             ]
@@ -184,7 +181,7 @@ class AppTest extends TestCase
     {
         $this->container->addDefinitions(
             [
-                RouteRunner::class => function (Locator $kernel) {
+                Routing\RouteRunner::class => function (Locator $kernel) {
                     return new Testing\RequestHandlerStub(
                         $kernel->get(ResponseFactory::class)->createResponse()
                     );
@@ -203,11 +200,9 @@ class AppTest extends TestCase
         $request = $request->withUri($request->getUri()->withPath($path));
         $app->run($request);
         /** @var Testing\RequestHandlerStub $handler */
-        $handler = $kernel->get(RouteRunner::class);
-        $context = RouteContext::fromRequest($handler->last());
-        $this->assertNotNull($context->getBasePath());
+        $handler = $kernel->get(Routing\RouteRunner::class);
+        $context = Routing\RouteContext::fromRequest($handler->last());
         $this->assertNotNull($context->getRoute());
-        $this->assertNotNull($context->getRouteParser());
         $this->assertNotNull($context->getRoutingResults());
     }
 
@@ -231,7 +226,7 @@ class AppTest extends TestCase
         $kernel = $this->container->build();
         $app = $kernel->get(App::class);
         $app->add(FastRouteMiddleware::class);
-        $app->group('/foo', function (Api $group) {
+        $app->group('/foo', function (Routing\Api $group) {
             $group->get('/bar', function ($request, $response, $args) {
                 return $response;
             })->add('set301');
@@ -263,7 +258,7 @@ class AppTest extends TestCase
         $kernel = $this->container->build();
         $app = $kernel->get(App::class);
         $app->add(FastRouteMiddleware::class);
-        $app->group('/foo', function (Api $group) {
+        $app->group('/foo', function (Routing\Api $group) {
             $group->get('/bar', function ($request, $response, $args) {
                 return $response;
             })->add('set301');
