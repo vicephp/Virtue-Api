@@ -24,44 +24,44 @@ class Api
         $this->groupPattern = $groupPattern;
     }
 
-    public function get(string $pattern, $callable): Route
+    public function get(string $pattern, $handler): Route
     {
-        return $this->map(['GET'], $pattern, $callable);
+        return $this->map(['GET'], $pattern, $handler);
     }
 
-    public function post(string $pattern, $callable): Route
+    public function post(string $pattern, $handler): Route
     {
-        return $this->map(['POST'], $pattern, $callable);
+        return $this->map(['POST'], $pattern, $handler);
     }
 
-    public function put(string $pattern, $callable): Route
+    public function put(string $pattern, $handler): Route
     {
-        return $this->map(['PUT'], $pattern, $callable);
+        return $this->map(['PUT'], $pattern, $handler);
     }
 
-    public function patch(string $pattern, $callable): Route
+    public function patch(string $pattern, $handler): Route
     {
-        return $this->map(['PATCH'], $pattern, $callable);
+        return $this->map(['PATCH'], $pattern, $handler);
     }
 
-    public function delete(string $pattern, $callable): Route
+    public function delete(string $pattern, $handler): Route
     {
-        return $this->map(['DELETE'], $pattern, $callable);
+        return $this->map(['DELETE'], $pattern, $handler);
     }
 
-    public function options(string $pattern, $callable): Route
+    public function options(string $pattern, $handler): Route
     {
-        return $this->map(['OPTIONS'], $pattern, $callable);
+        return $this->map(['OPTIONS'], $pattern, $handler);
     }
 
-    public function any(string $pattern, $callable): Route
+    public function any(string $pattern, $handler): Route
     {
-        return $this->map(['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'], $pattern, $callable);
+        return $this->map(['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'], $pattern, $handler);
     }
 
-    public function map(array $methods, string $pattern, $callable): Route
+    public function map(array $methods, string $pattern, $handler): Route
     {
-        return $this->routeCollector->map($methods, "{$this->groupPattern}{$pattern}", $callable);
+        return $this->routeCollector->map($methods, "{$this->groupPattern}{$pattern}", $handler);
     }
 
     public function group(string $pattern, $callable): RouteGroup
