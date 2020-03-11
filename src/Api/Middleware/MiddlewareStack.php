@@ -32,7 +32,7 @@ class MiddlewareStack implements HandlesServerRequests
         array_unshift($this->stack, $middleware);
     }
 
-    public function stack(self $bottom): self
+    public function stack(HandlesServerRequests $bottom): self
     {
         return new self($bottom, $this->stack);
     }

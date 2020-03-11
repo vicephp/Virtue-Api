@@ -74,23 +74,19 @@ class Route implements RequestHandlerInterface
 
     public function run(ServerRequest $request): Response
     {
-        if (!$this->groupMiddlewareAppended) {
-            $this->appendGroupMiddlewareToRoute();
-        }
-
-        return $this->middlewareStack->handle($request);
+        return $this->buildStack()->handle($request);
     }
 
-    protected function appendGroupMiddlewareToRoute(): void
+    protected function buildStack(): MiddlewareStack
     {
-        $this->middlewareStack = new MiddlewareStack($this->middlewareStack);
+        $stack = new MiddlewareStack($this->middlewareStack);
 
         /** @var RouteGroup $group */
         foreach ($this->groups as $group) {
-            $group->appendMiddlewareToDispatcher($this->middlewareStack);
+            $group->appendTo($stack);
         }
 
-        $this->groupMiddlewareAppended = true;
+        return $stack;
     }
 
     public function handle(ServerRequest $request): Response

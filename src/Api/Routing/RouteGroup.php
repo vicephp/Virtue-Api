@@ -2,7 +2,7 @@
 namespace Virtue\Api\Routing;
 
 use Psr\Container\ContainerInterface as Locator;
-use Psr\Http\Server\MiddlewareInterface;
+use Psr\Http\Server\MiddlewareInterface as ServerMiddleware;
 use Virtue\Api\Middleware\MiddlewareStack;
 
 class RouteGroup
@@ -15,7 +15,7 @@ class RouteGroup
     private $kernel;
     /** @var Api */
     private $api;
-    /** @var MiddlewareInterface[] */
+    /** @var ServerMiddleware[] */
     private $middleware = [];
 
     public function __construct(string $pattern, $callable, Locator $kernel, Api $api) {
@@ -35,7 +35,7 @@ class RouteGroup
         $this->middleware[] = $this->kernel->get($middleware);
     }
 
-    public function appendMiddlewareToDispatcher(MiddlewareStack $stack): void
+    public function appendTo(MiddlewareStack $stack): void
     {
         foreach ($this->middleware as $middleware) {
             $stack->append($middleware);
