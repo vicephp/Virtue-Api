@@ -66,9 +66,11 @@ class Route implements RequestHandlerInterface
         return $this->identifier;
     }
 
-    public function add(string $middleware): void
+    public function add(string $middleware): self
     {
         $this->middlewareStack->append($this->kernel->get($middleware));
+
+        return $this;
     }
 
     public function run(ServerRequest $request): Response

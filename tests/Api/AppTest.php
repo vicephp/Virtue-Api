@@ -10,6 +10,7 @@ use Psr\Http\Message\ServerRequestInterface as ServerRequest;
 use Psr\Http\Server\RequestHandlerInterface as HandlesServerRequests;
 use Slim\Middleware\ErrorMiddleware;
 use Slim\ResponseEmitter;
+use Virtue\Api\Middleware\CallableMiddleware;
 use Virtue\Api\Middleware\FastRouteMiddleware;
 use Virtue\Api\Middleware\MiddlewareStack;
 use Virtue\Api\Routing;
@@ -136,14 +137,18 @@ class AppTest extends AppTestCase
     {
         $this->container->addDefinitions(
             [
-                'set400' => $this->mockMiddleware(
+                'bar' => new CallableMiddleware(
                     function (ServerRequest $request, HandlesServerRequests $next) {
-                        return $next->handle($request)->withStatus(StatusCode::STATUS_BAD_REQUEST);
+                        $response = $next->handle($request);
+                        $response->getBody()->write('bar');
+                        return $response;
                     }
                 ),
-                'set301' => $this->mockMiddleware(
+                'foo' => new CallableMiddleware(
                     function (ServerRequest $request, HandlesServerRequests $next) {
-                        return $next->handle($request)->withStatus(StatusCode::STATUS_MOVED_PERMANENTLY);
+                        $response = $next->handle($request);
+                        $response->getBody()->write('foo');
+                        return $response;
                     }
                 )
             ]
@@ -155,13 +160,13 @@ class AppTest extends AppTestCase
         $app->group('/foo', function (Routing\Api $group) {
             $group->get('/bar', function (ServerRequest $request, Response $response, array $args) {
                 return $response;
-            })->add('set301');
-        })->add('set400');
+            })->add('bar');
+        })->add('foo');
         $request = $kernel->get(ServerRequest::class);
         $request = $request->withUri($request->getUri()->withPath('/foo/bar'));
 
         $response = $app->handle($request);
-        $this->assertEquals(400, $response->getStatusCode());
-        $this->assertEquals('Bad Request', $response->getReasonPhrase());
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertEquals('barfoo', (string) $response->getBody());
     }
 }

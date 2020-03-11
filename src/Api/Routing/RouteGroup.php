@@ -3,12 +3,11 @@ namespace Virtue\Api\Routing;
 
 use Psr\Container\ContainerInterface as Locator;
 use Psr\Http\Server\MiddlewareInterface as ServerMiddleware;
+use Psr\Http\Server\RequestHandlerInterface;
 use Virtue\Api\Middleware\MiddlewareStack;
 
 class RouteGroup
 {
-    /** @var string */
-    private $pattern;
     /** @var callable|string */
     private $callable;
     /** @var Locator */
@@ -29,9 +28,11 @@ class RouteGroup
         ($this->callable)($this->api);
     }
 
-    public function add(string $middleware): void
+    public function add(string $middleware): self
     {
         $this->middleware[] = $this->kernel->get($middleware);
+
+        return $this;
     }
 
     public function appendTo(MiddlewareStack $stack): void

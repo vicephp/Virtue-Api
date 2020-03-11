@@ -8,7 +8,6 @@ use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface as Locator;
 use Psr\Http\Message\ResponseFactoryInterface as ResponseFactory;
 use Psr\Http\Message\ServerRequestInterface as ServerRequest;
-use Psr\Http\Server\MiddlewareInterface as ServerMiddleware;
 use Slim\Factory\ServerRequestCreatorFactory;
 use Slim\Handlers\Strategies\RequestResponse;
 use Slim\Interfaces\AdvancedCallableResolverInterface;
@@ -23,14 +22,6 @@ class AppTestCase extends TestCase
 {
     /** @var ContainerBuilder */
     protected $container;
-
-    protected function mockMiddleware(callable $handle): ServerMiddleware
-    {
-        $middleware = \Mockery::mock(ServerMiddleware::class);
-        $middleware->shouldReceive('process')->andReturnUsing($handle);
-
-        return $middleware;
-    }
 
     protected function setUp()
     {
