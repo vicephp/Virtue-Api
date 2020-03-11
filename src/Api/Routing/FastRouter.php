@@ -37,7 +37,6 @@ class FastRouter implements RouteCollector
     {
         $route = $this->createRoute($methods, $pattern, $handler);
         $this->fastRouteCollector->addRoute($methods, $pattern, $route);
-        $this->routeCounter++;
 
         return $route;
     }
@@ -50,7 +49,7 @@ class FastRouter implements RouteCollector
             $handler,
             $this->kernel,
             $this->routeGroups,
-            $this->routeCounter
+            $this->routeCounter++
         );
     }
 }
