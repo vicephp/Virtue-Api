@@ -66,7 +66,7 @@ class FastRouteMiddleware implements ServerMiddleware
 
             case FastRoute\Dispatcher::METHOD_NOT_ALLOWED:
                 $exception = new HttpMethodNotAllowedException($request);
-                $exception->setAllowedMethods($routingResults[0]);
+                $exception->setAllowedMethods($routingResults[1]);
                 throw $exception;
 
             default:

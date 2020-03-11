@@ -18,8 +18,7 @@ class RouteGroup
     /** @var ServerMiddleware[] */
     private $middleware = [];
 
-    public function __construct(string $pattern, $callable, Locator $kernel, Api $api) {
-        $this->pattern = $pattern;
+    public function __construct($callable, Locator $kernel, Api $api) {
         $this->callable = $callable;
         $this->kernel = $kernel;
         $this->api = $api;

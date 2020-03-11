@@ -25,7 +25,7 @@ class FastRouter implements RouteCollector
     public function group(string $pattern, $callable): RouteGroup
     {
         $api = new Api($this->kernel, $this, $pattern);
-        $routeGroup = new RouteGroup($pattern, $callable, $this->kernel, $api);
+        $routeGroup = new RouteGroup($callable, $this->kernel, $api);
         $this->routeGroups[] = $routeGroup;
         $routeGroup->collectRoutes();
         array_pop($this->routeGroups);

@@ -3,6 +3,7 @@
 namespace Virtue\Api\Routing;
 
 use Psr\Container\ContainerInterface as Locator;
+use Psr\Http\Message\ResponseFactoryInterface as ResponseFactory;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as ServerRequest;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -32,8 +33,6 @@ class Route implements RequestHandlerInterface
     protected $kernel;
     /** @var string */
     protected $pattern;
-    /** @var bool */
-    protected $groupMiddlewareAppended = false;
 
     public function __construct(
         array $methods,
@@ -103,7 +102,7 @@ class Route implements RequestHandlerInterface
             $strategy = new RequestHandler();
         }
 
-        $response = $this->kernel->get(Response::class);
+        $response = $this->kernel->get(ResponseFactory::class)->createResponse();
         return $strategy($handler, $request, $response, RouteContext::fromRequest($request)->getRouteArgs());
     }
 }

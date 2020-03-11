@@ -2,21 +2,12 @@
 
 namespace Virtue\Api;
 
-use DI\ContainerBuilder;
-use FastRoute;
 use Fig\Http\Message\StatusCodeInterface as StatusCode;
-use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface as Locator;
 use Psr\Http\Message\ResponseFactoryInterface as ResponseFactory;
-use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as ServerRequest;
-use Psr\Http\Server\MiddlewareInterface as ServerMiddleware;
 use Psr\Http\Server\RequestHandlerInterface as HandlesServerRequests;
-use Slim\Factory\ServerRequestCreatorFactory;
-use Slim\Handlers\Strategies\RequestResponse;
-use Slim\Interfaces\AdvancedCallableResolverInterface;
-use Slim\Interfaces\CallableResolverInterface;
-use Slim\Interfaces\InvocationStrategyInterface;
 use Slim\Middleware\ErrorMiddleware;
 use Slim\ResponseEmitter;
 use Virtue\Api\Middleware\FastRouteMiddleware;
@@ -25,73 +16,8 @@ use Virtue\Api\Routing;
 use Virtue\Api\Testing\MiddlewareStackStub;
 use Virtue\Api\Testing\ResponseEmitterStub;
 
-class AppTest extends TestCase
+class AppTest extends AppTestCase
 {
-    /** @var ContainerBuilder */
-    private $container;
-
-    protected function mockMiddleware(callable $handle): ServerMiddleware
-    {
-        $middleware = \Mockery::mock(ServerMiddleware::class);
-        $middleware->shouldReceive('process')->andReturnUsing($handle);
-
-        return $middleware;
-    }
-
-    protected function setUp()
-    {
-        $this->container = new \DI\ContainerBuilder();
-        $this->container->addDefinitions(
-            [
-                App::class => function (Locator $kernel) {
-                    return new App($kernel);
-                },
-                InvocationStrategyInterface::class => new RequestResponse(),
-                AdvancedCallableResolverInterface::class => function (Locator $kernel) {
-                    // Here we should pass a different Locator than the kernel
-                    return new \Slim\CallableResolver($kernel);
-                },
-                ResponseFactory::class => function () {
-                    return \Slim\Factory\AppFactory::determineResponseFactory();
-                },
-                ResponseInterface::class => function (Locator $kernel) {
-                    return $kernel->get(ResponseFactory::class)->createResponse();
-                },
-                CallableResolverInterface::class => function (Locator $kernel) {
-                    return new \Slim\CallableResolver($kernel);
-                },
-                Routing\RouteCollector::class => function (Locator $kernel) {
-                    return new Routing\FastRouter($kernel);
-                },
-                FastRoute\RouteCollector::class => function() {
-                    return new FastRoute\RouteCollector(
-                        new FastRoute\RouteParser\Std(),
-                        new FastRoute\DataGenerator\GroupCountBased()
-                    );
-                },
-                FastRouteMiddleware::class => function (Locator $kernel) {
-                    return new FastRouteMiddleware(
-                        $kernel->get(FastRoute\RouteCollector::class)
-                    );
-                },
-                ErrorMiddleware::class => function (Locator $kernel) {
-                    return new ErrorMiddleware(
-                        $kernel->get(CallableResolverInterface::class),
-                        $kernel->get(ResponseFactory::class),
-                        false,
-                        false,
-                        false
-                    );
-                },
-                MiddlewareStack::class => function (Locator $kernel) {
-                    return new MiddlewareStack($kernel->get(Routing\RouteRunner::class));
-                },
-                ServerRequest::class => ServerRequestCreatorFactory::create()->createServerRequestFromGlobals(),
-                ResponseEmitter::class => function () { return new Testing\ResponseEmitterStub(); },
-            ]
-        );
-    }
-
     public function testRun()
     {
         $kernel = $this->container->build();
@@ -192,7 +118,7 @@ class AppTest extends TestCase
         $app = $kernel->get(App::class);
         $app->add(FastRouteMiddleware::class);
         $path = '/run';
-        $app->get($path, function ($request, $response, $args) {
+        $app->get($path, function (ServerRequest $request, Response $response, array $args) {
             return $response;
         });
 
@@ -228,7 +154,7 @@ class AppTest extends TestCase
         $app = $kernel->get(App::class);
         $app->add(FastRouteMiddleware::class);
         $app->group('/foo', function (Routing\Api $group) {
-            $group->get('/bar', function ($request, $response, $args) {
+            $group->get('/bar', function (ServerRequest $request, Response $response, array $args) {
                 return $response;
             })->add('set301');
         })->add('set400');
@@ -260,7 +186,7 @@ class AppTest extends TestCase
         $app = $kernel->get(App::class);
         $app->add(FastRouteMiddleware::class);
         $app->group('/foo', function (Routing\Api $group) {
-            $group->get('/bar', function ($request, $response, $args) {
+            $group->get('/bar', function (ServerRequest $request, Response $response, array $args) {
                 return $response;
             })->add('set301');
         });
@@ -293,7 +219,7 @@ class AppTest extends TestCase
         $app->add(FastRouteMiddleware::class);
         $app->group('/foo', function (Routing\Api $group) {
             $group->group('/bar', function (Routing\Api $group) {
-                $group->get('/baz', function ($request, $response, $args) {
+                $group->get('/baz', function (ServerRequest $request, Response $response, array $args) {
                     return $response;
                 });
             })->add('set400');
@@ -304,5 +230,48 @@ class AppTest extends TestCase
         $response = $app->handle($request);
         $this->assertEquals(301, $response->getStatusCode());
         $this->assertEquals('Moved Permanently', $response->getReasonPhrase());
+    }
+
+    public function testRouteArgs()
+    {
+        $kernel = $this->container->build();
+        $app = $kernel->get(App::class);
+        $app->add(FastRouteMiddleware::class);
+
+        $app->get('/handle/{id}', function (ServerRequest $request, Response $response, array $args) {
+            $response->getBody()->write($args['id']);
+            return $response;
+        });
+
+        $request = $kernel->get(ServerRequest::class);
+        $request = $request->withUri($request->getUri()->withPath('/handle/id'));
+        $response = $app->handle($request);
+
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertEquals('id', (string) $response->getBody());
+    }
+
+    public function testOptionalSegments()
+    {
+        $kernel = $this->container->build();
+        $app = $kernel->get(App::class);
+        $app->add(FastRouteMiddleware::class);
+
+        $app->get('/news[/{year}[/{month}]]', function (ServerRequest $request, Response $response, array $args) {
+            // reponds to `/news`, `/news/2016` and `/news/2016/03`
+            $response->getBody()->write(implode('/', $args));
+            return $response;
+        });
+
+        $request = $kernel->get(ServerRequest::class);
+        $response = $app->handle($request->withUri($request->getUri()->withPath('/news/2016')));
+
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertEquals('2016', (string) $response->getBody());
+
+        $response = $app->handle($request->withUri($request->getUri()->withPath('/news/2016/03')));
+
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertEquals('2016/03', (string) $response->getBody());
     }
 }
