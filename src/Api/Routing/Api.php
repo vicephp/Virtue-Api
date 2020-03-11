@@ -3,7 +3,7 @@
 namespace Virtue\Api\Routing;
 
 use Psr\Container\ContainerInterface as Locator;
-use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ResponseFactoryInterface;
 
 class Api
 {
@@ -71,8 +71,8 @@ class Api
 
     public function redirect(string $from, $to, int $status = 302): Route
     {
-        $response = $this->services->get(Response::class);
-        $response->withStatus($status)->withHeader('Location', (string) $to);
+        $response = $this->services->get(ResponseFactoryInterface::class)->createResponse();
+        $response = $response->withStatus($status)->withHeader('Location', (string) $to);
 
         $handler = function () use ($response) {
             return $response;

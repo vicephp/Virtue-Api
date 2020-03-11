@@ -1,0 +1,66 @@
+<?php
+
+namespace Virtue\Api\Routing;
+
+use Psr\Container\ContainerInterface as Locator;
+use Psr\Http\Message\ServerRequestInterface as ServerRequest;
+use Virtue\Api\App;
+use Virtue\Api\AppTestCase;
+use Virtue\Api\Middleware\FastRouteMiddleware;
+use Virtue\Api\Testing\HomeController;
+
+class ContainerResolutionTest extends AppTestCase
+{
+    public function testRegisteringAController()
+    {
+        $this->container->addDefinitions(
+            [
+                'HomeController' => function (Locator $kernel) {
+                    return new HomeController($kernel);
+                }
+            ]
+        );
+
+        $kernel = $this->container->build();
+        $app = $kernel->get(App::class);
+        $app->add(FastRouteMiddleware::class);
+        $app->get('/', 'HomeController');
+        $app->get('/home', 'HomeController:home');
+        $request = $kernel->get(ServerRequest::class);
+
+        $response = $app->handle($request->withUri($request->getUri()->withPath('/'))->withMethod('GET'));
+        $this->assertEquals(200, $response->getStatusCode());
+
+        $response = $app->handle($request->withUri($request->getUri()->withPath('/home'))->withMethod('GET'));
+        $this->assertEquals(200, $response->getStatusCode());
+    }
+
+    public function testAllowSlimToInstantiateTheController()
+    {
+        $kernel = $this->container->build();
+        $app = $kernel->get(App::class);
+        $app->add(FastRouteMiddleware::class);
+        $app->get('/', \Virtue\Api\Testing\HomeController::class . ':home');
+        $app->get('/contact', \Virtue\Api\Testing\HomeController::class . ':contact');
+        $request = $kernel->get(ServerRequest::class);
+
+        $response = $app->handle($request->withUri($request->getUri()->withPath('/'))->withMethod('GET'));
+        $this->assertEquals(200, $response->getStatusCode());
+
+        $response = $app->handle($request->withUri($request->getUri()->withPath('/contact'))->withMethod('GET'));
+        $this->assertEquals(200, $response->getStatusCode());
+    }
+
+    public function testUsingAnInvokableClass()
+    {
+        $kernel = $this->container->build();
+        $app = $kernel->get(App::class);
+        $app->add(FastRouteMiddleware::class);
+        $app->get('/', \Virtue\Api\Testing\HomeAction::class);
+
+        $request = $kernel->get(ServerRequest::class);
+
+        $response = $app->handle($request->withUri($request->getUri()->withPath('/'))->withMethod('GET'));
+        $this->assertEquals(200, $response->getStatusCode());
+    }
+}

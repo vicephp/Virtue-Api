@@ -13,8 +13,7 @@ use Slim\ResponseEmitter;
 use Virtue\Api\Middleware\FastRouteMiddleware;
 use Virtue\Api\Middleware\MiddlewareStack;
 use Virtue\Api\Routing;
-use Virtue\Api\Testing\MiddlewareStackStub;
-use Virtue\Api\Testing\ResponseEmitterStub;
+use Virtue\Api\Testing;
 
 class AppTest extends AppTestCase
 {
@@ -29,7 +28,7 @@ class AppTest extends AppTestCase
         $request = $kernel->get(ServerRequest::class);
         $request = $request->withUri($request->getUri()->withPath('/run'));
         $app->run($request);
-        /** @var ResponseEmitterStub $emitter */
+        /** @var Testing\ResponseEmitterStub $emitter */
         $emitter = $kernel->get(ResponseEmitter::class);
         $response = $emitter->last();
         $this->assertEquals(200, $response->getStatusCode());
@@ -68,7 +67,7 @@ class AppTest extends AppTestCase
             ]
         );
         $kernel = $this->container->build();
-        /** @var MiddlewareStackStub $stack */
+        /** @var Testing\MiddlewareStackStub $stack */
         $stack = $kernel->get(MiddlewareStack::class);
         /** @var App $app */
         $app = $kernel->get(App::class);
@@ -94,7 +93,7 @@ class AppTest extends AppTestCase
             ]
         );
         $kernel = $this->container->build();
-        /** @var MiddlewareStackStub $stack */
+        /** @var Testing\MiddlewareStackStub $stack */
         $stack = $kernel->get(MiddlewareStack::class);
 
         $app = $kernel->get(App::class);
@@ -164,114 +163,5 @@ class AppTest extends AppTestCase
         $response = $app->handle($request);
         $this->assertEquals(400, $response->getStatusCode());
         $this->assertEquals('Bad Request', $response->getReasonPhrase());
-    }
-
-    public function testRouteGroupWithRouteMiddleware()
-    {
-        $this->container->addDefinitions(
-            [
-                'set400' => $this->mockMiddleware(
-                    function (ServerRequest $request, HandlesServerRequests $next) {
-                        return $next->handle($request)->withStatus(StatusCode::STATUS_BAD_REQUEST);
-                    }
-                ),
-                'set301' => $this->mockMiddleware(
-                    function (ServerRequest $request, HandlesServerRequests $next) {
-                        return $next->handle($request)->withStatus(StatusCode::STATUS_MOVED_PERMANENTLY);
-                    }
-                )
-            ]
-        );
-        $kernel = $this->container->build();
-        $app = $kernel->get(App::class);
-        $app->add(FastRouteMiddleware::class);
-        $app->group('/foo', function (Routing\Api $group) {
-            $group->get('/bar', function (ServerRequest $request, Response $response, array $args) {
-                return $response;
-            })->add('set301');
-        });
-        $request = $kernel->get(ServerRequest::class);
-        $request = $request->withUri($request->getUri()->withPath('/foo/bar'));
-
-        $response = $app->handle($request);
-        $this->assertEquals(301, $response->getStatusCode());
-        $this->assertEquals('Moved Permanently', $response->getReasonPhrase());
-    }
-
-    public function testNestedRouteGroups()
-    {
-        $this->container->addDefinitions(
-            [
-                'set400' => $this->mockMiddleware(
-                    function (ServerRequest $request, HandlesServerRequests $next) {
-                        return $next->handle($request)->withStatus(StatusCode::STATUS_BAD_REQUEST);
-                    }
-                ),
-                'set301' => $this->mockMiddleware(
-                    function (ServerRequest $request, HandlesServerRequests $next) {
-                        return $next->handle($request)->withStatus(StatusCode::STATUS_MOVED_PERMANENTLY);
-                    }
-                )
-            ]
-        );
-        $kernel = $this->container->build();
-        $app = $kernel->get(App::class);
-        $app->add(FastRouteMiddleware::class);
-        $app->group('/foo', function (Routing\Api $group) {
-            $group->group('/bar', function (Routing\Api $group) {
-                $group->get('/baz', function (ServerRequest $request, Response $response, array $args) {
-                    return $response;
-                });
-            })->add('set400');
-        })->add('set301');
-        $request = $kernel->get(ServerRequest::class);
-        $request = $request->withUri($request->getUri()->withPath('/foo/bar/baz'));
-
-        $response = $app->handle($request);
-        $this->assertEquals(301, $response->getStatusCode());
-        $this->assertEquals('Moved Permanently', $response->getReasonPhrase());
-    }
-
-    public function testRouteArgs()
-    {
-        $kernel = $this->container->build();
-        $app = $kernel->get(App::class);
-        $app->add(FastRouteMiddleware::class);
-
-        $app->get('/handle/{id}', function (ServerRequest $request, Response $response, array $args) {
-            $response->getBody()->write($args['id']);
-            return $response;
-        });
-
-        $request = $kernel->get(ServerRequest::class);
-        $request = $request->withUri($request->getUri()->withPath('/handle/id'));
-        $response = $app->handle($request);
-
-        $this->assertEquals(200, $response->getStatusCode());
-        $this->assertEquals('id', (string) $response->getBody());
-    }
-
-    public function testOptionalSegments()
-    {
-        $kernel = $this->container->build();
-        $app = $kernel->get(App::class);
-        $app->add(FastRouteMiddleware::class);
-
-        $app->get('/news[/{year}[/{month}]]', function (ServerRequest $request, Response $response, array $args) {
-            // reponds to `/news`, `/news/2016` and `/news/2016/03`
-            $response->getBody()->write(implode('/', $args));
-            return $response;
-        });
-
-        $request = $kernel->get(ServerRequest::class);
-        $response = $app->handle($request->withUri($request->getUri()->withPath('/news/2016')));
-
-        $this->assertEquals(200, $response->getStatusCode());
-        $this->assertEquals('2016', (string) $response->getBody());
-
-        $response = $app->handle($request->withUri($request->getUri()->withPath('/news/2016/03')));
-
-        $this->assertEquals(200, $response->getStatusCode());
-        $this->assertEquals('2016/03', (string) $response->getBody());
     }
 }

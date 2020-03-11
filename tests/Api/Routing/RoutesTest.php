@@ -19,8 +19,8 @@ class RoutesTest extends AppTestCase
             // Show book identified by $args['id']
             return $response;
         });
-
         $request = $kernel->get(ServerRequest::class);
+
         $response = $app->handle($request->withUri($request->getUri()->withPath('/books/id'))->withMethod('GET'));
         $this->assertEquals(200, $response->getStatusCode());
     }
@@ -34,8 +34,8 @@ class RoutesTest extends AppTestCase
             // Create new book
             return $response;
         });
-
         $request = $kernel->get(ServerRequest::class);
+
         $response = $app->handle($request->withUri($request->getUri()->withPath('/books'))->withMethod('POST'));
         $this->assertEquals(200, $response->getStatusCode());
     }
@@ -49,8 +49,8 @@ class RoutesTest extends AppTestCase
             // Update book identified by $args['id']
             return $response;
         });
-
         $request = $kernel->get(ServerRequest::class);
+
         $response = $app->handle($request->withUri($request->getUri()->withPath('/books/id'))->withMethod('PUT'));
         $this->assertEquals(200, $response->getStatusCode());
     }
@@ -64,8 +64,8 @@ class RoutesTest extends AppTestCase
             // Delete book identified by $args['id']
             return $response;
         });
-
         $request = $kernel->get(ServerRequest::class);
+
         $response = $app->handle($request->withUri($request->getUri()->withPath('/books/id'))->withMethod('DELETE'));
         $this->assertEquals(200, $response->getStatusCode());
     }
@@ -79,8 +79,8 @@ class RoutesTest extends AppTestCase
             // Return response headers
             return $response;
         });
-
         $request = $kernel->get(ServerRequest::class);
+
         $response = $app->handle($request->withUri($request->getUri()->withPath('/books/id'))->withMethod('OPTIONS'));
         $this->assertEquals(200, $response->getStatusCode());
     }
@@ -94,8 +94,8 @@ class RoutesTest extends AppTestCase
             // Apply changes to book identified by $args['id']
             return $response;
         });
-
         $request = $kernel->get(ServerRequest::class);
+
         $response = $app->handle($request->withUri($request->getUri()->withPath('/books/id'))->withMethod('PATCH'));
         $this->assertEquals(200, $response->getStatusCode());
     }
@@ -109,12 +109,64 @@ class RoutesTest extends AppTestCase
             // Apply changes to book identified by $args['id']
             return $response;
         });
-
         $request = $kernel->get(ServerRequest::class);
+
         $response = $app->handle($request->withUri($request->getUri()->withPath('/books/id'))->withMethod('PATCH'));
         $this->assertEquals(200, $response->getStatusCode());
 
         $response = $app->handle($request->withUri($request->getUri()->withPath('/books/id'))->withMethod('GET'));
+        $this->assertEquals(200, $response->getStatusCode());
+    }
+
+    public function testCustomRoute()
+    {
+        $kernel = $this->container->build();
+        $app = $kernel->get(App::class);
+        $app->add(FastRouteMiddleware::class);
+        $app->map(['GET', 'POST'], '/books', function (ServerRequest $request, Response $response, array $args) {
+            // Create new book or list all books
+            return $response;
+        });
+        $request = $kernel->get(ServerRequest::class);
+
+        $response = $app->handle($request->withUri($request->getUri()->withPath('/books'))->withMethod('GET'));
+        $this->assertEquals(200, $response->getStatusCode());
+
+        $response = $app->handle($request->withUri($request->getUri()->withPath('/books'))->withMethod('POST'));
+        $this->assertEquals(200, $response->getStatusCode());
+    }
+
+    public function testRedirect()
+    {
+        $kernel = $this->container->build();
+        $app = $kernel->get(App::class);
+        $app->add(FastRouteMiddleware::class);
+        $app->redirect('/books', '/library', 301);
+        $request = $kernel->get(ServerRequest::class);
+
+        $response = $app->handle($request->withUri($request->getUri()->withPath('/books'))->withMethod('GET'));
+        $this->assertEquals(301, $response->getStatusCode());
+        $this->assertEquals(['/library'], $response->getHeader('Location'));
+    }
+
+    public function testClosureBinding()
+    {
+        $this->markTestSkipped('Inject Locator instead of binding');
+        $kernel = $this->container->build();
+        $app = $kernel->get(App::class);
+        $app->add(FastRouteMiddleware::class);
+        $app->get('/hello/{name}', function (ServerRequest $request, Response $response, array $args) {
+            // Use app HTTP cookie service
+            $this->get('cookies')->set('name', [
+                'value' => $args['name'],
+                'expires' => '7 days'
+            ]);
+
+            return $response;
+        });
+        $request = $kernel->get(ServerRequest::class);
+
+        $response = $app->handle($request->withUri($request->getUri()->withPath('/hello/world'))->withMethod('GET'));
         $this->assertEquals(200, $response->getStatusCode());
     }
 }
