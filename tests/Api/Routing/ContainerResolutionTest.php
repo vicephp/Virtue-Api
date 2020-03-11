@@ -6,7 +6,7 @@ use Psr\Container\ContainerInterface as Locator;
 use Psr\Http\Message\ServerRequestInterface as ServerRequest;
 use Virtue\Api\App;
 use Virtue\Api\AppTestCase;
-use Virtue\Api\Middleware\FastRouteMiddleware;
+use Virtue\Api\Middleware\RoutingMiddleware;
 use Virtue\Api\Testing\HomeController;
 
 class ContainerResolutionTest extends AppTestCase
@@ -23,7 +23,7 @@ class ContainerResolutionTest extends AppTestCase
 
         $kernel = $this->container->build();
         $app = $kernel->get(App::class);
-        $app->add(FastRouteMiddleware::class);
+        $app->add(RoutingMiddleware::class);
         $app->get('/', 'HomeController');
         $app->get('/home', 'HomeController:home');
         $request = $kernel->get(ServerRequest::class);
@@ -39,7 +39,7 @@ class ContainerResolutionTest extends AppTestCase
     {
         $kernel = $this->container->build();
         $app = $kernel->get(App::class);
-        $app->add(FastRouteMiddleware::class);
+        $app->add(RoutingMiddleware::class);
         $app->get('/', \Virtue\Api\Testing\HomeController::class . ':home');
         $app->get('/contact', \Virtue\Api\Testing\HomeController::class . ':contact');
         $request = $kernel->get(ServerRequest::class);
@@ -55,7 +55,7 @@ class ContainerResolutionTest extends AppTestCase
     {
         $kernel = $this->container->build();
         $app = $kernel->get(App::class);
-        $app->add(FastRouteMiddleware::class);
+        $app->add(RoutingMiddleware::class);
         $app->get('/', \Virtue\Api\Testing\HomeAction::class);
 
         $request = $kernel->get(ServerRequest::class);

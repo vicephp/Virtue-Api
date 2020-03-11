@@ -8,7 +8,7 @@ use Psr\Http\Server\RequestHandlerInterface as HandlesServerRequests;
 use Virtue\Api\App;
 use Virtue\Api\AppTestCase;
 use Virtue\Api\Middleware\CallableMiddleware;
-use Virtue\Api\Middleware\FastRouteMiddleware;
+use Virtue\Api\Middleware\RoutingMiddleware;
 use Virtue\Api\Routing;
 
 class RouteGroupsTest extends AppTestCase
@@ -42,7 +42,7 @@ class RouteGroupsTest extends AppTestCase
         );
         $kernel = $this->container->build();
         $app = $kernel->get(App::class);
-        $app->add(FastRouteMiddleware::class);
+        $app->add(RoutingMiddleware::class);
         $app->group('/foo', function (Routing\Api $group) {
             $group->group('/bar', function (Routing\Api $group) {
                 $group->get('/baz', function (ServerRequest $request, Response $response, array $args) {
@@ -80,7 +80,7 @@ class RouteGroupsTest extends AppTestCase
         );
         $kernel = $this->container->build();
         $app = $kernel->get(App::class);
-        $app->add(FastRouteMiddleware::class);
+        $app->add(RoutingMiddleware::class);
         $app->group('/foo', function (Routing\Api $group) {
             $group->get('/bar', function (ServerRequest $request, Response $response, array $args) {
                 return $response;

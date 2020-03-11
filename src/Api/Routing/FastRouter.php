@@ -6,7 +6,7 @@ use FastRoute;
 use Psr\Container\ContainerInterface as Locator;
 use function array_pop;
 
-class FastRouter implements RouteCollector
+class FastRouter implements RouteCollector, RouteDispatcher
 {
     /** @var Locator */
     private $kernel;
@@ -15,11 +15,11 @@ class FastRouter implements RouteCollector
     /** @var int */
     private $routeCounter = 0;
     /** @var FastRoute\RouteCollector */
-    private $fastRouteCollector;
+    private $routes;
 
     public function __construct(Locator $kernel) {
         $this->kernel = $kernel;
-        $this->fastRouteCollector = $kernel->get(FastRoute\RouteCollector::class);
+        $this->routes = $kernel->get(FastRoute\RouteCollector::class);
     }
 
     public function group(string $pattern, $callable): RouteGroup
@@ -36,9 +36,15 @@ class FastRouter implements RouteCollector
     public function map(array $methods, string $pattern, $handler): Route
     {
         $route = $this->createRoute($methods, $pattern, $handler);
-        $this->fastRouteCollector->addRoute($methods, $pattern, $route);
+        $this->routes->addRoute($methods, $pattern, $route);
 
         return $route;
+    }
+
+    public function dispatch(string $method, string $uri): RoutingResults
+    {
+        $dispatcher = new FastRoute\Dispatcher\GroupCountBased($this->routes->getData());
+        return new RoutingResults($dispatcher->dispatch($method, $uri));
     }
 
     protected function createRoute(array $methods, string $pattern, $handler): Route

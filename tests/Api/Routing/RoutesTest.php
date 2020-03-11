@@ -6,7 +6,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as ServerRequest;
 use Virtue\Api\App;
 use Virtue\Api\AppTestCase;
-use Virtue\Api\Middleware\FastRouteMiddleware;
+use Virtue\Api\Middleware\RoutingMiddleware;
 
 class RoutesTest extends AppTestCase
 {
@@ -14,7 +14,7 @@ class RoutesTest extends AppTestCase
     {
         $kernel = $this->container->build();
         $app = $kernel->get(App::class);
-        $app->add(FastRouteMiddleware::class);
+        $app->add(RoutingMiddleware::class);
         $app->get('/books/{id}', function (ServerRequest $request, Response $response, array $args) {
             // Show book identified by $args['id']
             return $response;
@@ -29,7 +29,7 @@ class RoutesTest extends AppTestCase
     {
         $kernel = $this->container->build();
         $app = $kernel->get(App::class);
-        $app->add(FastRouteMiddleware::class);
+        $app->add(RoutingMiddleware::class);
         $app->post('/books', function (ServerRequest $request, Response $response, array $args) {
             // Create new book
             return $response;
@@ -44,7 +44,7 @@ class RoutesTest extends AppTestCase
     {
         $kernel = $this->container->build();
         $app = $kernel->get(App::class);
-        $app->add(FastRouteMiddleware::class);
+        $app->add(RoutingMiddleware::class);
         $app->put('/books/{id}', function (ServerRequest $request, Response $response, array $args) {
             // Update book identified by $args['id']
             return $response;
@@ -59,7 +59,7 @@ class RoutesTest extends AppTestCase
     {
         $kernel = $this->container->build();
         $app = $kernel->get(App::class);
-        $app->add(FastRouteMiddleware::class);
+        $app->add(RoutingMiddleware::class);
         $app->delete('/books/{id}', function (ServerRequest $request, Response $response, array $args) {
             // Delete book identified by $args['id']
             return $response;
@@ -74,7 +74,7 @@ class RoutesTest extends AppTestCase
     {
         $kernel = $this->container->build();
         $app = $kernel->get(App::class);
-        $app->add(FastRouteMiddleware::class);
+        $app->add(RoutingMiddleware::class);
         $app->options('/books/{id}', function (ServerRequest $request, Response $response, array $args) {
             // Return response headers
             return $response;
@@ -89,7 +89,7 @@ class RoutesTest extends AppTestCase
     {
         $kernel = $this->container->build();
         $app = $kernel->get(App::class);
-        $app->add(FastRouteMiddleware::class);
+        $app->add(RoutingMiddleware::class);
         $app->patch('/books/{id}', function (ServerRequest $request, Response $response, array $args) {
             // Apply changes to book identified by $args['id']
             return $response;
@@ -104,7 +104,7 @@ class RoutesTest extends AppTestCase
     {
         $kernel = $this->container->build();
         $app = $kernel->get(App::class);
-        $app->add(FastRouteMiddleware::class);
+        $app->add(RoutingMiddleware::class);
         $app->any('/books/{id}', function (ServerRequest $request, Response $response, array $args) {
             // Apply changes to book identified by $args['id']
             return $response;
@@ -122,7 +122,7 @@ class RoutesTest extends AppTestCase
     {
         $kernel = $this->container->build();
         $app = $kernel->get(App::class);
-        $app->add(FastRouteMiddleware::class);
+        $app->add(RoutingMiddleware::class);
         $app->map(['GET', 'POST'], '/books', function (ServerRequest $request, Response $response, array $args) {
             // Create new book or list all books
             return $response;
@@ -140,7 +140,7 @@ class RoutesTest extends AppTestCase
     {
         $kernel = $this->container->build();
         $app = $kernel->get(App::class);
-        $app->add(FastRouteMiddleware::class);
+        $app->add(RoutingMiddleware::class);
         $app->redirect('/books', '/library', 301);
         $request = $kernel->get(ServerRequest::class);
 
@@ -154,7 +154,7 @@ class RoutesTest extends AppTestCase
         $this->markTestSkipped('Inject Locator instead of binding');
         $kernel = $this->container->build();
         $app = $kernel->get(App::class);
-        $app->add(FastRouteMiddleware::class);
+        $app->add(RoutingMiddleware::class);
         $app->get('/hello/{name}', function (ServerRequest $request, Response $response, array $args) {
             // Use app HTTP cookie service
             $this->get('cookies')->set('name', [

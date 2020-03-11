@@ -11,7 +11,7 @@ use Psr\Http\Server\RequestHandlerInterface as HandlesServerRequests;
 use Slim\Middleware\ErrorMiddleware;
 use Slim\ResponseEmitter;
 use Virtue\Api\Middleware\CallableMiddleware;
-use Virtue\Api\Middleware\FastRouteMiddleware;
+use Virtue\Api\Middleware\RoutingMiddleware;
 use Virtue\Api\Middleware\MiddlewareStack;
 use Virtue\Api\Routing;
 use Virtue\Api\Testing;
@@ -22,7 +22,7 @@ class AppTest extends AppTestCase
     {
         $kernel = $this->container->build();
         $app = $kernel->get(App::class);
-        $app->add(FastRouteMiddleware::class);
+        $app->add(RoutingMiddleware::class);
         $app->get('/run', function ($request, $response, $args) {
             return $response;
         });
@@ -40,7 +40,7 @@ class AppTest extends AppTestCase
     {
         $kernel = $this->container->build();
         $app = $kernel->get(App::class);
-        $app->add(FastRouteMiddleware::class);
+        $app->add(RoutingMiddleware::class);
         $app->get('/handle', function ($request, $response, $args) {
             return $response;
         });
@@ -72,9 +72,9 @@ class AppTest extends AppTestCase
         $stack = $kernel->get(MiddlewareStack::class);
         /** @var App $app */
         $app = $kernel->get(App::class);
-        $app->add(FastRouteMiddleware::class);
+        $app->add(RoutingMiddleware::class);
 
-        $this->assertEquals(1, $stack->contains(FastRouteMiddleware::class));
+        $this->assertEquals(1, $stack->contains(RoutingMiddleware::class));
     }
 
     public function testAddErrorMiddleware()
@@ -116,7 +116,7 @@ class AppTest extends AppTestCase
         );
         $kernel = $this->container->build();
         $app = $kernel->get(App::class);
-        $app->add(FastRouteMiddleware::class);
+        $app->add(RoutingMiddleware::class);
         $path = '/run';
         $app->get($path, function (ServerRequest $request, Response $response, array $args) {
             return $response;
@@ -130,7 +130,6 @@ class AppTest extends AppTestCase
         $handler = $kernel->get(Routing\RouteRunner::class);
         $context = Routing\RoutingResults::fromRequest($handler->last());
         $this->assertNotNull($context->getRoute());
-        $this->assertNotNull($context->getRoutingResults());
     }
 
     public function testRouteGroupWithGroupMiddleware()
@@ -156,7 +155,7 @@ class AppTest extends AppTestCase
 
         $kernel = $this->container->build();
         $app = $kernel->get(App::class);
-        $app->add(FastRouteMiddleware::class);
+        $app->add(RoutingMiddleware::class);
         $app->group('/foo', function (Routing\Api $group) {
             $group->get('/bar', function (ServerRequest $request, Response $response, array $args) {
                 return $response;

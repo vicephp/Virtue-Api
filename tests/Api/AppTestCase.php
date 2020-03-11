@@ -15,7 +15,7 @@ use Slim\Interfaces\CallableResolverInterface;
 use Slim\Interfaces\InvocationStrategyInterface;
 use Slim\Middleware\ErrorMiddleware;
 use Slim\ResponseEmitter;
-use Virtue\Api\Middleware\FastRouteMiddleware;
+use Virtue\Api\Middleware\RoutingMiddleware;
 use Virtue\Api\Middleware\MiddlewareStack;
 
 class AppTestCase extends TestCase
@@ -51,9 +51,9 @@ class AppTestCase extends TestCase
                         new FastRoute\DataGenerator\GroupCountBased()
                     );
                 },
-                FastRouteMiddleware::class => function (Locator $kernel) {
-                    return new FastRouteMiddleware(
-                        $kernel->get(FastRoute\RouteCollector::class)
+                RoutingMiddleware::class => function (Locator $kernel) {
+                    return new RoutingMiddleware(
+                        $kernel->get(Routing\RouteCollector::class)
                     );
                 },
                 ErrorMiddleware::class => function (Locator $kernel) {
