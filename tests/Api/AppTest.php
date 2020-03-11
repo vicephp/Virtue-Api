@@ -177,7 +177,7 @@ class AppTest extends TestCase
         $this->assertEquals(1, $stack->contains(ErrorMiddleware::class));
     }
 
-    public function testFastRouter()
+    public function testFastRouteMiddleware()
     {
         $this->container->addDefinitions(
             [
@@ -198,6 +198,7 @@ class AppTest extends TestCase
 
         $request = $kernel->get(ServerRequest::class);
         $request = $request->withUri($request->getUri()->withPath($path));
+        $app->run($request); // run twice, application should be stateless
         $app->run($request);
         /** @var Testing\RequestHandlerStub $handler */
         $handler = $kernel->get(Routing\RouteRunner::class);
