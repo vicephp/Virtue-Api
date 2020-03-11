@@ -48,14 +48,14 @@ class RouteGroupsTest extends AppTestCase
                 $group->get('/baz', function (ServerRequest $request, Response $response, array $args) {
                     return $response;
                 })->add('bar')->add('foo');
-            })->add('bar')->add('foo');
-        })->add('bar')->add('foo');
+            })->add('foo')->add('baz');
+        })->add('baz')->add('bar');
         $request = $kernel->get(ServerRequest::class);
         $request = $request->withUri($request->getUri()->withPath('/foo/bar/baz'));
 
         $response = $app->handle($request);
         $this->assertEquals(200, $response->getStatusCode());
-        $this->assertEquals('foobarfoobarfoobar', (string) $response->getBody());
+        $this->assertEquals('foobarbazfoobarbaz', (string) $response->getBody());
     }
 
     public function testRouteGroupWithRouteMiddleware()
