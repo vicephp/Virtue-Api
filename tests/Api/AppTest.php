@@ -128,7 +128,7 @@ class AppTest extends AppTestCase
         $app->run($request);
         /** @var Testing\RequestHandlerStub $handler */
         $handler = $kernel->get(Routing\RouteRunner::class);
-        $context = Routing\RouteContext::fromRequest($handler->last());
+        $context = Routing\RoutingResults::fromRequest($handler->last());
         $this->assertNotNull($context->getRoute());
         $this->assertNotNull($context->getRoutingResults());
     }

@@ -3,7 +3,6 @@ namespace Virtue\Api\Routing;
 
 use Psr\Container\ContainerInterface as Locator;
 use Psr\Http\Server\MiddlewareInterface as ServerMiddleware;
-use Psr\Http\Server\RequestHandlerInterface;
 use Virtue\Api\Middleware\MiddlewareStack;
 
 class RouteGroup

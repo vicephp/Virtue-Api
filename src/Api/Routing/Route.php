@@ -105,6 +105,6 @@ class Route implements RequestHandlerInterface
         }
 
         $response = $this->kernel->get(ResponseFactory::class)->createResponse();
-        return $strategy($handler, $request, $response, RouteContext::fromRequest($request)->getRouteArgs());
+        return $strategy($handler, $request, $response, RoutingResults::fromRequest($request)->getRouteArgs());
     }
 }

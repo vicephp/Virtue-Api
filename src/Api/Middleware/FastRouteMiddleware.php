@@ -10,7 +10,7 @@ use Psr\Http\Server\RequestHandlerInterface as HandlesServerRequests;
 use RuntimeException;
 use Slim\Exception\HttpMethodNotAllowedException;
 use Slim\Exception\HttpNotFoundException;
-use Slim\Routing\RouteContext;
+use Virtue\Api\Routing\RoutingResults;
 
 class FastRouteMiddleware implements ServerMiddleware
 {
@@ -53,18 +53,18 @@ class FastRouteMiddleware implements ServerMiddleware
      */
     private function performRouting(ServerRequest $request): ServerRequest
     {
-        $routingResults = $this->dispatch($request->getMethod(), $request->getUri()->getPath());
+        $routingResults = new RoutingResults($this->dispatch($request->getMethod(), $request->getUri()->getPath()));
 
-        $request = $request->withAttribute(RouteContext::ROUTING_RESULTS, $routingResults);
+        $request = $request->withAttribute(RoutingResults::REQUEST_PARAM, $routingResults->getRoutingResults());
 
-        switch ($routingResults[0]) {
-            case FastRoute\Dispatcher::FOUND:
+        switch ($routingResults->getResult()) {
+            case RoutingResults::FOUND:
                 return $request;
 
-            case FastRoute\Dispatcher::NOT_FOUND:
+            case RoutingResults::NOT_FOUND:
                 throw new HttpNotFoundException($request);
 
-            case FastRoute\Dispatcher::METHOD_NOT_ALLOWED:
+            case RoutingResults::METHOD_NOT_ALLOWED:
                 $exception = new HttpMethodNotAllowedException($request);
                 $exception->setAllowedMethods($routingResults[1]);
                 throw $exception;
