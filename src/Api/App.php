@@ -34,24 +34,11 @@ class App extends Api implements HandlesServerRequests
         $this->middlewareStack->append($this->kernel->get($middleware));
     }
 
-    /**
-     * Run application
-     *
-     * This method traverses the application middleware stack and then sends the
-     * resultant Response object to the HTTP client.
-     *
-     * @param ServerRequest|null $request
-     * @return void
-     */
     public function run(?ServerRequest $request = null): void
     {
-        if (!$request) {
-            $request = $this->kernel->get(ServerRequest::class);
-        }
+        $request = $request ?? $this->kernel->get(ServerRequest::class);
 
-        $response = $this->handle($request);
-        $responseEmitter = new ResponseEmitter();
-        $responseEmitter->emit($response);
+        $this->kernel->get(ResponseEmitter::class)->emit($this->handle($request));
     }
 
     public function handle(ServerRequest $request): Response

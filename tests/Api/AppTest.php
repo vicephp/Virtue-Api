@@ -18,6 +18,7 @@ use Slim\Interfaces\AdvancedCallableResolverInterface;
 use Slim\Interfaces\CallableResolverInterface;
 use Slim\Interfaces\InvocationStrategyInterface;
 use Slim\Middleware\ErrorMiddleware;
+use Slim\ResponseEmitter;
 use Virtue\Api\Middleware\FastRouteMiddleware;
 use Virtue\Api\Middleware\MiddlewareStack;
 use Virtue\Api\Routing\Api;
@@ -25,6 +26,7 @@ use Virtue\Api\Routing\RouteCollector;
 use Virtue\Api\Routing\RouteContext;
 use Virtue\Api\Routing\RouteRunner;
 use Virtue\Api\Testing\MiddlewareStackStub;
+use Virtue\Api\Testing\ResponseEmitterStub;
 
 class AppTest extends TestCase
 {
@@ -88,6 +90,7 @@ class AppTest extends TestCase
                     return new MiddlewareStack($kernel->get(RouteRunner::class));
                 },
                 ServerRequest::class => ServerRequestCreatorFactory::create()->createServerRequestFromGlobals(),
+                ResponseEmitter::class => function () { return new Testing\ResponseEmitterStub(); },
             ]
         );
     }
@@ -102,6 +105,24 @@ class AppTest extends TestCase
         });
         $request = $kernel->get(ServerRequest::class);
         $request = $request->withUri($request->getUri()->withPath('/run'));
+        $app->run($request);
+        /** @var ResponseEmitterStub $emitter */
+        $emitter = $kernel->get(ResponseEmitter::class);
+        $response = $emitter->last();
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertEquals('OK', $response->getReasonPhrase());
+    }
+
+    public function testHandle()
+    {
+        $kernel = $this->container->build();
+        $app = $kernel->get(App::class);
+        $app->add(FastRouteMiddleware::class);
+        $app->get('/handle', function ($request, $response, $args) {
+            return $response;
+        });
+        $request = $kernel->get(ServerRequest::class);
+        $request = $request->withUri($request->getUri()->withPath('/handle'));
         $response = $app->handle($request);
         $this->assertEquals(200, $response->getStatusCode());
         $this->assertEquals('OK', $response->getReasonPhrase());
