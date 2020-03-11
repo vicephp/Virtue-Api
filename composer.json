@@ -1,7 +1,7 @@
 {
     "name": "virtue/api",
     "type": "library",
-    "description": "A very simple http API",
+    "description": "Making PHP more Pythonic",
     "keywords": ["framework","micro","api","router"],
     "license": "MIT",
     "minimum-stability": "dev",
