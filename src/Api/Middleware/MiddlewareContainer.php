@@ -10,7 +10,7 @@ use Psr\Http\Server\RequestHandlerInterface as HandlesServerRequests;
 class MiddlewareContainer implements HandlesServerRequests, Stackable
 {
     /** @var ServerMiddleware[] */
-    protected $stack = [];
+    protected $middlewares = [];
     /** @var HandlesServerRequests */
     protected $bottom;
 
@@ -24,17 +24,17 @@ class MiddlewareContainer implements HandlesServerRequests, Stackable
 
     public function append(ServerMiddleware $middleware): void
     {
-        $this->stack[] = $middleware;
+        $this->middlewares[] = $middleware;
     }
 
     public function prepend(ServerMiddleware $middleware): void
     {
-        array_unshift($this->stack, $middleware);
+        array_unshift($this->middlewares, $middleware);
     }
 
     public function stack(HandlesServerRequests $bottom): self
     {
-        return new self($bottom, $this->stack);
+        return new self($bottom, $this->middlewares);
     }
 
     public function handle(ServerRequest $request): Response
@@ -44,6 +44,6 @@ class MiddlewareContainer implements HandlesServerRequests, Stackable
 
     private function buildHandlerStack($index = 0): HandlesServerRequests
     {
-        return isset($this->stack[$index]) ? new RequestHandler($this->stack[$index], $this->buildHandlerStack($index + 1)) : $this->bottom;
+        return isset($this->middlewares[$index]) ? new RequestHandler($this->middlewares[$index], $this->buildHandlerStack($index + 1)) : $this->bottom;
     }
 }
