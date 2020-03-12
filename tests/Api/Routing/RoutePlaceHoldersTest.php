@@ -70,12 +70,11 @@ class RoutePlaceHoldersTest extends AppTestCase
 
     public function testUnlimitedOptionalSegments()
     {
-        $this->markTestSkipped('Not Supported!');
         $kernel = $this->container->build();
         $app = $kernel->get(App::class);
         $app->add(RoutingMiddleware::class);
         $app->get('/news[/{params:.*}]', function (ServerRequest $request, Response $response, $args) {
-            $response->getBody()->write($args['params']);
+            $response->getBody()->write($args['params'] ?? '');
 
             return $response;
         });
@@ -83,10 +82,13 @@ class RoutePlaceHoldersTest extends AppTestCase
 
         $response = $app->handle($request->withUri($request->getUri()->withPath('/news'))->withMethod('GET'));
         $this->assertEquals(200, $response->getStatusCode());
+        $this->assertEquals('', (string) $response->getBody());
         $response = $app->handle($request->withUri($request->getUri()->withPath('/news/2016'))->withMethod('GET'));
         $this->assertEquals(200, $response->getStatusCode());
+        $this->assertEquals('2016', (string) $response->getBody());
         $response = $app->handle($request->withUri($request->getUri()->withPath('/news/2016/03'))->withMethod('GET'));
         $this->assertEquals(200, $response->getStatusCode());
+        $this->assertEquals('2016/03', (string) $response->getBody());
     }
 
     public function testRegexMatch()

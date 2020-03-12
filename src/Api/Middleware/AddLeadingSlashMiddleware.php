@@ -7,7 +7,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface as ServerMiddleware;
 use Psr\Http\Server\RequestHandlerInterface;
 
-class AddLeadingSlash implements ServerMiddleware
+class AddLeadingSlashMiddleware implements ServerMiddleware
 {
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
