@@ -23,6 +23,8 @@ class Route implements RequestHandlerInterface
     protected $methods = [];
     /** @var string */
     protected $identifier;
+    /** @var string */
+    protected $name = '';
     /** @var RouteGroup[] */
     protected $groups;
     /** @var MiddlewareDispatcher */
@@ -49,6 +51,18 @@ class Route implements RequestHandlerInterface
         $this->groups = $groups;
         $this->identifier = "route::{$identifier}";
         $this->middlewareStack = new MiddlewareStack($this);
+    }
+
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    public function setName(string $name): self
+    {
+        $this->name = $name;
+
+        return $this;
     }
 
     public function getMethods(): array
