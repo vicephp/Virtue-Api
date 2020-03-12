@@ -8,7 +8,7 @@ use Psr\Http\Message\ResponseFactoryInterface;
 class Api
 {
     /** @var Locator */
-    private $services;
+    protected $kernel;
     /** @var RouteCollector */
     private $routeCollector;
     /** @var string */
@@ -19,7 +19,7 @@ class Api
         RouteCollector $routeCollector,
         ?string $groupPattern = ''
     ) {
-        $this->services = $kernel;
+        $this->kernel = $kernel;
         $this->routeCollector = $routeCollector;
         $this->groupPattern = $groupPattern;
     }
@@ -71,7 +71,7 @@ class Api
 
     public function redirect(string $from, $to, int $status = 302): Route
     {
-        $response = $this->services->get(ResponseFactoryInterface::class)->createResponse();
+        $response = $this->kernel->get(ResponseFactoryInterface::class)->createResponse();
         $response = $response->withStatus($status)->withHeader('Location', (string) $to);
 
         $handler = function () use ($response) {

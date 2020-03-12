@@ -18,15 +18,9 @@ class App extends Api implements HandlesServerRequests
     public const VERSION = '0.0.0';
     /** @var MiddlewareStack */
     protected $middlewareStack;
-    /** @var Locator */
-    private $kernel;
 
     public function __construct(Locator $kernel) {
-        parent::__construct(
-            $kernel,
-            $kernel->get(RouteCollector::class)
-        );
-        $this->kernel = $kernel;
+        parent::__construct($kernel, $kernel->get(RouteCollector::class));
         $this->middlewareStack = new MiddlewareStack($kernel->get(RouteRunner::class));
     }
 
