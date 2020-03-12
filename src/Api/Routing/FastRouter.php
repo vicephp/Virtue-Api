@@ -4,6 +4,7 @@ namespace Virtue\Api\Routing;
 
 use FastRoute;
 use Psr\Container\ContainerInterface as Locator;
+use Psr\Http\Message\ServerRequestInterface as ServerRequest;
 use function array_pop;
 
 class FastRouter implements RouteCollector, RouteDispatcher
@@ -41,10 +42,11 @@ class FastRouter implements RouteCollector, RouteDispatcher
         return $route;
     }
 
-    public function dispatch(string $method, string $uri): RoutingResults
+    public function dispatch(ServerRequest $request): ServerRequest
     {
         $dispatcher = new FastRoute\Dispatcher\GroupCountBased($this->routes->getData());
-        return new RoutingResults($dispatcher->dispatch($method, $uri));
+        $result = new RoutingResults($dispatcher->dispatch($request->getMethod(), $request->getUri()->getPath()));
+        return $result->withRequest($request);
     }
 
     protected function createRoute(array $methods, string $pattern, $handler): Route

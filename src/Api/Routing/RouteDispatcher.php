@@ -2,7 +2,9 @@
 
 namespace Virtue\Api\Routing;
 
+use Psr\Http\Message\ServerRequestInterface as ServerRequest;
+
 interface RouteDispatcher
 {
-    public function dispatch(string $method, string $uri): RoutingResults;
+    public function dispatch(ServerRequest $request): ServerRequest;
 }
