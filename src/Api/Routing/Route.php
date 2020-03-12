@@ -97,7 +97,7 @@ class Route implements HandlesServerRequests
     {
         return array_reduce(
             array_reverse($this->groups),
-            function (HandlesServerRequests $handler, Stackable $stack) { return $stack->stack($handler); },
+            function (HandlesServerRequests $bottom, Stackable $stack) { return $stack->stack($bottom); },
             $this->middlewareStack
         );
     }
@@ -110,7 +110,7 @@ class Route implements HandlesServerRequests
 
         if (
             is_array($handler)
-            && $handler[0] instanceof RequestHandlerInterface
+            && $handler[0] instanceof HandlesServerRequests
             && !in_array(RequestHandlerInvocationStrategyInterface::class, class_implements($strategy))
         ) {
             $strategy = new RequestHandler();
