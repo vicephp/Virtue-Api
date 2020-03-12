@@ -65,9 +65,6 @@ class AppTestCase extends TestCase
                         false
                     );
                 },
-                MiddlewareStack::class => function (Locator $kernel) {
-                    return new MiddlewareStack($kernel->get(Routing\RouteRunner::class));
-                },
                 ServerRequest::class => ServerRequestCreatorFactory::create()->createServerRequestFromGlobals(),
                 ResponseEmitter::class => function () { return new Testing\ResponseEmitterStub(); },
             ]
