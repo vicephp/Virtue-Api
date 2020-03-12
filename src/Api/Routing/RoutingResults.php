@@ -21,7 +21,7 @@ class RoutingResults
         $routingResults = $request->getAttribute(self::REQUEST_ATTR);
 
         if ($routingResults === null) {
-            throw new RuntimeException('Cannot create RouteContext before routing has been completed');
+            throw new RuntimeException('Cannot create RoutingResults before routing has been completed.');
         }
 
         return new self($routingResults);
