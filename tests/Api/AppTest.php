@@ -2,17 +2,13 @@
 
 namespace Virtue\Api;
 
-use Fig\Http\Message\StatusCodeInterface as StatusCode;
 use Psr\Container\ContainerInterface as Locator;
 use Psr\Http\Message\ResponseFactoryInterface as ResponseFactory;
-use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as ServerRequest;
-use Psr\Http\Server\RequestHandlerInterface as HandlesServerRequests;
 use Slim\Middleware\ErrorMiddleware;
 use Slim\ResponseEmitter;
-use Virtue\Api\Middleware\CallableMiddleware;
-use Virtue\Api\Middleware\RoutingMiddleware;
 use Virtue\Api\Middleware\MiddlewareStack;
+use Virtue\Api\Middleware\RoutingMiddleware;
 use Virtue\Api\Routing;
 use Virtue\Api\Testing;
 

@@ -43,7 +43,7 @@ class RouteGroupsTest extends AppTestCase
         );
     }
 
-    public function testNestedRouteGroups()
+    public function testNestedRouteGroupsWithMiddleware()
     {
         $kernel = $this->container->build();
         $app = $kernel->get(App::class);
@@ -60,10 +60,10 @@ class RouteGroupsTest extends AppTestCase
 
         $response = $app->handle($request);
         $this->assertEquals(200, $response->getStatusCode());
-        $this->assertEquals('klaatu barada nikto klaatu barada nikto ', (string) $response->getBody());
+        $this->assertEquals('klaatu barada nikto klaatu barada nikto ', (string) $response->getBody(), "Klaatu Barada N... necktie... nectar... nickel... noodle. It's an 'N' word, it's definitely an 'N' word!");
     }
 
-    public function testRouteGroupWithRouteMiddleware()
+    public function testRouteGroupWithMiddleware()
     {
         $kernel = $this->container->build();
         $app = $kernel->get(App::class);
@@ -79,6 +79,6 @@ class RouteGroupsTest extends AppTestCase
 
         $response = $app->handle($request);
         $this->assertEquals(200, $response->getStatusCode());
-        $this->assertEquals('klaatu barada nikto ', (string)$response->getBody());
+        $this->assertEquals('klaatu barada nikto ', (string)$response->getBody(),  "Klaatu Barada N... necktie... nectar... nickel... noodle. It's an 'N' word, it's definitely an 'N' word!");
     }
 }
