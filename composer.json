@@ -5,6 +5,9 @@
     "keywords": ["framework","micro","api","router"],
     "license": "MIT",
     "minimum-stability": "dev",
+    "config": {
+        "sort-packages": true
+    },
     "require": {
         "php": "^7.1",
         "slim/psr7": "dev-master",
@@ -17,15 +20,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Virtue\\Api\\": "src/Api/"
+            "Virtue\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Virtue\\Api\\": "tests/Api/"
+            "Virtue\\": "tests/"
         }
-    },
-    "config": {
-        "sort-packages": true
     }
 }
