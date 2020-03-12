@@ -53,10 +53,10 @@ class FastRouter implements RouteCollector, Router
     protected function createRoute(array $methods, string $pattern, $handler): Route
     {
         return new Route(
+            $this->kernel,
             $methods,
             $pattern,
             $handler,
-            $this->kernel,
             $this->routeGroups,
             $this->routeCounter++
         );

@@ -3,9 +3,11 @@ namespace Virtue\Api\Routing;
 
 use Psr\Container\ContainerInterface as Locator;
 use Psr\Http\Server\MiddlewareInterface as ServerMiddleware;
+use Psr\Http\Server\RequestHandlerInterface as HandlesServerRequests;
 use Virtue\Api\Middleware\MiddlewareStack;
+use Virtue\Api\Middleware\Stackable;
 
-class RouteGroup
+class RouteGroup implements Stackable
 {
     /** @var callable|string */
     private $callable;
@@ -34,10 +36,8 @@ class RouteGroup
         return $this;
     }
 
-    public function appendTo(MiddlewareStack $stack): void
+    public function stack(HandlesServerRequests $bottom): MiddlewareStack
     {
-        foreach ($this->middleware as $middleware) {
-            $stack->append($middleware);
-        }
+        return new MiddlewareStack($bottom, $this->middleware);
     }
 }

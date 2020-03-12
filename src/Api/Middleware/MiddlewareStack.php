@@ -7,7 +7,7 @@ use Psr\Http\Message\ServerRequestInterface as ServerRequest;
 use Psr\Http\Server\MiddlewareInterface as ServerMiddleware;
 use Psr\Http\Server\RequestHandlerInterface as HandlesServerRequests;
 
-class MiddlewareStack implements HandlesServerRequests
+class MiddlewareStack implements HandlesServerRequests, Stackable
 {
     /** @var ServerMiddleware[] */
     protected $stack = [];

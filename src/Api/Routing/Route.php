@@ -6,19 +6,24 @@ use Psr\Container\ContainerInterface as Locator;
 use Psr\Http\Message\ResponseFactoryInterface as ResponseFactory;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as ServerRequest;
-use Psr\Http\Server\RequestHandlerInterface;
+use Psr\Http\Server\RequestHandlerInterface as HandlesServerRequests;
 use Slim\Handlers\Strategies\RequestHandler;
 use Slim\Interfaces\AdvancedCallableResolverInterface;
 use Slim\Interfaces\InvocationStrategyInterface;
 use Slim\Interfaces\RequestHandlerInvocationStrategyInterface;
 use Slim\MiddlewareDispatcher;
 use Virtue\Api\Middleware\MiddlewareStack;
+use Virtue\Api\Middleware\Stackable;
 use function class_implements;
 use function in_array;
 use function is_array;
 
-class Route implements RequestHandlerInterface
+class Route implements HandlesServerRequests
 {
+    /** @var Locator */
+    protected $kernel;
+    /** @var MiddlewareDispatcher */
+    protected $middlewareStack;
     /** @var string[] */
     protected $methods = [];
     /** @var string */
@@ -27,27 +32,23 @@ class Route implements RequestHandlerInterface
     protected $name = '';
     /** @var RouteGroup[] */
     protected $groups;
-    /** @var MiddlewareDispatcher */
-    protected $middlewareStack;
     /** @var callable|string */
     protected $handler;
-    /** @var Locator */
-    protected $kernel;
     /** @var string */
     protected $pattern;
 
     public function __construct(
+        Locator $kernel,
         array $methods,
         string $pattern,
         $handler,
-        Locator $kernel,
         array $groups = [],
         int $identifier = 0
     ) {
+        $this->kernel = $kernel;
         $this->methods = $methods;
         $this->pattern = $pattern;
         $this->handler = $handler;
-        $this->kernel = $kernel;
         $this->groups = $groups;
         $this->identifier = "route::{$identifier}";
         $this->middlewareStack = new MiddlewareStack($this);
@@ -94,14 +95,11 @@ class Route implements RequestHandlerInterface
 
     protected function buildStack(): MiddlewareStack
     {
-        $stack = new MiddlewareStack($this->middlewareStack);
-
-        /** @var RouteGroup $group */
-        foreach ($this->groups as $group) {
-            $group->appendTo($stack);
-        }
-
-        return $stack;
+        return array_reduce(
+            array_reverse($this->groups),
+            function (HandlesServerRequests $handler, Stackable $stack) { return $stack->stack($handler); },
+            $this->middlewareStack
+        );
     }
 
     public function handle(ServerRequest $request): Response
