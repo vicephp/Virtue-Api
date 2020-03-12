@@ -7,6 +7,8 @@ use Psr\Http\Message\ServerRequestInterface as ServerRequest;
 use Virtue\Api\App;
 use Virtue\Api\AppTestCase;
 use Virtue\Api\Middleware\RoutingMiddleware;
+use Virtue\Api\Routing\Route;
+use Virtue\Api\Routing\RouteCollector;
 
 class RoutesTest extends AppTestCase
 {
@@ -151,16 +153,14 @@ class RoutesTest extends AppTestCase
 
     public function testClosureBinding()
     {
-        $this->markTestSkipped('Inject Locator instead of binding');
         $kernel = $this->container->build();
         $app = $kernel->get(App::class);
         $app->add(RoutingMiddleware::class);
         $app->get('/hello/{name}', function (ServerRequest $request, Response $response, array $args) {
-            // Use app HTTP cookie service
-            $this->get('cookies')->set('name', [
-                'value' => $args['name'],
-                'expires' => '7 days'
-            ]);
+            /** @var Route $route */
+            foreach ($this->get(RouteCollector::class)->getRoutes() as $route) {
+                $response->getBody()->write($route->getPattern());
+            }
 
             return $response;
         });
@@ -168,5 +168,6 @@ class RoutesTest extends AppTestCase
 
         $response = $app->handle($request->withUri($request->getUri()->withPath('/hello/world'))->withMethod('GET'));
         $this->assertEquals(200, $response->getStatusCode());
+        $this->assertEquals('/hello/{name}', (string) $response->getBody());
     }
 }

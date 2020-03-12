@@ -16,11 +16,18 @@ class FastRouter implements RouteCollector, Router
     /** @var int */
     private $routeCounter = 0;
     /** @var FastRoute\RouteCollector */
-    private $routes;
+    private $routeCollector;
+    /** @var Route[] */
+    private $routes = [];
 
-    public function __construct(Locator $kernel) {
+    public function __construct(Locator $kernel, FastRoute\RouteCollector $routeCollector) {
         $this->kernel = $kernel;
-        $this->routes = $kernel->get(FastRoute\RouteCollector::class);
+        $this->routeCollector = $routeCollector;
+    }
+
+    public function getRoutes(): array
+    {
+        return $this->routes;
     }
 
     public function group(string $pattern, $callable): RouteGroup
@@ -37,14 +44,15 @@ class FastRouter implements RouteCollector, Router
     public function map(array $methods, string $pattern, $handler): Route
     {
         $route = $this->createRoute($methods, $pattern, $handler);
-        $this->routes->addRoute($methods, $pattern, $route);
+        $this->routeCollector->addRoute($methods, $pattern, $route);
+        $this->routes[$route->getIdentifier()] = $route;
 
         return $route;
     }
 
     public function route(ServerRequest $request): ServerRequest
     {
-        $dispatcher = new FastRoute\Dispatcher\GroupCountBased($this->routes->getData());
+        $dispatcher = new FastRoute\Dispatcher\GroupCountBased($this->routeCollector->getData());
         $result = new RoutingResults($dispatcher->dispatch($request->getMethod(), $request->getUri()->getPath()));
 
         return $result->withRequest($request);
