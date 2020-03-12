@@ -2,9 +2,9 @@
 
 namespace Virtue\Api\Testing;
 
-use Virtue\Api\Middleware\MiddlewareStack;
+use Virtue\Api\Middleware\MiddlewareContainer;
 
-class MiddlewareStackStub extends MiddlewareStack
+class MiddlewareContainerStub extends MiddlewareContainer
 {
     public function contains(string $className): int
     {

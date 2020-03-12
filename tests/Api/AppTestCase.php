@@ -16,7 +16,7 @@ use Slim\Interfaces\InvocationStrategyInterface;
 use Slim\Middleware\ErrorMiddleware;
 use Slim\ResponseEmitter;
 use Virtue\Api\Middleware\RoutingMiddleware;
-use Virtue\Api\Middleware\MiddlewareStack;
+use Virtue\Api\Middleware\MiddlewareContainer;
 
 class AppTestCase extends TestCase
 {

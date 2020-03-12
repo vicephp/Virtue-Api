@@ -33,7 +33,7 @@ class MiddlewareStackTest extends MockeryTestCase
             }
         );
 
-        $stack = new MiddlewareStack(new RequestHandlerStub(new Response()));
+        $stack = new MiddlewareContainer(new RequestHandlerStub(new Response()));
         $stack->append($set400);
         $stack->append($set301);
         $response = $stack->handle(\Mockery::mock(ServerRequest::class));
@@ -56,7 +56,7 @@ class MiddlewareStackTest extends MockeryTestCase
             }
         );
 
-        $stack = new MiddlewareStack(new RequestHandlerStub(new Response()), [$set400, $set301]);
+        $stack = new MiddlewareContainer(new RequestHandlerStub(new Response()), [$set400, $set301]);
         $response = $stack->handle(\Mockery::mock(ServerRequest::class));
         $this->assertEquals(400, $response->getStatusCode());
         $this->assertNotEquals(301, $response->getStatusCode());

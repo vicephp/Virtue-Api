@@ -4,7 +4,7 @@ namespace Virtue\Api\Routing;
 use Psr\Container\ContainerInterface as Locator;
 use Psr\Http\Server\MiddlewareInterface as ServerMiddleware;
 use Psr\Http\Server\RequestHandlerInterface as HandlesServerRequests;
-use Virtue\Api\Middleware\MiddlewareStack;
+use Virtue\Api\Middleware\MiddlewareContainer;
 use Virtue\Api\Middleware\Stackable;
 
 class RouteGroup implements Stackable
@@ -16,7 +16,7 @@ class RouteGroup implements Stackable
     /** @var Api */
     private $api;
     /** @var ServerMiddleware[] */
-    private $middleware = [];
+    private $middlewares = [];
 
     public function __construct($callable, Locator $kernel, Api $api) {
         $this->callable = $callable;
@@ -31,13 +31,13 @@ class RouteGroup implements Stackable
 
     public function add(string $middleware): self
     {
-        $this->middleware[] = $this->kernel->get($middleware);
+        $this->middlewares[] = $this->kernel->get($middleware);
 
         return $this;
     }
 
-    public function stack(HandlesServerRequests $bottom): MiddlewareStack
+    public function stack(HandlesServerRequests $bottom): MiddlewareContainer
     {
-        return new MiddlewareStack($bottom, $this->middleware);
+        return new MiddlewareContainer($bottom, $this->middlewares);
     }
 }

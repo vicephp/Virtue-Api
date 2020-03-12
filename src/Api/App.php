@@ -7,7 +7,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as ServerRequest;
 use Psr\Http\Server\RequestHandlerInterface as HandlesServerRequests;
 use Slim\ResponseEmitter;
-use Virtue\Api\Middleware\MiddlewareStack;
+use Virtue\Api\Middleware\MiddlewareContainer;
 use Virtue\Api\Routing\Api;
 use Virtue\Api\Routing\RouteCollector;
 use Virtue\Api\Routing\RouteRunner;
@@ -16,17 +16,17 @@ class App extends Api implements HandlesServerRequests
 {
     /** @var string */
     public const VERSION = '0.0.0';
-    /** @var MiddlewareStack */
-    protected $middlewareStack;
+    /** @var MiddlewareContainer */
+    protected $middlewares;
 
     public function __construct(Locator $kernel) {
         parent::__construct($kernel, $kernel->get(RouteCollector::class));
-        $this->middlewareStack = new MiddlewareStack($kernel->get(RouteRunner::class));
+        $this->middlewares = new MiddlewareContainer($kernel->get(RouteRunner::class));
     }
 
     public function add(string $middleware): void
     {
-        $this->middlewareStack->append($this->kernel->get($middleware));
+        $this->middlewares->append($this->kernel->get($middleware));
     }
 
     public function run(?ServerRequest $request = null): void
@@ -38,6 +38,6 @@ class App extends Api implements HandlesServerRequests
 
     public function handle(ServerRequest $request): Response
     {
-        return $this->middlewareStack->handle($request);
+        return $this->middlewares->handle($request);
     }
 }

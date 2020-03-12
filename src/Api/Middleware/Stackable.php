@@ -6,5 +6,5 @@ use Psr\Http\Server\RequestHandlerInterface as HandlesServerRequests;
 
 interface Stackable
 {
-    public function stack(HandlesServerRequests $bottom): MiddlewareStack;
+    public function stack(HandlesServerRequests $bottom): MiddlewareContainer;
 }

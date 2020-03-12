@@ -12,7 +12,7 @@ use Slim\Interfaces\AdvancedCallableResolverInterface;
 use Slim\Interfaces\InvocationStrategyInterface;
 use Slim\Interfaces\RequestHandlerInvocationStrategyInterface;
 use Slim\MiddlewareDispatcher;
-use Virtue\Api\Middleware\MiddlewareStack;
+use Virtue\Api\Middleware\MiddlewareContainer;
 use Virtue\Api\Middleware\Stackable;
 use function class_implements;
 use function in_array;
@@ -23,7 +23,7 @@ class Route implements HandlesServerRequests
     /** @var Locator */
     protected $kernel;
     /** @var MiddlewareDispatcher */
-    protected $middlewareStack;
+    protected $middlewares;
     /** @var string[] */
     protected $methods = [];
     /** @var string */
@@ -51,7 +51,7 @@ class Route implements HandlesServerRequests
         $this->handler = $handler;
         $this->groups = $groups;
         $this->identifier = "route::{$identifier}";
-        $this->middlewareStack = new MiddlewareStack($this);
+        $this->middlewares = new MiddlewareContainer($this);
     }
 
     public function getName(): string
@@ -83,22 +83,22 @@ class Route implements HandlesServerRequests
 
     public function add(string $middleware): self
     {
-        $this->middlewareStack->append($this->kernel->get($middleware));
+        $this->middlewares->append($this->kernel->get($middleware));
 
         return $this;
     }
 
     public function run(ServerRequest $request): Response
     {
-        return $this->buildStack()->handle($request);
+        return $this->buildHandlerStack()->handle($request);
     }
 
-    protected function buildStack(): MiddlewareStack
+    protected function buildHandlerStack(): HandlesServerRequests
     {
         return array_reduce(
             array_reverse($this->groups),
             function (HandlesServerRequests $bottom, Stackable $stack) { return $stack->stack($bottom); },
-            $this->middlewareStack
+            $this->middlewares
         );
     }
 
