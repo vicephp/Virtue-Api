@@ -70,7 +70,7 @@ class RoutePlaceHoldersTest extends AppTestCase
 
     public function testUnlimitedOptionalSegments()
     {
-        $this->markTestSkipped('Not supported!');
+        $this->markTestSkipped('Not Supported!');
         $kernel = $this->container->build();
         $app = $kernel->get(App::class);
         $app->add(RoutingMiddleware::class);

@@ -10,15 +10,15 @@ use Virtue\Api\Routing;
 
 class RoutingMiddleware implements ServerMiddleware
 {
-    /** @var Routing\RouteDispatcher */
+    /** @var Routing\Router */
     private $routes;
 
-    public function __construct(Routing\RouteDispatcher $routes) {
+    public function __construct(Routing\Router $routes) {
         $this->routes = $routes;
     }
 
     public function process(ServerRequest $request, HandlesServerRequests $handler): Response
     {
-        return $handler->handle($this->routes->dispatch($request));
+        return $handler->handle($this->routes->route($request));
     }
 }

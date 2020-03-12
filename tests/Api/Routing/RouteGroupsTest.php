@@ -13,84 +13,72 @@ use Virtue\Api\Routing;
 
 class RouteGroupsTest extends AppTestCase
 {
-    public function testNestedRouteGroups()
+    protected function setUp()
     {
+        parent::setUp();
         $this->container->addDefinitions(
             [
-                'foo' => new CallableMiddleware(
+                'klaatu' => new CallableMiddleware(
                     function (ServerRequest $request, HandlesServerRequests $next) {
                         $response = $next->handle($request);
-                        $response->getBody()->write('foo');
+                        $response->getBody()->write('klaatu ');
                         return $response;
                     }
                 ),
-                'bar' => new CallableMiddleware(
+                'barada' => new CallableMiddleware(
                     function (ServerRequest $request, HandlesServerRequests $next) {
                         $response = $next->handle($request);
-                        $response->getBody()->write('bar');
+                        $response->getBody()->write('barada ');
                         return $response;
                     }
                 ),
-                'baz' => new CallableMiddleware(
+                'nikto' => new CallableMiddleware(
                     function (ServerRequest $request, HandlesServerRequests $next) {
                         $response = $next->handle($request);
-                        $response->getBody()->write('baz');
+                        $response->getBody()->write('nikto ');
                         return $response;
                     }
                 )
             ]
         );
+    }
+
+    public function testNestedRouteGroups()
+    {
         $kernel = $this->container->build();
         $app = $kernel->get(App::class);
         $app->add(RoutingMiddleware::class);
-        $app->group('/foo', function (Routing\Api $group) {
-            $group->group('/bar', function (Routing\Api $group) {
-                $group->get('/baz', function (ServerRequest $request, Response $response, array $args) {
+        $app->group('/klaatu', function (Routing\Api $group) {
+            $group->group('/barada', function (Routing\Api $group) {
+                $group->get('/nikto', function (ServerRequest $request, Response $response, array $args) {
                     return $response;
-                })->add('bar')->add('foo');
-            })->add('foo')->add('baz');
-        })->add('baz')->add('bar');
+                })->add('barada')->add('klaatu');
+            })->add('klaatu')->add('nikto');
+        })->add('nikto')->add('barada');
         $request = $kernel->get(ServerRequest::class);
-        $request = $request->withUri($request->getUri()->withPath('/foo/bar/baz'));
+        $request = $request->withUri($request->getUri()->withPath('/klaatu/barada/nikto'));
 
         $response = $app->handle($request);
         $this->assertEquals(200, $response->getStatusCode());
-        $this->assertEquals('foobarbazfoobarbaz', (string) $response->getBody());
+        $this->assertEquals('klaatu barada nikto klaatu barada nikto ', (string) $response->getBody());
     }
 
     public function testRouteGroupWithRouteMiddleware()
     {
-        $this->container->addDefinitions(
-            [
-                'foo' => new CallableMiddleware(
-                    function (ServerRequest $request, HandlesServerRequests $next) {
-                        $response = $next->handle($request);
-                        $response->getBody()->write('foo');
-                        return $response;
-                    }
-                ),
-                'bar' => new CallableMiddleware(
-                    function (ServerRequest $request, HandlesServerRequests $next) {
-                        $response = $next->handle($request);
-                        $response->getBody()->write('bar');
-                        return $response;
-                    }
-                )
-            ]
-        );
         $kernel = $this->container->build();
         $app = $kernel->get(App::class);
         $app->add(RoutingMiddleware::class);
-        $app->group('/foo', function (Routing\Api $group) {
-            $group->get('/bar', function (ServerRequest $request, Response $response, array $args) {
+        $app->add('nikto');
+        $app->group('/klaatu', function (Routing\Api $group) {
+            $group->get('/barada', function (ServerRequest $request, Response $response, array $args) {
                 return $response;
-            })->add('bar')->add('foo');
+            })->add('barada')->add('klaatu');
         });
         $request = $kernel->get(ServerRequest::class);
-        $request = $request->withUri($request->getUri()->withPath('/foo/bar'));
+        $request = $request->withUri($request->getUri()->withPath('/klaatu/barada'));
 
         $response = $app->handle($request);
         $this->assertEquals(200, $response->getStatusCode());
-        $this->assertEquals('foobar', (string)$response->getBody());
+        $this->assertEquals('klaatu barada nikto ', (string)$response->getBody());
     }
 }

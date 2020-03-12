@@ -103,7 +103,7 @@ class AppTest extends AppTestCase
         $this->assertEquals(1, $stack->contains(ErrorMiddleware::class));
     }
 
-    public function testRunFastRouteMiddlewareTwice()
+    public function testRoutingMiddlewareTwice()
     {
         $this->container->addDefinitions(
             [
@@ -121,8 +121,8 @@ class AppTest extends AppTestCase
         $app->get($path, function (ServerRequest $request, Response $response, array $args) {
             return $response;
         });
-
         $request = $kernel->get(ServerRequest::class);
+
         $request = $request->withUri($request->getUri()->withPath($path));
         $app->run($request); // run twice, application should be stateless
         $app->run($request);
@@ -132,40 +132,47 @@ class AppTest extends AppTestCase
         $this->assertNotNull($context->getRoute());
     }
 
-    public function testRouteGroupWithGroupMiddleware()
+    public function testNotFound()
     {
         $this->container->addDefinitions(
             [
-                'bar' => new CallableMiddleware(
-                    function (ServerRequest $request, HandlesServerRequests $next) {
-                        $response = $next->handle($request);
-                        $response->getBody()->write('bar');
-                        return $response;
-                    }
-                ),
-                'foo' => new CallableMiddleware(
-                    function (ServerRequest $request, HandlesServerRequests $next) {
-                        $response = $next->handle($request);
-                        $response->getBody()->write('foo');
-                        return $response;
-                    }
-                )
+                Routing\RouteRunner::class => function (Locator $kernel) {
+                    return new Testing\RequestHandlerStub(
+                        $kernel->get(ResponseFactory::class)->createResponse()
+                    );
+                },
             ]
         );
-
         $kernel = $this->container->build();
         $app = $kernel->get(App::class);
         $app->add(RoutingMiddleware::class);
-        $app->group('/foo', function (Routing\Api $group) {
-            $group->get('/bar', function (ServerRequest $request, Response $response, array $args) {
-                return $response;
-            })->add('bar');
-        })->add('foo');
         $request = $kernel->get(ServerRequest::class);
-        $request = $request->withUri($request->getUri()->withPath('/foo/bar'));
 
-        $response = $app->handle($request);
-        $this->assertEquals(200, $response->getStatusCode());
-        $this->assertEquals('barfoo', (string) $response->getBody());
+        $this->expectException(\Slim\Exception\HttpNotFoundException::class);
+        $app->run($request->withUri($request->getUri()->withPath('/notfound')));
+    }
+
+    public function testMethodNotAllowed()
+    {
+        $this->container->addDefinitions(
+            [
+                Routing\RouteRunner::class => function (Locator $kernel) {
+                    return new Testing\RequestHandlerStub(
+                        $kernel->get(ResponseFactory::class)->createResponse()
+                    );
+                },
+            ]
+        );
+        $kernel = $this->container->build();
+        $app = $kernel->get(App::class);
+        $app->add(RoutingMiddleware::class);
+        $app->get('/books', function (ServerRequest $request, Response $response, array $args) {
+            // Create new book
+            return $response;
+        });
+        $request = $kernel->get(ServerRequest::class);
+
+        $this->expectException(\Slim\Exception\HttpMethodNotAllowedException::class);
+        $app->run($request->withUri($request->getUri()->withPath('/books'))->withMethod('POST'));
     }
 }
