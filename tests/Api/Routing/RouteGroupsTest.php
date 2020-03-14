@@ -10,6 +10,7 @@ use Virtue\Api\AppTestCase;
 use Virtue\Api\Middleware\CallableMiddleware;
 use Virtue\Api\Middleware\RoutingMiddleware;
 use Virtue\Api\Routing;
+use Virtue\Api\Testing\KlaatuBaradaNword;
 
 class RouteGroupsTest extends AppTestCase
 {
@@ -60,7 +61,7 @@ class RouteGroupsTest extends AppTestCase
 
         $response = $app->handle($request);
         $this->assertEquals(200, $response->getStatusCode());
-        $this->assertEquals('klaatu barada nikto klaatu barada nikto ', (string) $response->getBody(), "Klaatu Barada N... necktie... nectar... nickel... noodle. It's an 'N' word, it's definitely an 'N' word!");
+        $this->assertEquals('klaatu barada nikto klaatu barada nikto ', (string) $response->getBody(), new KlaatuBaradaNword());
     }
 
     public function testRouteGroupWithMiddleware()
@@ -79,6 +80,6 @@ class RouteGroupsTest extends AppTestCase
 
         $response = $app->handle($request);
         $this->assertEquals(200, $response->getStatusCode());
-        $this->assertEquals('klaatu barada nikto ', (string)$response->getBody(),  "Klaatu Barada N... necktie... nectar... nickel... noodle. It's an 'N' word, it's definitely an 'N' word!");
+        $this->assertEquals('klaatu barada nikto ', (string)$response->getBody(), new KlaatuBaradaNword());
     }
 }

@@ -2,8 +2,21 @@
 
 <phpunit bootstrap="./tests/bootstrap.php" colors="true">
     <testsuites>
-        <testsuite name="Virtue-Api Unit Tests">
-            <directory>./tests</directory>
+        <testsuite name="Virtue-Api">
+            <directory>./tests/Api</directory>
         </testsuite>
     </testsuites>
+    <filter>
+        <whitelist processUncoveredFilesFromWhitelist="true">
+            <directory suffix=".php">./src/*</directory>
+        </whitelist>
+    </filter>
+    <logging>
+        <log
+                type="coverage-html"
+                target="./tests/coverage"
+                lowUpperBound="20"
+                highLowerBound="50"
+        />
+    </logging>
 </phpunit>

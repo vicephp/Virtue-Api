@@ -34,6 +34,10 @@ class MiddlewareContainer implements HandlesServerRequests, Stackable
 
     public function stack(HandlesServerRequests $bottom): self
     {
+        if ($bottom === $this) {
+            throw new \InvalidArgumentException('You shall not stack same container.');
+        }
+
         return new self($bottom, $this->middlewares);
     }
 
