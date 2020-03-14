@@ -11,7 +11,6 @@ use Slim\Handlers\Strategies\RequestHandler;
 use Slim\Interfaces\AdvancedCallableResolverInterface;
 use Slim\Interfaces\InvocationStrategyInterface;
 use Slim\Interfaces\RequestHandlerInvocationStrategyInterface;
-use Slim\MiddlewareDispatcher;
 use Virtue\Api\Middleware\MiddlewareContainer;
 use Virtue\Api\Middleware\Stackable;
 use function class_implements;
@@ -22,7 +21,7 @@ class Route implements HandlesServerRequests
 {
     /** @var Locator */
     protected $kernel;
-    /** @var MiddlewareDispatcher */
+    /** @var MiddlewareContainer */
     protected $middlewares;
     /** @var string[] */
     protected $methods = [];
