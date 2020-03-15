@@ -1,5 +1,5 @@
 {
-    "name": "virtue/api",
+    "name": "vicephp/virtue-api",
     "type": "library",
     "description": "Making PHP more Pythonic",
     "keywords": ["framework","micro","api","router"],

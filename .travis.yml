@@ -11,4 +11,4 @@ cache:
 sudo: false
 
 install:
-  - travis_retry composer install
+  - travis_retry composer install -n
