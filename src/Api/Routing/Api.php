@@ -10,18 +10,14 @@ class Api
     /** @var Locator */
     protected $kernel;
     /** @var RouteCollector */
-    private $routeCollector;
-    /** @var string */
-    private $groupPattern = '';
+    protected $routeCollector;
 
     public function __construct(
         Locator $kernel,
-        RouteCollector $routeCollector,
-        ?string $groupPattern = ''
+        RouteCollector $routeCollector
     ) {
         $this->kernel = $kernel;
         $this->routeCollector = $routeCollector;
-        $this->groupPattern = $groupPattern;
     }
 
     public function get(string $pattern, $handler): Route
@@ -61,12 +57,7 @@ class Api
 
     public function map(array $methods, string $pattern, $handler): Route
     {
-        return $this->routeCollector->map($methods, "{$this->groupPattern}{$pattern}", $handler);
-    }
-
-    public function group(string $pattern, $callable): RouteGroup
-    {
-        return $this->routeCollector->group("{$this->groupPattern}{$pattern}", $callable);
+        return $this->routeCollector->map($methods, $pattern, $handler);
     }
 
     public function redirect(string $from, $to, int $status = 302): Route

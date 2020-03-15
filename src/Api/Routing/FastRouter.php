@@ -5,7 +5,6 @@ namespace Virtue\Api\Routing;
 use FastRoute;
 use Psr\Container\ContainerInterface as Locator;
 use Psr\Http\Message\ServerRequestInterface as ServerRequest;
-use function array_pop;
 
 class FastRouter implements RouteCollector, Router
 {
@@ -13,6 +12,8 @@ class FastRouter implements RouteCollector, Router
     private $kernel;
     /** @var RouteGroup[] */
     private $routeGroups = [];
+    /** @var RouteGroup */
+    private $routeGroup;
     /** @var int */
     private $routeCounter = 0;
     /** @var FastRoute\RouteCollector */
@@ -30,13 +31,13 @@ class FastRouter implements RouteCollector, Router
         return $this->routes;
     }
 
-    public function group(string $pattern, $callable): RouteGroup
+    public function group(string $name, $callable): RouteGroup
     {
-        $api = new Api($this->kernel, $this, $pattern);
-        $routeGroup = new RouteGroup($callable, $this->kernel, $api);
-        $this->routeGroups[] = $routeGroup;
-        $routeGroup->collectRoutes();
-        array_pop($this->routeGroups);
+        $api = new Api($this->kernel, $this);
+        $this->routeGroups[$name] = $this->routeGroups[$name] ?? new RouteGroup($this->kernel, $api);
+        $routeGroup = $this->routeGroup = $this->routeGroups[$name];
+        $routeGroup->collectRoutes($callable);
+        unset($this->routeGroup);
 
         return $routeGroup;
     }
@@ -63,7 +64,7 @@ class FastRouter implements RouteCollector, Router
             $methods,
             $pattern,
             $handler,
-            $this->routeGroups,
+            array_filter([$this->routeGroup]),
             $this->routeCounter++
         );
     }

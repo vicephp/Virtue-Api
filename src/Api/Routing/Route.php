@@ -29,7 +29,7 @@ class Route implements HandlesServerRequests
     protected $identifier;
     /** @var string */
     protected $name = '';
-    /** @var RouteGroup[] */
+    /** @var Stackable[] */
     protected $groups;
     /** @var callable|string */
     protected $handler;

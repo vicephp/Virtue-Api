@@ -10,6 +10,7 @@ use Slim\ResponseEmitter;
 use Virtue\Api\Middleware\MiddlewareContainer;
 use Virtue\Api\Routing\Api;
 use Virtue\Api\Routing\RouteCollector;
+use Virtue\Api\Routing\RouteGroup;
 
 class App extends Api implements HandlesServerRequests
 {
@@ -25,6 +26,11 @@ class App extends Api implements HandlesServerRequests
     ) {
         parent::__construct($kernel, $routeCollector);
         $this->middlewares = $middlewares;
+    }
+
+    public function group(string $name, $callable): RouteGroup
+    {
+        return $this->routeCollector->group($name, $callable);
     }
 
     public function add(string $middleware): void

@@ -44,39 +44,30 @@ class RouteGroupsTest extends AppTestCase
         );
     }
 
-    public function testNestedRouteGroupsWithMiddleware()
-    {
-        $kernel = $this->container->build();
-        $app = $kernel->get(App::class);
-        $app->add(RoutingMiddleware::class);
-        $app->group('/klaatu', function (Routing\Api $group) {
-            $group->group('/barada', function (Routing\Api $group) {
-                $group->get('/nikto', function (ServerRequest $request, Response $response, array $args) {
-                    return $response;
-                })->add('barada')->add('klaatu');
-            })->add('klaatu')->add('nikto');
-        })->add('nikto')->add('barada');
-        $request = $kernel->get(ServerRequest::class);
-        $request = $request->withUri($request->getUri()->withPath('/klaatu/barada/nikto'));
-
-        $response = $app->handle($request);
-        $this->assertEquals(200, $response->getStatusCode());
-        $this->assertEquals('klaatu barada nikto klaatu barada nikto ', (string) $response->getBody(), new KlaatuBaradaNword());
-    }
-
     public function testRouteGroupWithMiddleware()
     {
         $kernel = $this->container->build();
         $app = $kernel->get(App::class);
         $app->add(RoutingMiddleware::class);
         $app->add('nikto');
-        $app->group('/klaatu', function (Routing\Api $group) {
+        $app->group('ash', function (Routing\Api $group) {
+            $group->get('/klaatu', function (ServerRequest $request, Response $response, array $args) {
+                return $response;
+            })->add('klaatu');
+        })->add('barada');
+        $request = $kernel->get(ServerRequest::class);
+        $request = $request->withUri($request->getUri()->withPath('/klaatu'));
+
+        $response = $app->handle($request);
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertEquals('klaatu barada nikto ', (string)$response->getBody(), new KlaatuBaradaNword());
+
+        $app->group('ash', function (Routing\Api $group) {
             $group->get('/barada', function (ServerRequest $request, Response $response, array $args) {
                 return $response;
-            })->add('barada')->add('klaatu');
+            })->add('klaatu');
         });
-        $request = $kernel->get(ServerRequest::class);
-        $request = $request->withUri($request->getUri()->withPath('/klaatu/barada'));
+        $request = $request->withUri($request->getUri()->withPath('/barada'));
 
         $response = $app->handle($request);
         $this->assertEquals(200, $response->getStatusCode());

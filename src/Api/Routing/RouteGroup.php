@@ -9,8 +9,6 @@ use Virtue\Api\Middleware\Stackable;
 
 class RouteGroup implements Stackable
 {
-    /** @var callable|string */
-    private $callable;
     /** @var Locator */
     private $kernel;
     /** @var Api */
@@ -18,15 +16,14 @@ class RouteGroup implements Stackable
     /** @var ServerMiddleware[] */
     private $middlewares = [];
 
-    public function __construct($callable, Locator $kernel, Api $api) {
-        $this->callable = $callable;
+    public function __construct(Locator $kernel, Api $api) {
         $this->kernel = $kernel;
         $this->api = $api;
     }
 
-    public function collectRoutes(): void
+    public function collectRoutes($callable): void
     {
-        ($this->callable)($this->api);
+        $callable($this->api);
     }
 
     public function add(string $middleware): self
