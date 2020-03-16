@@ -50,12 +50,10 @@ class FastRouter implements RouteCollector, Router
         return $route;
     }
 
-    public function route(ServerRequest $request): ServerRequest
+    public function route($httpMethod, $uri): array
     {
         $dispatcher = new FastRoute\Dispatcher\GroupCountBased($this->routeCollector->getData());
-        $result = new RoutingResults($dispatcher->dispatch($request->getMethod(), $request->getUri()->getPath()));
-
-        return $result->withRequest($request);
+        return $dispatcher->dispatch($httpMethod, $uri);
     }
 
     protected function createRoute(array $methods, string $pattern, $handler): Route

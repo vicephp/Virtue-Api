@@ -19,6 +19,12 @@ class RoutingMiddleware implements ServerMiddleware
 
     public function process(ServerRequest $request, HandlesServerRequests $handler): Response
     {
-        return $handler->handle($this->routes->route($request));
+        $results = new Routing\RoutingResults(
+            $this->routes->route(
+                $request->getMethod(), $request->getUri()->getPath()
+            )
+        );
+
+        return $handler->handle($results->withRequest($request));
     }
 }
