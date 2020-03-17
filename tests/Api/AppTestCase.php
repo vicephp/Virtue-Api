@@ -15,7 +15,10 @@ use Slim\Interfaces\CallableResolverInterface;
 use Slim\Interfaces\InvocationStrategyInterface;
 use Slim\Middleware\ErrorMiddleware;
 use Slim\ResponseEmitter;
+use Virtue\Api\Middleware\MiddlewareContainer;
 use Virtue\Api\Middleware\RoutingMiddleware;
+use Virtue\Api\Routing\RouteCollector;
+use Virtue\Api\Routing\RouteRunner;
 
 class AppTestCase extends TestCase
 {
@@ -28,7 +31,11 @@ class AppTestCase extends TestCase
         $this->container->addDefinitions(
             [
                 App::class => function (Locator $kernel) {
-                    return new App($kernel);
+                    return new App(
+                        $kernel,
+                        $kernel->get(RouteCollector::class),
+                        new MiddlewareContainer($kernel->get(RouteRunner::class))
+                    );
                 },
                 InvocationStrategyInterface::class => new RequestResponse(),
                 AdvancedCallableResolverInterface::class => function (Locator $kernel) {

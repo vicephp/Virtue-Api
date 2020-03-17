@@ -2,16 +2,31 @@
 
 namespace Virtue\Api;
 
+use Prophecy\Argument;
+use Psr\Container\ContainerInterface;
 use Psr\Container\ContainerInterface as Locator;
+use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseFactoryInterface as ResponseFactory;
 use Psr\Http\Message\ServerRequestInterface as ServerRequest;
 use Slim\ResponseEmitter;
+use Virtue\Api\Middleware\MiddlewareContainer;
 use Virtue\Api\Middleware\RoutingMiddleware;
 use Virtue\Api\Routing;
 use Virtue\Api\Testing;
 
 class AppTest extends AppTestCase
 {
+    public function testDoesNotUseContainerAsServiceLocator()
+    {
+        $routeCollector = $this->prophesize(Routing\RouteCollector::class);
+        $kernel = $this->prophesize(ContainerInterface::class);
+        $middlewares = $this->prophesize(MiddlewareContainer::class);
+        new App($kernel->reveal(), $routeCollector->reveal(), $middlewares->reveal());
+
+        $kernel->has(Argument::type('string'))->shouldNotHaveBeenCalled();
+        $kernel->get(Argument::type('string'))->shouldNotHaveBeenCalled();
+    }
+
     public function testRun()
     {
         $kernel = $this->container->build();

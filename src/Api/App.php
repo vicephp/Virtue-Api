@@ -10,7 +10,6 @@ use Slim\ResponseEmitter;
 use Virtue\Api\Middleware\MiddlewareContainer;
 use Virtue\Api\Routing\Api;
 use Virtue\Api\Routing\RouteCollector;
-use Virtue\Api\Routing\RouteRunner;
 
 class App extends Api implements HandlesServerRequests
 {
@@ -19,9 +18,13 @@ class App extends Api implements HandlesServerRequests
     /** @var MiddlewareContainer */
     protected $middlewares;
 
-    public function __construct(Locator $kernel) {
-        parent::__construct($kernel, $kernel->get(RouteCollector::class));
-        $this->middlewares = new MiddlewareContainer($kernel->get(RouteRunner::class));
+    public function __construct(
+        Locator $kernel,
+        RouteCollector $routeCollector,
+        MiddlewareContainer $middlewares
+    ) {
+        parent::__construct($kernel, $routeCollector);
+        $this->middlewares = $middlewares;
     }
 
     public function add(string $middleware): void
