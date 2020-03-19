@@ -1,6 +1,6 @@
 <?php
 
-namespace Virtue\Api;
+namespace Virtue\Api\Handler;
 
 use DI\ContainerBuilder;
 use PHPUnit\Framework\TestCase;

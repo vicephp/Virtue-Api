@@ -3,19 +3,12 @@
 namespace Virtue\Api\Routing;
 
 use Psr\Container\ContainerInterface as Locator;
-use Psr\Http\Message\ResponseFactoryInterface as ResponseFactory;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as ServerRequest;
 use Psr\Http\Server\RequestHandlerInterface as HandlesServerRequests;
-use Slim\Handlers\Strategies\RequestHandler;
-use Slim\Interfaces\CallableResolverInterface;
-use Slim\Interfaces\InvocationStrategyInterface;
-use Slim\Interfaces\RequestHandlerInvocationStrategyInterface;
+use Virtue\Api\Handler\CallableInvoker;
 use Virtue\Api\Middleware\MiddlewareContainer;
 use Virtue\Api\Middleware\Stackable;
-use function class_implements;
-use function in_array;
-use function is_array;
 
 class Route implements HandlesServerRequests
 {
@@ -51,7 +44,7 @@ class Route implements HandlesServerRequests
         $this->groups = $groups;
         $this->identifier = "route::{$identifier}";
         $this->middlewares = new MiddlewareContainer(
-            $kernel->get(CallableResolverInterface::class)
+            $kernel->get(CallableInvoker::class)
         );
     }
 

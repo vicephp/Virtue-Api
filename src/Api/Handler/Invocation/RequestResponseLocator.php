@@ -1,13 +1,13 @@
 <?php
 
-namespace Virtue\Api\Handlers\Invocation;
+namespace Virtue\Api\Handler\Invocation;
 
 use Psr\Container\ContainerInterface as Locator;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Slim\Interfaces\RequestHandlerInvocationStrategyInterface;
+use Slim\Interfaces\InvocationStrategyInterface;
 
-class RequestResponseLocator implements RequestHandlerInvocationStrategyInterface
+class RequestResponseLocator implements InvocationStrategyInterface
 {
     /** @var Locator */
     private $services;

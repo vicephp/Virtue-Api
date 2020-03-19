@@ -15,6 +15,7 @@ use Slim\Interfaces\CallableResolverInterface;
 use Slim\Interfaces\InvocationStrategyInterface;
 use Slim\Middleware\ErrorMiddleware;
 use Slim\ResponseEmitter;
+use Virtue\Api\Handler\CallableInvoker;
 use Virtue\Api\Middleware\MiddlewareContainer;
 use Virtue\Api\Middleware\RoutingMiddleware;
 use Virtue\Api\Routing\RouteCollector;
@@ -40,7 +41,7 @@ class AppTestCase extends TestCase
                 InvocationStrategyInterface::class => new RequestResponse(),
                 CallableResolverInterface::class => function (Locator $kernel) {
                     // Here we should pass a different Locator than the kernel
-                    return new CallableResolver($kernel);
+                    return new Handler\CallableResolver($kernel);
                 },
                 ResponseFactory::class => function () {
                     return \Slim\Factory\AppFactory::determineResponseFactory();
