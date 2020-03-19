@@ -80,6 +80,11 @@ class Route implements HandlesServerRequests
         return $this->identifier;
     }
 
+    public function getHandler()
+    {
+        return $this->handler;
+    }
+
     public function add(string $middleware): self
     {
         $this->middlewares->append($this->kernel->get($middleware));
