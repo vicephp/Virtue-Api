@@ -62,11 +62,6 @@ final class CallableResolver implements CallableResolverInterface, HandlesServer
         return $this->bindToContainer($callable);
     }
 
-    public function resolveRoute($resolvable): callable
-    {
-        return $this->resolve($resolvable);
-    }
-
     private function resolveSlimNotation(string $resolvable): array
     {
         preg_match(CallableResolver::$callablePattern, $resolvable, $matches);
