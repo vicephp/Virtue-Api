@@ -4,7 +4,6 @@ namespace Virtue\Api\Routing;
 
 use FastRoute;
 use Psr\Container\ContainerInterface as Locator;
-use Psr\Http\Message\ServerRequestInterface as ServerRequest;
 
 class FastRouter implements RouteCollector, Router
 {

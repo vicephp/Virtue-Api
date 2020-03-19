@@ -8,7 +8,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as ServerRequest;
 use Psr\Http\Server\RequestHandlerInterface as HandlesServerRequests;
 use Slim\Handlers\Strategies\RequestHandler;
-use Slim\Interfaces\AdvancedCallableResolverInterface;
+use Slim\Interfaces\CallableResolverInterface;
 use Slim\Interfaces\InvocationStrategyInterface;
 use Slim\Interfaces\RequestHandlerInvocationStrategyInterface;
 use Virtue\Api\Middleware\MiddlewareContainer;
@@ -50,7 +50,9 @@ class Route implements HandlesServerRequests
         $this->handler = $handler;
         $this->groups = $groups;
         $this->identifier = "route::{$identifier}";
-        $this->middlewares = new MiddlewareContainer($this);
+        $this->middlewares = new MiddlewareContainer(
+            $kernel->get(CallableResolverInterface::class)
+        );
     }
 
     public function getName(): string
@@ -108,19 +110,6 @@ class Route implements HandlesServerRequests
 
     public function handle(ServerRequest $request): Response
     {
-        $callableResolver = $this->kernel->get(AdvancedCallableResolverInterface::class);
-        $handler = $callableResolver->resolveRoute($this->handler);
-        $strategy = $this->kernel->get(InvocationStrategyInterface::class);
-
-        if (
-            is_array($handler)
-            && $handler[0] instanceof HandlesServerRequests
-            && !in_array(RequestHandlerInvocationStrategyInterface::class, class_implements($strategy))
-        ) {
-            $strategy = new RequestHandler();
-        }
-
-        $response = $this->kernel->get(ResponseFactory::class)->createResponse();
-        return $strategy($handler, $request, $response, RoutingResults::fromRequest($request)->getRouteArgs());
+        return $this->buildHandlerStack()->handle($request);
     }
 }

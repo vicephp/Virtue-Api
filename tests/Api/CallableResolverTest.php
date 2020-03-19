@@ -4,6 +4,8 @@ namespace Virtue\Api;
 
 use DI\ContainerBuilder;
 use PHPUnit\Framework\TestCase;
+use Slim\Handlers\Strategies\RequestResponse;
+use Slim\Interfaces\InvocationStrategyInterface;
 use Slim\Psr7\Response;
 use Virtue\Api\Testing;
 
@@ -15,6 +17,7 @@ class CallableResolverTest extends TestCase
         $container->addDefinitions([
             'klaatu' => 'barada',
             Testing\RequestHandlerStub::class => new Testing\RequestHandlerStub(new Response()),
+            InvocationStrategyInterface::class => new RequestResponse()
         ]);
         $kernel = $container->build();
 
@@ -34,14 +37,10 @@ class CallableResolverTest extends TestCase
         $handler = $callable->resolve(function () { return $this->get('klaatu'); });
         $this->assertEquals('barada', $handler());
 
-        // Original one fails here
-        $handler = $callable->resolve(Testing\RequestHandlerStub::class);
-        $this->assertEquals('handle', $handler[CallableResolver::METHOD]);
-
         $handler = $callable->resolve($kernel->get(Testing\HomeAction::class));
         $this->assertInstanceOf(Testing\HomeAction::class, $handler);
 
         $this->expectException(\RuntimeException::class);
-        $handler = $callable->resolve($kernel->get(Testing\RequestHandlerStub::class));
+        $callable->resolve(Testing\RequestHandlerStub::class);
     }
 }

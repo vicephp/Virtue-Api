@@ -38,15 +38,12 @@ class AppTestCase extends TestCase
                     );
                 },
                 InvocationStrategyInterface::class => new RequestResponse(),
-                AdvancedCallableResolverInterface::class => function (Locator $kernel) {
+                CallableResolverInterface::class => function (Locator $kernel) {
                     // Here we should pass a different Locator than the kernel
-                    return new \Slim\CallableResolver($kernel);
+                    return new CallableResolver($kernel);
                 },
                 ResponseFactory::class => function () {
                     return \Slim\Factory\AppFactory::determineResponseFactory();
-                },
-                CallableResolverInterface::class => function (Locator $kernel) {
-                    return new \Slim\CallableResolver($kernel);
                 },
                 Routing\RouteCollector::class => function (Locator $kernel) {
                     return new Routing\FastRouter(
