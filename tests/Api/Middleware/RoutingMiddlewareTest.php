@@ -8,6 +8,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as ServerRequest;
 use Virtue\Api\App;
 use Virtue\Api\Routing;
+use Virtue\Api\ServerRequest\RoutingResults;
 use Virtue\Api\Testing;
 use Virtue\Api\AppTestCase;
 
@@ -43,7 +44,7 @@ class RoutingMiddlewareTest extends AppTestCase
         $app->run($request);
         /** @var Testing\RequestHandlerStub $handler */
         $handler = $kernel->get(Routing\RouteRunner::class);
-        $context = Routing\RoutingResults::fromRequest($handler->last());
+        $context = RoutingResults::fromRequest($handler->last());
         $this->assertNotNull($context->getRoute());
     }
 

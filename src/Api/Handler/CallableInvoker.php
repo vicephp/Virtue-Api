@@ -8,7 +8,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface as HandlesServerRequests;
 use Slim\Interfaces\CallableResolverInterface as ResolvesCallables;
 use Slim\Interfaces\InvocationStrategyInterface;
-use Virtue\Api\Routing\RoutingResults;
+use Virtue\Api\ServerRequest\RoutingResults;
 
 class CallableInvoker implements HandlesServerRequests
 {

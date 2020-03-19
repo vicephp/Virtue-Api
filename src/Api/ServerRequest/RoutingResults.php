@@ -1,11 +1,12 @@
 <?php
 
-namespace Virtue\Api\Routing;
+namespace Virtue\Api\ServerRequest;
 
 use Psr\Http\Message\ServerRequestInterface as ServerRequest;
 use RuntimeException;
 use Slim\Exception\HttpMethodNotAllowedException;
 use Slim\Exception\HttpNotFoundException;
+use Virtue\Api\Routing\Route;
 
 class RoutingResults
 {

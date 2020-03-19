@@ -25,10 +25,10 @@ class ParseAcceptHeaders implements ServerMiddleware
         );
 
         $headers = array_map(
-            function ($accepts) {
+            function ($lines) {
                 return array_map(
-                    function ($accept) {return $this->parse($accept); },
-                    $accepts
+                    function ($line) {return $this->parse($line); },
+                    $lines
                 );
             },
             $headers

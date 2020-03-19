@@ -7,6 +7,7 @@ use Psr\Http\Message\ServerRequestInterface as ServerRequest;
 use Psr\Http\Server\MiddlewareInterface as ServerMiddleware;
 use Psr\Http\Server\RequestHandlerInterface as HandlesServerRequests;
 use Virtue\Api\Routing;
+use Virtue\Api\ServerRequest\RoutingResults;
 
 class RoutingMiddleware implements ServerMiddleware
 {
@@ -19,7 +20,7 @@ class RoutingMiddleware implements ServerMiddleware
 
     public function process(ServerRequest $request, HandlesServerRequests $handler): Response
     {
-        $results = new Routing\RoutingResults(
+        $results = new RoutingResults(
             $this->routes->route(
                 $request->getMethod(), $request->getUri()->getPath()
             )
