@@ -64,7 +64,7 @@ class AcceptHeadersResults
         return $sum;
     }
 
-    public function matches(array $accept, array $acceptable): float
+    private function matches(array $accept, array $acceptable): float
     {
         unset($accept[1]['q']);
         $params = count(array_intersect($accept[1], $acceptable[1]));
@@ -73,15 +73,5 @@ class AcceptHeadersResults
         $fitness = preg_match($pattern, strtolower($accept[0])) * $factor;
 
         return $params + $fitness;
-    }
-
-    private function klaatu(array $range): array
-    {
-        return array_map(
-            function (array $accept) {
-                $accept[1]['q'] = (float)$accept[1]['q'] ?? 1.0;
-            },
-            $range
-        );
     }
 }
