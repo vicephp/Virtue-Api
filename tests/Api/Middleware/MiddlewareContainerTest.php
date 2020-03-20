@@ -17,21 +17,21 @@ class MiddlewareContainerTest extends MockeryTestCase
     {
         parent::setUp();
         $this->middlewares = [
-            'klaatu' => new CallableMiddleware(
+            'klaatu' => new InjectCallable(
                 function (ServerRequest $request, HandlesServerRequests $next) {
                     $response = $next->handle($request);
                     $response->getBody()->write('klaatu ');
                     return $response;
                 }
             ),
-            'barada' => new CallableMiddleware(
+            'barada' => new InjectCallable(
                 function (ServerRequest $request, HandlesServerRequests $next) {
                     $response = $next->handle($request);
                     $response->getBody()->write('barada ');
                     return $response;
                 }
             ),
-            'nikto' => new CallableMiddleware(
+            'nikto' => new InjectCallable(
                 function (ServerRequest $request, HandlesServerRequests $next) {
                     $response = $next->handle($request);
                     $response->getBody()->write('nikto ');

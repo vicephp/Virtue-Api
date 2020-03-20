@@ -17,7 +17,7 @@ use Slim\Middleware\ErrorMiddleware;
 use Slim\ResponseEmitter;
 use Virtue\Api\Handler\CallableInvoker;
 use Virtue\Api\Middleware\MiddlewareContainer;
-use Virtue\Api\Middleware\RoutingMiddleware;
+use Virtue\Api\Middleware\Router;
 use Virtue\Api\Routing\RouteCollector;
 use Virtue\Api\Routing\RouteRunner;
 
@@ -55,8 +55,8 @@ class AppTestCase extends TestCase
                         )
                     );
                 },
-                RoutingMiddleware::class => function (Locator $kernel) {
-                    return new RoutingMiddleware(
+                Router::class => function (Locator $kernel) {
+                    return new Router(
                         $kernel->get(Routing\RouteCollector::class)
                     );
                 },

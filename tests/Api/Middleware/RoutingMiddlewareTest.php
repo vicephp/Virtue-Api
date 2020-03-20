@@ -32,7 +32,7 @@ class RoutingMiddlewareTest extends AppTestCase
     {
         $kernel = $this->container->build();
         $app = $kernel->get(App::class);
-        $app->add(RoutingMiddleware::class);
+        $app->add(Router::class);
         $path = '/run';
         $app->get($path, function (ServerRequest $request, Response $response, array $args) {
             return $response;
@@ -52,7 +52,7 @@ class RoutingMiddlewareTest extends AppTestCase
     {
         $kernel = $this->container->build();
         $app = $kernel->get(App::class);
-        $app->add(RoutingMiddleware::class);
+        $app->add(Router::class);
         $request = $kernel->get(ServerRequest::class);
 
         $this->expectException(\Slim\Exception\HttpNotFoundException::class);
@@ -63,7 +63,7 @@ class RoutingMiddlewareTest extends AppTestCase
     {
         $kernel = $this->container->build();
         $app = $kernel->get(App::class);
-        $app->add(RoutingMiddleware::class);
+        $app->add(Router::class);
         $app->get('/books', function (ServerRequest $request, Response $response, array $args) {
             // Create new book
             return $response;

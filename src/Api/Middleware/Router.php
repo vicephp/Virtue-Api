@@ -9,7 +9,7 @@ use Psr\Http\Server\RequestHandlerInterface as HandlesServerRequests;
 use Virtue\Api\Routing;
 use Virtue\Api\ServerRequest\RoutingResults;
 
-class RoutingMiddleware implements ServerMiddleware
+class Router implements ServerMiddleware
 {
     /** @var Routing\Router */
     private $routes;

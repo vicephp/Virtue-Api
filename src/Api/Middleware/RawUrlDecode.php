@@ -7,7 +7,7 @@ use Psr\Http\Message\ServerRequestInterface as ServerRequest;
 use Psr\Http\Server\MiddlewareInterface as ServerMiddleware;
 use Psr\Http\Server\RequestHandlerInterface as HandlesServerRequests;
 
-class RawUrlDecodeMiddleware implements ServerMiddleware
+class RawUrlDecode implements ServerMiddleware
 {
     public function process(ServerRequest $request, HandlesServerRequests $handler): Response
     {

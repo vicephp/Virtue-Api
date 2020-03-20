@@ -12,7 +12,7 @@ class HeadRequestMiddlewareTest extends TestCase
     public function testAssertBodyIsEmpty()
     {
         $responseFactory = \Slim\Factory\AppFactory::determineResponseFactory();
-        $middleware = new HeadRequestMiddleware($responseFactory);
+        $middleware = new HeadRequest($responseFactory);
         $request = ServerRequestCreatorFactory::create()->createServerRequestFromGlobals();
         $request = $request->withMethod(RequestMethod::HEAD);
         $response = $middleware->process($request, new RequestHandlerStub($responseFactory->createResponse()));

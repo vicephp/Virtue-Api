@@ -7,8 +7,8 @@ use Psr\Http\Message\ServerRequestInterface as ServerRequest;
 use Psr\Http\Server\RequestHandlerInterface as HandlesServerRequests;
 use Virtue\Api\App;
 use Virtue\Api\AppTestCase;
-use Virtue\Api\Middleware\CallableMiddleware;
-use Virtue\Api\Middleware\RoutingMiddleware;
+use Virtue\Api\Middleware\InjectCallable;
+use Virtue\Api\Middleware\Router;
 use Virtue\Api\Routing;
 use Virtue\Api\Testing\KlaatuBaradaNword;
 
@@ -19,21 +19,21 @@ class RouteGroupsTest extends AppTestCase
         parent::setUp();
         $this->container->addDefinitions(
             [
-                'klaatu' => new CallableMiddleware(
+                'klaatu' => new InjectCallable(
                     function (ServerRequest $request, HandlesServerRequests $next) {
                         $response = $next->handle($request);
                         $response->getBody()->write('klaatu ');
                         return $response;
                     }
                 ),
-                'barada' => new CallableMiddleware(
+                'barada' => new InjectCallable(
                     function (ServerRequest $request, HandlesServerRequests $next) {
                         $response = $next->handle($request);
                         $response->getBody()->write('barada ');
                         return $response;
                     }
                 ),
-                'nikto' => new CallableMiddleware(
+                'nikto' => new InjectCallable(
                     function (ServerRequest $request, HandlesServerRequests $next) {
                         $response = $next->handle($request);
                         $response->getBody()->write('nikto ');
@@ -48,7 +48,7 @@ class RouteGroupsTest extends AppTestCase
     {
         $kernel = $this->container->build();
         $app = $kernel->get(App::class);
-        $app->add(RoutingMiddleware::class);
+        $app->add(Router::class);
         $app->add('nikto');
         $app->group('ash', function (Routing\Api $group) {
             $group->get('/klaatu', function (ServerRequest $request, Response $response, array $args) {

@@ -10,7 +10,7 @@ use Psr\Http\Message\ResponseFactoryInterface as ResponseFactory;
 use Psr\Http\Message\ServerRequestInterface as ServerRequest;
 use Slim\ResponseEmitter;
 use Virtue\Api\Middleware\MiddlewareContainer;
-use Virtue\Api\Middleware\RoutingMiddleware;
+use Virtue\Api\Middleware\Router;
 use Virtue\Api\Routing;
 use Virtue\Api\Testing;
 
@@ -31,7 +31,7 @@ class AppTest extends AppTestCase
     {
         $kernel = $this->container->build();
         $app = $kernel->get(App::class);
-        $app->add(RoutingMiddleware::class);
+        $app->add(Router::class);
         $app->get('/run', function ($request, $response, $args) {
             return $response;
         });
@@ -59,7 +59,7 @@ class AppTest extends AppTestCase
         $kernel = $this->container->build();
         /** @var App $app */
         $app = $kernel->get(App::class);
-        $app->add(RoutingMiddleware::class);
+        $app->add(Router::class);
         $app->get('/handle', function ($request, $response, $args) {
             return $response;
         });

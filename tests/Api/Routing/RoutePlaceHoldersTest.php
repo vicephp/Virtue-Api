@@ -6,7 +6,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as ServerRequest;
 use Virtue\Api\App;
 use Virtue\Api\AppTestCase;
-use Virtue\Api\Middleware\RoutingMiddleware;
+use Virtue\Api\Middleware\Router;
 
 class RoutePlaceHoldersTest extends AppTestCase
 {
@@ -14,7 +14,7 @@ class RoutePlaceHoldersTest extends AppTestCase
     {
         $kernel = $this->container->build();
         $app = $kernel->get(App::class);
-        $app->add(RoutingMiddleware::class);
+        $app->add(Router::class);
         $app->get('/hello/{name}', function (ServerRequest $request, Response $response, $args) {
             $response->getBody()->write("Hello, {$args['name']}");
             return $response;
@@ -30,7 +30,7 @@ class RoutePlaceHoldersTest extends AppTestCase
     {
         $kernel = $this->container->build();
         $app = $kernel->get(App::class);
-        $app->add(RoutingMiddleware::class);
+        $app->add(Router::class);
         $app->get('/users[/{id}]', function (ServerRequest $request, Response $response, $args) {
             // responds to both `/users` and `/users/123`
             // but not to `/users/`
@@ -48,7 +48,7 @@ class RoutePlaceHoldersTest extends AppTestCase
     {
         $kernel = $this->container->build();
         $app = $kernel->get(App::class);
-        $app->add(RoutingMiddleware::class);
+        $app->add(Router::class);
 
         $app->get('/news[/{year}[/{month}]]', function (ServerRequest $request, Response $response, array $args) {
             // responds to `/news`, `/news/2016` and `/news/2016/03`
@@ -72,7 +72,7 @@ class RoutePlaceHoldersTest extends AppTestCase
     {
         $kernel = $this->container->build();
         $app = $kernel->get(App::class);
-        $app->add(RoutingMiddleware::class);
+        $app->add(Router::class);
         $app->get('/news[/{params:.*}]', function (ServerRequest $request, Response $response, $args) {
             $response->getBody()->write($args['params'] ?? '');
 
@@ -95,7 +95,7 @@ class RoutePlaceHoldersTest extends AppTestCase
     {
         $kernel = $this->container->build();
         $app = $kernel->get(App::class);
-        $app->add(RoutingMiddleware::class);
+        $app->add(Router::class);
         $app->get('/users/{id:[0-9]+}', function (ServerRequest $request, Response $response, $args) {
             // user identified by $args['id']
             $response->getBody()->write($args['id']);

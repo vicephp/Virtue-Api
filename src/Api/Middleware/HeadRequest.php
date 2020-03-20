@@ -9,7 +9,7 @@ use Psr\Http\Server\MiddlewareInterface as ServerMiddleware;
 use Psr\Http\Server\RequestHandlerInterface as HandlesServerRequests;
 use Virtue\Api\Http\RequestMethod;
 
-class HeadRequestMiddleware implements ServerMiddleware
+class HeadRequest implements ServerMiddleware
 {
     /** @var ResponseFactory */
     private $responseFactory;
