@@ -47,6 +47,11 @@ class AcceptHeaderParser
         return $params + $fitness;
     }
 
+    public function parseRange(string $line): array
+    {
+        return array_map(function ($accept) { return $this->parse($accept); }, explode(',', $line));
+    }
+
     private function parse(string $accept):array
     {
         $parts = explode(";", $accept);
@@ -60,10 +65,5 @@ class AcceptHeaderParser
             []
         );
         return [trim($parts[0]), $params];
-    }
-
-    public function parseRange(string $line): array
-    {
-        return array_map(function ($accept) { return $this->parse($accept); }, explode(',', $line));
     }
 }

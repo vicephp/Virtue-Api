@@ -17,7 +17,7 @@ class RoutingResults
     /** @var array */
     private $routingResults = [];
 
-    public static function fromRequest(ServerRequest $request): self
+    public static function ofRequest(ServerRequest $request): self
     {
         $routingResults = $request->getAttribute(self::REQUEST_ATTR);
 

@@ -44,7 +44,7 @@ class RoutingMiddlewareTest extends TestCase
         $app->run($request);
         /** @var Testing\RequestHandlerStub $handler */
         $handler = $kernel->get(Routing\RouteRunner::class);
-        $context = RoutingResults::fromRequest($handler->last());
+        $context = RoutingResults::ofRequest($handler->last());
         $this->assertNotNull($context->getRoute());
     }
 

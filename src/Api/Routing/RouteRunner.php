@@ -11,6 +11,6 @@ class RouteRunner implements HandlesServerRequests
 {
     public function handle(ServerRequest $request): Response
     {
-        return RoutingResults::fromRequest($request)->getRoute()->handle($request);
+        return RoutingResults::ofRequest($request)->getRoute()->handle($request);
     }
 }

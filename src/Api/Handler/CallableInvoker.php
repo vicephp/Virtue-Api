@@ -31,7 +31,7 @@ class CallableInvoker implements HandlesServerRequests
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $results = RoutingResults::fromRequest($request);
+        $results = RoutingResults::ofRequest($request);
         $handler = $this->callables->resolve($results->getRoute()->getHandler());
         $strategy = $this->invoker;
 
