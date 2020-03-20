@@ -5,10 +5,10 @@ namespace Virtue\Api\Routing;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as ServerRequest;
 use Virtue\Api\App;
-use Virtue\Api\AppTestCase;
+use Virtue\Api\TestCase;
 use Virtue\Api\Middleware\Router;
 
-class RoutePlaceHoldersTest extends AppTestCase
+class RoutePlaceHoldersTest extends TestCase
 {
     public function testFormat()
     {

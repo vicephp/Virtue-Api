@@ -6,11 +6,12 @@ use Psr\Container\ContainerInterface as Locator;
 use Psr\Http\Message\ResponseFactoryInterface as ResponseFactory;
 use Psr\Http\Message\ServerRequestInterface as ServerRequest;
 use Virtue\Api\App;
-use Virtue\Api\AppTestCase;
+use Virtue\Api\ServerRequest\AcceptHeadersResults;
+use Virtue\Api\TestCase;
 use Virtue\Api\Routing;
 use Virtue\Api\Testing;
 
-class AcceptHeadersTest extends AppTestCase
+class AcceptHeadersTest extends TestCase
 {
     protected function setUp()
     {
@@ -44,7 +45,7 @@ class AcceptHeadersTest extends AppTestCase
             'application/signed-exchange;v=b3;q=0.9',
         );
         $app->handle(
-            $request->withHeader('Accept', implode(', ',$accept))
+            $request->withHeader('Accept', implode(', ', $accept))
         );
 
         /** @var ServerRequest $request */
@@ -64,7 +65,7 @@ class AcceptHeadersTest extends AppTestCase
             ]
         ];
 
-        $this->assertEquals($expected, $request->getAttribute('parsed'));
+        $this->assertEquals($expected, $request->getAttribute(AcceptHeadersResults::REQUEST_ATTR));
     }
 
     public function testParseAcceptCharset()
@@ -88,7 +89,7 @@ class AcceptHeadersTest extends AppTestCase
             ]
         ];
 
-        $this->assertEquals($expected, $request->getAttribute('parsed'));
+        $this->assertEquals($expected, $request->getAttribute(AcceptHeadersResults::REQUEST_ATTR));
     }
 
 
@@ -113,7 +114,7 @@ class AcceptHeadersTest extends AppTestCase
             ]
         ];
 
-        $this->assertEquals($expected, $request->getAttribute('parsed'));
+        $this->assertEquals($expected, $request->getAttribute(AcceptHeadersResults::REQUEST_ATTR));
     }
 
     public function testParseAcceptLanguage()
@@ -137,6 +138,6 @@ class AcceptHeadersTest extends AppTestCase
             ]
         ];
 
-        $this->assertEquals($expected, $request->getAttribute('parsed'));
+        $this->assertEquals($expected, $request->getAttribute(AcceptHeadersResults::REQUEST_ATTR));
     }
 }

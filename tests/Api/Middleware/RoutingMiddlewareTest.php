@@ -10,9 +10,9 @@ use Virtue\Api\App;
 use Virtue\Api\Routing;
 use Virtue\Api\ServerRequest\RoutingResults;
 use Virtue\Api\Testing;
-use Virtue\Api\AppTestCase;
+use Virtue\Api\TestCase;
 
-class RoutingMiddlewareTest extends AppTestCase
+class RoutingMiddlewareTest extends TestCase
 {
     protected function setUp()
     {

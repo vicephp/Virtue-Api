@@ -5,7 +5,6 @@ namespace Virtue\Api;
 use Prophecy\Argument;
 use Psr\Container\ContainerInterface;
 use Psr\Container\ContainerInterface as Locator;
-use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseFactoryInterface as ResponseFactory;
 use Psr\Http\Message\ServerRequestInterface as ServerRequest;
 use Slim\ResponseEmitter;
@@ -14,7 +13,7 @@ use Virtue\Api\Middleware\Router;
 use Virtue\Api\Routing;
 use Virtue\Api\Testing;
 
-class AppTest extends AppTestCase
+class AppTest extends TestCase
 {
     public function testDoesNotUseContainerAsServiceLocator()
     {

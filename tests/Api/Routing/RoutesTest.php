@@ -5,12 +5,12 @@ namespace Api\Routing;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as ServerRequest;
 use Virtue\Api\App;
-use Virtue\Api\AppTestCase;
+use Virtue\Api\TestCase;
 use Virtue\Api\Middleware\Router;
 use Virtue\Api\Routing\Route;
 use Virtue\Api\Routing\RouteCollector;
 
-class RoutesTest extends AppTestCase
+class RoutesTest extends TestCase
 {
     public function testGetRoute()
     {

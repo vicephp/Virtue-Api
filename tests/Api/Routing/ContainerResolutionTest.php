@@ -5,11 +5,11 @@ namespace Virtue\Api\Routing;
 use Psr\Container\ContainerInterface as Locator;
 use Psr\Http\Message\ServerRequestInterface as ServerRequest;
 use Virtue\Api\App;
-use Virtue\Api\AppTestCase;
+use Virtue\Api\TestCase;
 use Virtue\Api\Middleware\Router;
 use Virtue\Api\Testing\HomeController;
 
-class ContainerResolutionTest extends AppTestCase
+class ContainerResolutionTest extends TestCase
 {
     public function testRegisteringAController()
     {

@@ -6,52 +6,61 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as ServerRequest;
 use Psr\Http\Server\MiddlewareInterface as ServerMiddleware;
 use Psr\Http\Server\RequestHandlerInterface as HandlesServerRequests;
+use Virtue\Api\ServerRequest\AcceptHeadersResults;
 
 class AcceptHeaders implements ServerMiddleware
 {
-
-    private $headers = ['Accept', 'Accept-Charset', 'Accept-Encoding', 'Accept-Language'];
-
     public function process(ServerRequest $request, HandlesServerRequests $handler): Response
     {
-        $headers = array_reduce(
-            array_intersect(array_keys($request->getHeaders()), $this->headers),
-            function (array $headers, string $name) use ($request) {
-                $headers[$name] = $request->getHeader($name);
-
-                return $headers;
-            },
-            []
+        $headers = array_filter(
+            $request->getHeaders(),
+            function ($key) { return substr($key, 0, 6) == 'Accept'; },
+            ARRAY_FILTER_USE_KEY
         );
-
         $headers = array_map(
             function ($lines) {
                 return array_map(
-                    function ($line) { return $this->parseHeader($line); },
+                    function ($line) { return $this->parseRange($line); },
                     $lines
                 );
             },
             $headers
         );
 
-        return $handler->handle($request->withAttribute('parsed', $headers));
+        $results = new AcceptHeadersResults($headers);
+
+        return $handler->handle($results->withRequest($request));
     }
 
-    private function parseHeader(string $line): array
+    /**
+     * @link https://www.xml.com/pub/a/2005/06/08/restful.html
+     * @param string $accept
+     * @return array
+     */
+    private function parse(string $accept):array
+    {
+        $parts = explode(";", $accept);
+        $params = array_reduce(
+            array_slice($parts, 1),
+            function (array $params, string $pair) {
+                $pair = explode('=', $pair);
+                $params[trim($pair[0])] = trim($pair[1]);
+                return $params;
+            },
+            []
+        );
+        return [trim($parts[0]), $params];
+    }
+
+    /**
+     * @param string $line
+     * @return array
+     */
+    private function parseRange(string $line): array
     {
         return array_map(
             function ($accept) {
-                $parts = explode(";", $accept);
-                $params = array_reduce(
-                    array_slice($parts, 1),
-                    function (array $params, string $pair) {
-                        $pair = explode('=', $pair);
-                        $params[trim($pair[0])] = trim($pair[1]);
-                        return $params;
-                    },
-                    []
-                );
-                return [trim($parts[0]), $params];
+                return $this->parse($accept);
             },
             explode(',', $line)
         );

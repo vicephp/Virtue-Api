@@ -6,13 +6,13 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as ServerRequest;
 use Psr\Http\Server\RequestHandlerInterface as HandlesServerRequests;
 use Virtue\Api\App;
-use Virtue\Api\AppTestCase;
+use Virtue\Api\TestCase;
 use Virtue\Api\Middleware\InjectCallable;
 use Virtue\Api\Middleware\Router;
 use Virtue\Api\Routing;
 use Virtue\Api\Testing\KlaatuBaradaNword;
 
-class RouteGroupsTest extends AppTestCase
+class RouteGroupsTest extends TestCase
 {
     protected function setUp()
     {

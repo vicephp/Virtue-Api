@@ -4,24 +4,21 @@ namespace Virtue\Api;
 
 use DI\ContainerBuilder;
 use FastRoute;
-use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface as Locator;
 use Psr\Http\Message\ResponseFactoryInterface as ResponseFactory;
 use Psr\Http\Message\ServerRequestInterface as ServerRequest;
 use Slim\Factory\ServerRequestCreatorFactory;
 use Slim\Handlers\Strategies\RequestResponse;
-use Slim\Interfaces\AdvancedCallableResolverInterface;
 use Slim\Interfaces\CallableResolverInterface;
 use Slim\Interfaces\InvocationStrategyInterface;
 use Slim\Middleware\ErrorMiddleware;
 use Slim\ResponseEmitter;
-use Virtue\Api\Handler\CallableInvoker;
 use Virtue\Api\Middleware\MiddlewareContainer;
 use Virtue\Api\Middleware\Router;
 use Virtue\Api\Routing\RouteCollector;
 use Virtue\Api\Routing\RouteRunner;
 
-class AppTestCase extends TestCase
+class TestCase extends \PHPUnit\Framework\TestCase
 {
     /** @var ContainerBuilder */
     protected $container;
