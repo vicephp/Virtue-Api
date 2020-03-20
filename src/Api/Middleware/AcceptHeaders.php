@@ -31,9 +31,8 @@ class AcceptHeaders implements ServerMiddleware
         );
 
         foreach ($headers as $type => $lines) {
-            foreach ($lines as $line) {
-                $headers[$type] = $this->parser->bestMatch($this->supported[$type] ?? [], $line);
-            }
+            $line = implode(',', $lines);
+            $headers[$type] = $this->parser->bestMatch($this->supported[$type] ?? [], $line);
         }
 
         $results = new AcceptHeadersResults($headers);

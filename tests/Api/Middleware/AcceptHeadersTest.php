@@ -52,14 +52,23 @@ class AcceptHeadersTest extends TestCase
         $kernel = $this->container->build();
         $request = $kernel->get(ServerRequest::class);
         $runner = $kernel->get(Routing\RouteRunner::class);
-        $acceptHeaders = new AcceptHeaders(['Accept-Charset' => ['ISO-8859-1']]);
+        $acceptHeaders = new AcceptHeaders(['Accept-Charset' => ['utf-8']]);
         $acceptHeaders->process(
             $request->withHeader('Accept-Charset', 'ISO-8859-1,utf-8;q=0.7,*;q=0.7'),
             $runner
         );
 
         $results = AcceptHeadersResults::ofRequest($runner->last());
-        $this->assertEquals('ISO-8859-1', $results->bestMatch('Accept-Charset'));
+        $this->assertEquals('utf-8', $results->bestMatch('Accept-Charset'));
+
+        $acceptHeaders->process(
+            $request->withHeader('Accept-Charset', 'ISO-8859-1')
+                ->withHeader('Accept-Charset', 'utf-8;q=0.7,*;q=0.7'),
+            $runner
+        );
+
+        $results = AcceptHeadersResults::ofRequest($runner->last());
+        $this->assertEquals('utf-8', $results->bestMatch('Accept-Charset'));
     }
 
     public function testParseAcceptEncoding()
@@ -75,6 +84,15 @@ class AcceptHeadersTest extends TestCase
 
         $results = AcceptHeadersResults::ofRequest($runner->last());
         $this->assertEquals('gzip', $results->bestMatch('Accept-Encoding'));
+
+        $acceptHeaders->process(
+            $request->withHeader('Accept-Encoding', 'deflate')
+                ->withHeader('Accept-Encoding', 'gzip'),
+            $runner
+        );
+
+        $results = AcceptHeadersResults::ofRequest($runner->last());
+        $this->assertEquals('gzip', $results->bestMatch('Accept-Encoding'));
     }
 
     public function testParseAcceptLanguage()
@@ -85,6 +103,15 @@ class AcceptHeadersTest extends TestCase
         $acceptHeaders = new AcceptHeaders(['Accept-Language' => ['en-us', 'en']]);
         $acceptHeaders->process(
             $request->withHeader('Accept-Language', 'en-us,en;q=0.5'),
+            $runner
+        );
+
+        $results = AcceptHeadersResults::ofRequest($runner->last());
+        $this->assertEquals('en-us', $results->bestMatch('Accept-Language'));
+
+        $acceptHeaders->process(
+            $request->withHeader('Accept-Language', 'en;q=0.5')
+            ->withHeader('Accept-Language', 'en-us'),
             $runner
         );
 
