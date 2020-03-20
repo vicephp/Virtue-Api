@@ -7,7 +7,7 @@ use Psr\Http\Message\ServerRequestInterface as ServerRequest;
 use Psr\Http\Server\MiddlewareInterface as ServerMiddleware;
 use Psr\Http\Server\RequestHandlerInterface as HandlesServerRequests;
 
-class ParseAcceptHeaders implements ServerMiddleware
+class AcceptHeaders implements ServerMiddleware
 {
 
     private $headers = ['Accept', 'Accept-Charset', 'Accept-Encoding', 'Accept-Language'];
