@@ -24,12 +24,7 @@ class AcceptHeaders implements ServerMiddleware
 
     public function process(ServerRequest $request, HandlesServerRequests $handler): Response
     {
-        $headers = array_filter(
-            $request->getHeaders(),
-            function ($key) { return substr($key, 0, 6) == 'Accept'; },
-            ARRAY_FILTER_USE_KEY
-        );
-
+        $headers = array_intersect_key($request->getHeaders(), $this->supported);
         foreach ($headers as $type => $lines) {
             $line = implode(',', $lines);
             $headers[$type] = $this->parser->bestMatch($this->supported[$type] ?? [], $line);
