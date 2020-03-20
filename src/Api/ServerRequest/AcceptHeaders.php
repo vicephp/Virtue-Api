@@ -30,4 +30,14 @@ class AcceptHeaders
     {
         return $request->withAttribute(self::REQUEST_ATTR, $this->headers);
     }
+
+    private function quantify(array $range): array
+    {
+        return array_map(
+            function (array $accept) {
+                $accept[1]['q'] = (float)$accept[1]['q'] ?? 1.0;
+            },
+            $range
+        );
+    }
 }

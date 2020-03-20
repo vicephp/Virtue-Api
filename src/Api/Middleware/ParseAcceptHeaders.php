@@ -10,12 +10,12 @@ use Psr\Http\Server\RequestHandlerInterface as HandlesServerRequests;
 class ParseAcceptHeaders implements ServerMiddleware
 {
 
-    private $headers = ['Accept-Charset'];
+    private $headers = ['Accept', 'Accept-Charset', 'Accept-Encoding', 'Accept-Language'];
 
     public function process(ServerRequest $request, HandlesServerRequests $handler): Response
     {
         $headers = array_reduce(
-            $this->headers,
+            array_intersect(array_keys($request->getHeaders()), $this->headers),
             function (array $headers, string $name) use ($request) {
                 $headers[$name] = $request->getHeader($name);
 
@@ -27,7 +27,7 @@ class ParseAcceptHeaders implements ServerMiddleware
         $headers = array_map(
             function ($lines) {
                 return array_map(
-                    function ($line) {return $this->parse($line); },
+                    function ($line) { return $this->parseHeader($line); },
                     $lines
                 );
             },
@@ -37,7 +37,7 @@ class ParseAcceptHeaders implements ServerMiddleware
         return $handler->handle($request->withAttribute('parsed', $headers));
     }
 
-    private function parse(string $line): array
+    private function parseHeader(string $line): array
     {
         return array_map(
             function ($accept) {

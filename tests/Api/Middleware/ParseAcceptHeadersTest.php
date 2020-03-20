@@ -12,8 +12,9 @@ use Virtue\Api\Testing;
 
 class ParseAcceptHeadersTest extends AppTestCase
 {
-    public function testParse()
+    protected function setUp()
     {
+        parent::setUp();
         $this->container->addDefinitions(
             [
                 Routing\RouteRunner::class => function (Locator $kernel) {
@@ -23,12 +24,14 @@ class ParseAcceptHeadersTest extends AppTestCase
                 },
             ]
         );
+    }
 
+    public function testAcceptCharset()
+    {
         $kernel = $this->container->build();
 
         $app = $kernel->get(App::class);
         $app->add(ParseAcceptHeaders::class);
-
         $request = $kernel->get(ServerRequest::class);
 
         $app->handle(
@@ -41,6 +44,95 @@ class ParseAcceptHeadersTest extends AppTestCase
         $expected = [
             'Accept-Charset' => [
                 [['ISO-8859-1', []], ['utf-8', ['q' => '0.7']], ['*', ['q' => '0.7']],],
+            ]
+        ];
+
+        $this->assertEquals($expected, $request->getAttribute('parsed'));
+    }
+
+    public function testAccept()
+    {
+        $kernel = $this->container->build();
+
+        $app = $kernel->get(App::class);
+        $app->add(ParseAcceptHeaders::class);
+        $request = $kernel->get(ServerRequest::class);
+
+        $accept = array (
+            'text/html',
+            'application/xhtml+xml',
+            'application/xml;q=0.9',
+            'image/webp',
+            'image/apng',
+            '*/*;q=0.8',
+            'application/signed-exchange;v=b3;q=0.9',
+        );
+        $app->handle(
+            $request->withHeader('Accept', implode(', ',$accept))
+        );
+
+        /** @var ServerRequest $request */
+        $request = $kernel->get(Routing\RouteRunner::class)->last();
+
+        $expected = [
+            'Accept' => [
+                [
+                    ['text/html', []],
+                    ['application/xhtml+xml', []],
+                    ['application/xml', ['q' => '0.9']],
+                    ['image/webp', []],
+                    ['image/apng', []],
+                    ['*/*', ['q' => '0.8']],
+                    ['application/signed-exchange', ['v' => 'b3', 'q' => '0.9']],
+                ],
+            ]
+        ];
+
+        $this->assertEquals($expected, $request->getAttribute('parsed'));
+    }
+
+    public function testAcceptEncoding()
+    {
+        $kernel = $this->container->build();
+
+        $app = $kernel->get(App::class);
+        $app->add(ParseAcceptHeaders::class);
+        $request = $kernel->get(ServerRequest::class);
+
+        $app->handle(
+            $request->withHeader('Accept-Encoding', 'gzip,deflate')
+        );
+
+        /** @var ServerRequest $request */
+        $request = $kernel->get(Routing\RouteRunner::class)->last();
+
+        $expected = [
+            'Accept-Encoding' => [
+                [['gzip', []], ['deflate', []],],
+            ]
+        ];
+
+        $this->assertEquals($expected, $request->getAttribute('parsed'));
+    }
+
+    public function testAcceptLanguage()
+    {
+        $kernel = $this->container->build();
+
+        $app = $kernel->get(App::class);
+        $app->add(ParseAcceptHeaders::class);
+        $request = $kernel->get(ServerRequest::class);
+
+        $app->handle(
+            $request->withHeader('Accept-Language', 'en-us,en;q=0.5')
+        );
+
+        /** @var ServerRequest $request */
+        $request = $kernel->get(Routing\RouteRunner::class)->last();
+
+        $expected = [
+            'Accept-Language' => [
+                [['en-us', []], ['en', ['q' => '0.5']],],
             ]
         ];
 
