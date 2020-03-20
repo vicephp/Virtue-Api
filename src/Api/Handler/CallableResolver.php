@@ -11,7 +11,6 @@ use function is_array;
 use function is_callable;
 use function is_object;
 use function is_string;
-use function json_encode;
 use function preg_match;
 use function sprintf;
 
@@ -64,7 +63,7 @@ final class CallableResolver implements CallableResolverInterface
             throw new RuntimeException(sprintf(
                 '%s is not resolvable',
                 is_callable($resolvable) || is_object($resolvable) || is_array($resolvable) ?
-                    json_encode($resolvable) : $resolvable
+                    var_export($resolvable, true) : $resolvable
             ));
         }
         return $resolved;
