@@ -8,7 +8,7 @@ use Psr\Http\Server\MiddlewareInterface as ServerMiddleware;
 use Psr\Http\Server\RequestHandlerInterface as HandlesServerRequests;
 use Virtue\Access;
 use Slim\Exception\HttpForbiddenException;
-use Virtue\Api\ServerRequest\RoutingResults;
+use Virtue\Api\Routing\Route;
 
 class RouteAccess implements ServerMiddleware
 {
@@ -22,7 +22,7 @@ class RouteAccess implements ServerMiddleware
 
     public function process(ServerRequest $request, HandlesServerRequests $handler): Response
     {
-        $route = RoutingResults::ofRequest($request)->getRoute();
+        $route = $request->getAttribute(Route::class);
         if ($this->routeAccess->granted($route->getPattern())) {
             return $handler->handle($request);
         }

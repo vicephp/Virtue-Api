@@ -9,6 +9,7 @@ use Psr\Http\Message\ServerRequestInterface as ServerRequest;
 use Slim\Exception\HttpForbiddenException;
 use Virtue\Access;
 use Virtue\Api\App;
+use Virtue\Api\Middleware;
 use Virtue\Api\Routing;
 use Virtue\Api\TestCase;
 use Virtue\Api\Testing;
@@ -41,7 +42,7 @@ class RouteAccessTest extends TestCase
         $app->get('/run', function ($request, $response, $args) {
             return $response;
         });
-        $app->add(Router::class);
+        $app->add(Middleware\Routing::class);
         $app->add(RouteAccess::class);
         $request = $kernel->get(ServerRequest::class);
 
@@ -65,7 +66,7 @@ class RouteAccessTest extends TestCase
         $app->get('/run', function ($request, $response, $args) {
             return $response;
         });
-        $app->add(Router::class);
+        $app->add(Middleware\Routing::class);
         $app->add(RouteAccess::class);
         $request = $kernel->get(ServerRequest::class);
 

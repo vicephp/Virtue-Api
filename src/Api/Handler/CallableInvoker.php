@@ -3,12 +3,13 @@
 namespace Virtue\Api\Handler;
 
 use Psr\Http\Message\ResponseFactoryInterface as ResponseFactory;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as ServerRequest;
 use Psr\Http\Server\RequestHandlerInterface as HandlesServerRequests;
 use Slim\Interfaces\CallableResolverInterface as ResolvesCallables;
 use Slim\Interfaces\InvocationStrategyInterface;
-use Virtue\Api\ServerRequest\RoutingResults;
+use Virtue\Api\Routing\Route;
+use Virtue\Api\Routing\RouteParams;
 
 class CallableInvoker implements HandlesServerRequests
 {
@@ -29,12 +30,16 @@ class CallableInvoker implements HandlesServerRequests
         $this->invoker = $invoker;
     }
 
-    public function handle(ServerRequestInterface $request): ResponseInterface
+    public function handle(ServerRequest $request): Response
     {
-        $results = RoutingResults::ofRequest($request);
-        $handler = $this->callables->resolve($results->getRoute()->getHandler());
+        $handler = $this->callables->resolve($request->getAttribute(Route::class)->getHandler());
         $strategy = $this->invoker;
 
-        return $strategy($handler, $request, $this->factory->createResponse(), $results->getRouteArgs());
+        return $strategy(
+            $handler,
+            $request,
+            $this->factory->createResponse(),
+            $request->getAttribute(RouteParams::class)->asArray()
+        );
     }
 }

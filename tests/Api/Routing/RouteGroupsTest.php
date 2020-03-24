@@ -7,8 +7,7 @@ use Psr\Http\Message\ServerRequestInterface as ServerRequest;
 use Psr\Http\Server\RequestHandlerInterface as HandlesServerRequests;
 use Virtue\Api\App;
 use Virtue\Api\TestCase;
-use Virtue\Api\Middleware\InjectCallable;
-use Virtue\Api\Middleware\Router;
+use Virtue\Api\Middleware;
 use Virtue\Api\Routing;
 use Virtue\Api\Testing\KlaatuBaradaNword;
 
@@ -19,21 +18,21 @@ class RouteGroupsTest extends TestCase
         parent::setUp();
         $this->container->addDefinitions(
             [
-                'klaatu' => new InjectCallable(
+                'klaatu' => new Middleware\InjectCallable(
                     function (ServerRequest $request, HandlesServerRequests $next) {
                         $response = $next->handle($request);
                         $response->getBody()->write('klaatu ');
                         return $response;
                     }
                 ),
-                'barada' => new InjectCallable(
+                'barada' => new Middleware\InjectCallable(
                     function (ServerRequest $request, HandlesServerRequests $next) {
                         $response = $next->handle($request);
                         $response->getBody()->write('barada ');
                         return $response;
                     }
                 ),
-                'nikto' => new InjectCallable(
+                'nikto' => new Middleware\InjectCallable(
                     function (ServerRequest $request, HandlesServerRequests $next) {
                         $response = $next->handle($request);
                         $response->getBody()->write('nikto ');
@@ -48,7 +47,7 @@ class RouteGroupsTest extends TestCase
     {
         $kernel = $this->container->build();
         $app = $kernel->get(App::class);
-        $app->add(Router::class);
+        $app->add(Middleware\Routing::class);
         $app->add('nikto');
         $app->group('ash', function (Routing\Api $group) {
             $group->get('/klaatu', function (ServerRequest $request, Response $response, array $args) {

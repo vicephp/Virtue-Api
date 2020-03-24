@@ -13,10 +13,8 @@ use Slim\Interfaces\CallableResolverInterface;
 use Slim\Interfaces\InvocationStrategyInterface;
 use Slim\Middleware\ErrorMiddleware;
 use Slim\ResponseEmitter;
-use Virtue\Api\Middleware\MiddlewareContainer;
-use Virtue\Api\Middleware\Router;
-use Virtue\Api\Routing\RouteCollector;
-use Virtue\Api\Routing\RouteRunner;
+use Virtue\Api\Middleware;
+use Virtue\Api\Routing;
 
 class TestCase extends \PHPUnit\Framework\TestCase
 {
@@ -31,8 +29,10 @@ class TestCase extends \PHPUnit\Framework\TestCase
                 App::class => function (Locator $kernel) {
                     return new App(
                         $kernel,
-                        $kernel->get(RouteCollector::class),
-                        new MiddlewareContainer($kernel->get(RouteRunner::class))
+                        $kernel->get(Routing\RouteCollector::class),
+                        new Middleware\MiddlewareContainer(
+                            $kernel->get(Routing\RouteRunner::class)
+                        )
                     );
                 },
                 InvocationStrategyInterface::class => new RequestResponse(),
@@ -52,8 +52,8 @@ class TestCase extends \PHPUnit\Framework\TestCase
                         )
                     );
                 },
-                Router::class => function (Locator $kernel) {
-                    return new Router(
+                Middleware\Routing::class => function (Locator $kernel) {
+                    return new Middleware\Routing(
                         $kernel->get(Routing\RouteCollector::class)
                     );
                 },

@@ -7,7 +7,6 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as ServerRequest;
 use Psr\Http\Server\MiddlewareInterface as ServerMiddleware;
 use Psr\Http\Server\RequestHandlerInterface as HandlesServerRequests;
-use Virtue\Api\Http\RequestMethod;
 
 class HeadRequest implements ServerMiddleware
 {
@@ -33,7 +32,7 @@ class HeadRequest implements ServerMiddleware
     public function process(ServerRequest $request, HandlesServerRequests $next): Response
     {
         $response = $next->handle($request);
-        if(strtoupper($request->getMethod()) === RequestMethod::HEAD) {
+        if(strtoupper($request->getMethod()) === 'HEAD') {
             $response = $response->withBody($this->responseFactory->createResponse()->getBody());
         }
 
