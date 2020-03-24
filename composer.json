@@ -19,13 +19,15 @@
         "mockery/mockery": "^1.2",
         "php-di/php-di": "~6.0",
         "phpstan/phpstan": "^0.12.0",
-        "phpunit/phpunit": "~7.0"
+        "phpunit/phpunit": "~7.0",
+        "psr/log": "^1.1"
     },
     "suggest": {
         "guzzlehttp/psr7": "PSR-7 Message Implementation",
         "http-interop/http-factory-guzzle": "HTTP Factory for Guzzle",
         "php-di/php-di": "PHP-DI The dependency injection container for humans",
-        "vicephp/virtue-access": "Pythonic access management"
+        "vicephp/virtue-access": "Needed to support Authentication and RouteAccess middleware",
+        "psr/log": "Needed to support ErrorLogging middleware"
     },
     "autoload": {
         "psr-4": {

@@ -4,7 +4,6 @@ namespace Virtue\Api;
 
 use DI\ContainerBuilder;
 use FastRoute;
-use Http\Factory\Guzzle\ServerRequestFactory;
 use Psr\Container\ContainerInterface as Locator;
 use Psr\Http\Message\ResponseFactoryInterface as ResponseFactory;
 use Psr\Http\Message\ServerRequestInterface as ServerRequest;
