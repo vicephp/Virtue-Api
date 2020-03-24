@@ -3,10 +3,10 @@
 namespace Virtue\Api\Handler;
 
 use DI\ContainerBuilder;
+use GuzzleHttp\Psr7\Response;
 use PHPUnit\Framework\TestCase;
 use Slim\Handlers\Strategies\RequestResponse;
 use Slim\Interfaces\InvocationStrategyInterface;
-use Slim\Psr7\Response;
 use Virtue\Api\Testing;
 
 class CallableResolverTest extends TestCase

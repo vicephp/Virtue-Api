@@ -4,6 +4,7 @@ namespace Virtue\Api;
 
 use DI\ContainerBuilder;
 use FastRoute;
+use Http\Factory\Guzzle\ServerRequestFactory;
 use Psr\Container\ContainerInterface as Locator;
 use Psr\Http\Message\ResponseFactoryInterface as ResponseFactory;
 use Psr\Http\Message\ServerRequestInterface as ServerRequest;
@@ -41,7 +42,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
                     return new Handler\CallableResolver($kernel);
                 },
                 ResponseFactory::class => function () {
-                    return \Slim\Factory\AppFactory::determineResponseFactory();
+                    return new \Http\Factory\Guzzle\ResponseFactory();
                 },
                 Routing\RouteCollector::class => function (Locator $kernel) {
                     return new Routing\FastRouter(

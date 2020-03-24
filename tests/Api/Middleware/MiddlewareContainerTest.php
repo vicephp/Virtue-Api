@@ -2,10 +2,10 @@
 
 namespace Virtue\Api\Middleware;
 
+use GuzzleHttp\Psr7\Response;
 use Mockery\Adapter\Phpunit\MockeryTestCase;
 use Psr\Http\Message\ServerRequestInterface as ServerRequest;
 use Psr\Http\Server\RequestHandlerInterface as HandlesServerRequests;
-use Slim\Psr7\Response;
 use Virtue\Api\Testing\KlaatuBaradaNword;
 use Virtue\Api\Testing\RequestHandlerStub;
 
