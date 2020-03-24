@@ -2,7 +2,7 @@
     "name": "vicephp/virtue-api",
     "type": "library",
     "description": "Making PHP more Pythonic",
-    "keywords": ["framework","micro","api","router"],
+    "keywords": ["framework", "micro", "api", "router"],
     "license": "MIT",
     "minimum-stability": "dev",
     "prefer-stable": true,
