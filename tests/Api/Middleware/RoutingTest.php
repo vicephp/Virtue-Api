@@ -70,6 +70,8 @@ class RoutingTest extends TestCase
         $request = $kernel->get(ServerRequest::class);
 
         $this->expectException(\Slim\Exception\HttpMethodNotAllowedException::class);
-        $app->run($request->withUri($request->getUri()->withPath('/books'))->withMethod('POST'));
+        $app->run(
+            $request->withUri($request->getUri()->withPath('/books'))->withMethod('POST')
+        );
     }
 }

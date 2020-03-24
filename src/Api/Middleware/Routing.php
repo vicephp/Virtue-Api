@@ -8,6 +8,8 @@ use Psr\Http\Server\MiddlewareInterface as ServerMiddleware;
 use Psr\Http\Server\RequestHandlerInterface as HandlesServerRequests;
 use Slim\Exception\HttpMethodNotAllowedException;
 use Slim\Exception\HttpNotFoundException;
+use Virtue\Api\Routing\Found;
+use Virtue\Api\Routing\MethodNotAllowed;
 use Virtue\Api\Routing\Router;
 use Virtue\Api\Routing\Route;
 use Virtue\Api\Routing\RouteParams;
@@ -23,28 +25,21 @@ class Routing implements ServerMiddleware
 
     public function process(ServerRequest $request, HandlesServerRequests $handler): Response
     {
-        $routingResults = $this->routes->route(
+        $result = $this->routes->route(
             $request->getMethod(), $request->getUri()->getPath()
         );
 
-        switch ($routingResults[0]) {
-            case 1:
-                $request = $request->withAttribute(Route::class, $routingResults[1]);
-                $request = $request->withAttribute(RouteParams::class, new RouteParams($routingResults[2]));
-                break;
+        if ($result instanceof Found) {
+            $request = $request->withAttribute(Route::class, $result->getRoute());
+            $request = $request->withAttribute(RouteParams::class, $result->getRouteParams());
+        } elseif ($result instanceof MethodNotAllowed) {
+            $exception = new HttpMethodNotAllowedException($request);
+            $exception->setAllowedMethods($result->getAllowedMethods());
 
-            case 0:
-                throw new HttpNotFoundException($request);
-
-            case 2:
-                $exception = new HttpMethodNotAllowedException($request);
-                $exception->setAllowedMethods($routingResults[1]);
-                throw $exception;
-
-            default:
-                throw new \RuntimeException('An unexpected error occurred while performing routing.');
+            throw $exception;
+        } else {
+            throw new HttpNotFoundException($request);
         }
-
 
         return $handler->handle($request);
     }
