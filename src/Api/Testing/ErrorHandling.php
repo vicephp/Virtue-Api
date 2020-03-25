@@ -8,7 +8,7 @@ use Psr\Http\Message\ServerRequestInterface as ServerRequest;
 use Psr\Http\Server\MiddlewareInterface as ServerMiddleware;
 use Psr\Http\Server\RequestHandlerInterface as HandlesServerRequests;
 
-class ErrorHandlingStub implements ServerMiddleware
+class ErrorHandling implements ServerMiddleware
 {
     /** @var ResponseFactory */
     private $response;

@@ -5,8 +5,6 @@ namespace Virtue\Api\Handler;
 use DI\ContainerBuilder;
 use GuzzleHttp\Psr7\Response;
 use PHPUnit\Framework\TestCase;
-use Slim\Handlers\Strategies\RequestResponse;
-use Slim\Interfaces\InvocationStrategyInterface;
 use Virtue\Api\Testing;
 
 class CallableResolverTest extends TestCase
@@ -16,15 +14,11 @@ class CallableResolverTest extends TestCase
         $container = new ContainerBuilder();
         $container->addDefinitions([
             'klaatu' => 'barada',
-            Testing\RequestHandlerStub::class => new Testing\RequestHandlerStub(new Response()),
-            InvocationStrategyInterface::class => new RequestResponse()
+            Testing\RequestHandler::class => new Testing\RequestHandler(new Response()),
         ]);
         $kernel = $container->build();
 
         $callable = new CallableResolver($kernel);
-        $handler = $callable->resolve(Testing\HomeAction::class);
-        $this->assertInstanceOf(Testing\HomeAction::class, $handler[CallableResolver::INSTANCE]);
-        $this->assertEquals('__invoke', $handler[CallableResolver::METHOD]);
 
         $handler = $callable->resolve(Testing\HomeController::class);
         $this->assertInstanceOf(Testing\HomeController::class, $handler[CallableResolver::INSTANCE]);
@@ -37,10 +31,7 @@ class CallableResolverTest extends TestCase
         $handler = $callable->resolve(function () { return $this->get('klaatu'); });
         $this->assertEquals('barada', $handler());
 
-        $handler = $callable->resolve($kernel->get(Testing\HomeAction::class));
-        $this->assertInstanceOf(Testing\HomeAction::class, $handler);
-
         $this->expectException(\RuntimeException::class);
-        $callable->resolve(Testing\RequestHandlerStub::class);
+        $callable->resolve(Testing\RequestHandler::class);
     }
 }

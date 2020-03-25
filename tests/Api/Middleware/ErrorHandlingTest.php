@@ -16,11 +16,11 @@ class ErrorHandlingTest extends TestCase
         $request = $kernel->get(ServerRequest::class);
         $errorHandling = new ErrorHandling(
             new HeaderParser(),
-            ['text/html' => $kernel->get(Testing\ErrorHandlingStub::class)]
+            ['text/html' => $kernel->get(Testing\ErrorHandling::class)]
         );
         $response = $errorHandling->process(
             $request->withHeader('Accept', 'text/html'),
-            new Testing\RequestHandlerStub(
+            new Testing\RequestHandler(
                 $kernel->get(ResponseFactory::class)->createResponse()
             )
         );

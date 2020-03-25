@@ -4,7 +4,7 @@ namespace Virtue\Api\Testing;
 
 use Psr\Log\LoggerInterface;
 
-class LoggerStub implements LoggerInterface
+class Logger implements LoggerInterface
 {
     private $logs = [];
 

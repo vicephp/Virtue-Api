@@ -22,7 +22,7 @@ class RouteAccessTest extends TestCase
         $this->container->addDefinitions(
             [
                 Routing\RouteRunner::class => function (Locator $kernel) {
-                    return new Testing\RequestHandlerStub(
+                    return new Testing\RequestHandler(
                         $kernel->get(ResponseFactory::class)->createResponse()
                     );
                 },

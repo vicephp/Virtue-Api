@@ -8,14 +8,6 @@ use Psr\Http\Message\ServerRequestInterface as ServerRequest;
 
 class HomeController
 {
-    /** @var Locator */
-    protected $services;
-
-    // constructor receives locator instance
-    public function __construct(Locator $services) {
-        $this->services = $services;
-    }
-
     public function __invoke(ServerRequest $request, Response $response, array $args): Response
     {
         // your code

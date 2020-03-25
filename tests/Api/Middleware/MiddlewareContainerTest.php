@@ -7,7 +7,7 @@ use Mockery\Adapter\Phpunit\MockeryTestCase;
 use Psr\Http\Message\ServerRequestInterface as ServerRequest;
 use Psr\Http\Server\RequestHandlerInterface as HandlesServerRequests;
 use Virtue\Api\Testing\KlaatuBaradaNword;
-use Virtue\Api\Testing\RequestHandlerStub;
+use Virtue\Api\Testing\RequestHandler;
 
 class MiddlewareContainerTest extends MockeryTestCase
 {
@@ -17,21 +17,21 @@ class MiddlewareContainerTest extends MockeryTestCase
     {
         parent::setUp();
         $this->middlewares = [
-            'klaatu' => new InjectCallable(
+            'klaatu' => new CallableMiddleware(
                 function (ServerRequest $request, HandlesServerRequests $next) {
                     $response = $next->handle($request);
                     $response->getBody()->write('klaatu ');
                     return $response;
                 }
             ),
-            'barada' => new InjectCallable(
+            'barada' => new CallableMiddleware(
                 function (ServerRequest $request, HandlesServerRequests $next) {
                     $response = $next->handle($request);
                     $response->getBody()->write('barada ');
                     return $response;
                 }
             ),
-            'nikto' => new InjectCallable(
+            'nikto' => new CallableMiddleware(
                 function (ServerRequest $request, HandlesServerRequests $next) {
                     $response = $next->handle($request);
                     $response->getBody()->write('nikto ');
@@ -44,7 +44,7 @@ class MiddlewareContainerTest extends MockeryTestCase
     public function testMiddlewareInConstructor()
     {
         $container = new MiddlewareContainer(
-            new RequestHandlerStub(new Response()),
+            new RequestHandler(new Response()),
             [$this->middlewares['nikto'], $this->middlewares['barada'], $this->middlewares['klaatu']]
         );
 
@@ -54,7 +54,7 @@ class MiddlewareContainerTest extends MockeryTestCase
 
     public function testMiddlewareAdded()
     {
-        $middlewares = new MiddlewareContainer(new RequestHandlerStub(new Response()));
+        $middlewares = new MiddlewareContainer(new RequestHandler(new Response()));
         $middlewares->append($this->middlewares['barada']);
         $middlewares->append($this->middlewares['klaatu']);
         $middlewares->prepend($this->middlewares['nikto']);
@@ -65,10 +65,10 @@ class MiddlewareContainerTest extends MockeryTestCase
 
     public function testStack()
     {
-        $aStack = new MiddlewareContainer(new RequestHandlerStub(new Response()));
+        $aStack = new MiddlewareContainer(new RequestHandler(new Response()));
         $aStack->append($this->middlewares['barada']);
         $aStack->append($this->middlewares['klaatu']);
-        $bStack = new MiddlewareContainer(new RequestHandlerStub(new Response()));
+        $bStack = new MiddlewareContainer(new RequestHandler(new Response()));
         $bStack->append($this->middlewares['nikto']);
 
         $response = $bStack->stack($aStack)->handle(\Mockery::mock(ServerRequest::class));

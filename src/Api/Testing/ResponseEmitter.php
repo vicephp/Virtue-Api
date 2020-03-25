@@ -3,9 +3,8 @@
 namespace Virtue\Api\Testing;
 
 use Psr\Http\Message\ResponseInterface as Response;
-use Slim\ResponseEmitter;
 
-class ResponseEmitterStub extends ResponseEmitter
+class ResponseEmitter extends \Slim\ResponseEmitter
 {
     /** @var Response */
     private $response;

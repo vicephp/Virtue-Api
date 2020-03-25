@@ -20,7 +20,7 @@ class RoutingTest extends TestCase
         $this->container->addDefinitions(
             [
                 Routing\RouteRunner::class => function (Locator $kernel) {
-                    return new Testing\RequestHandlerStub(
+                    return new Testing\RequestHandler(
                         $kernel->get(ResponseFactory::class)->createResponse()
                     );
                 },
@@ -42,7 +42,7 @@ class RoutingTest extends TestCase
         $request = $request->withUri($request->getUri()->withPath($path));
         $app->run($request); // run twice, application should be stateless
         $app->run($request);
-        /** @var Testing\RequestHandlerStub $handler */
+        /** @var Testing\RequestHandler $handler */
         $handler = $kernel->get(Routing\RouteRunner::class);
         $this->assertNotNull($handler->last()->getAttribute(Routing\Route::class));
     }

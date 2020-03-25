@@ -6,7 +6,6 @@ use Closure;
 use Psr\Container\ContainerInterface as Locator;
 use RuntimeException;
 use Slim\Interfaces\CallableResolverInterface;
-use Slim\Interfaces\InvocationStrategyInterface as InvocationStrategy;
 use function is_array;
 use function is_callable;
 use function is_object;
@@ -19,16 +18,13 @@ final class CallableResolver implements CallableResolverInterface
     const INSTANCE = 0;
     const METHOD = 1;
 
-    public static $callablePattern = '!^([^\:]+)\:([a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*)$!';
+    public static $callablePattern = '!^([^\:]+)\:{1,2}([a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*)$!';
     /** @var Locator */
     private $kernel;
-    /** @var InvocationStrategy */
-    private $invoker;
 
     public function __construct(Locator $kernel)
     {
         $this->kernel = $kernel;
-        $this->invoker = $kernel->get(InvocationStrategy::class);
     }
 
     public function resolve($resolvable): callable

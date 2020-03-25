@@ -7,7 +7,7 @@ use Psr\Http\Message\ServerRequestInterface as ServerRequest;
 use Psr\Http\Server\MiddlewareInterface as ServerMiddleware;
 use Psr\Http\Server\RequestHandlerInterface as HandlesServerRequests;
 
-class InjectCallable implements ServerMiddleware
+class CallableMiddleware implements ServerMiddleware
 {
     /** @var callable */
     private $callable;

@@ -15,16 +15,16 @@ class ErrorLoggingTest extends TestCase
         $kernel = $this->container->build();
         $request = $kernel->get(ServerRequest::class);
 
-        $errorHandling = new Testing\ErrorHandlingStub(
+        $errorHandling = new Testing\ErrorHandling(
             $kernel->get(ResponseFactoryInterface::class)
         );
 
-        $logger = new Testing\LoggerStub();
+        $logger = new Testing\Logger();
         $errorHandling->process(
             $request,
             new RequestHandler(
                 new ErrorLogging($logger),
-                new Testing\CallableHandlerStub(
+                new Testing\CallableHandler(
                     function (ServerRequest $request) {
                         throw new \RuntimeException('anError');
                     }
@@ -40,13 +40,13 @@ class ErrorLoggingTest extends TestCase
         $kernel = $this->container->build();
         $request = $kernel->get(ServerRequest::class);
 
-        $logger = new Testing\LoggerStub();
+        $logger = new Testing\Logger();
         $errorLogging = new ErrorLogging($logger);
 
         $this->expectException(HttpException::class);
         $errorLogging->process(
             $request,
-            new Testing\CallableHandlerStub(
+            new Testing\CallableHandler(
                 function (ServerRequest $request) {
                     throw new HttpException($request);
                 }

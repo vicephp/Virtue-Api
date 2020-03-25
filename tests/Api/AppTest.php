@@ -37,7 +37,7 @@ class AppTest extends TestCase
         $request = $kernel->get(ServerRequest::class);
         $request = $request->withUri($request->getUri()->withPath('/run'));
         $app->run($request);
-        /** @var Testing\ResponseEmitterStub $emitter */
+        /** @var Testing\ResponseEmitter $emitter */
         $emitter = $kernel->get(ResponseEmitter::class);
         $response = $emitter->last();
         $this->assertEquals(200, $response->getStatusCode());
@@ -49,7 +49,7 @@ class AppTest extends TestCase
         $this->container->addDefinitions(
             [
                 Routing\RouteRunner::class => function (Locator $kernel) {
-                    return new Testing\RequestHandlerStub(
+                    return new Testing\RequestHandler(
                         $kernel->get(ResponseFactory::class)->createResponse()
                     );
                 },

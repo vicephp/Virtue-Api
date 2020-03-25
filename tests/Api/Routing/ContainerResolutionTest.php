@@ -56,7 +56,7 @@ class ContainerResolutionTest extends TestCase
         $kernel = $this->container->build();
         $app = $kernel->get(App::class);
         $app->add(Routing::class);
-        $app->get('/', \Virtue\Api\Testing\HomeAction::class);
+        $app->get('/', \Virtue\Api\Testing\HomeController::class);
 
         $request = $kernel->get(ServerRequest::class);
 

@@ -18,21 +18,21 @@ class RouteGroupsTest extends TestCase
         parent::setUp();
         $this->container->addDefinitions(
             [
-                'klaatu' => new Middleware\InjectCallable(
+                'klaatu' => new Middleware\CallableMiddleware(
                     function (ServerRequest $request, HandlesServerRequests $next) {
                         $response = $next->handle($request);
                         $response->getBody()->write('klaatu ');
                         return $response;
                     }
                 ),
-                'barada' => new Middleware\InjectCallable(
+                'barada' => new Middleware\CallableMiddleware(
                     function (ServerRequest $request, HandlesServerRequests $next) {
                         $response = $next->handle($request);
                         $response->getBody()->write('barada ');
                         return $response;
                     }
                 ),
-                'nikto' => new Middleware\InjectCallable(
+                'nikto' => new Middleware\CallableMiddleware(
                     function (ServerRequest $request, HandlesServerRequests $next) {
                         $response = $next->handle($request);
                         $response->getBody()->write('nikto ');

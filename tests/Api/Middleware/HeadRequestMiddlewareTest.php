@@ -4,7 +4,7 @@ namespace Virtue\Api\Middleware;
 
 use PHPUnit\Framework\TestCase;
 use Slim\Factory\ServerRequestCreatorFactory;
-use Virtue\Api\Testing\RequestHandlerStub;
+use Virtue\Api\Testing\RequestHandler;
 
 class HeadRequestMiddlewareTest extends TestCase
 {
@@ -14,7 +14,7 @@ class HeadRequestMiddlewareTest extends TestCase
         $middleware = new HeadRequest($responseFactory);
         $request = ServerRequestCreatorFactory::create()->createServerRequestFromGlobals();
         $request = $request->withMethod('HEAD');
-        $response = $middleware->process($request, new RequestHandlerStub($responseFactory->createResponse()));
+        $response = $middleware->process($request, new RequestHandler($responseFactory->createResponse()));
 
         $this->assertEmpty($response->getBody()->getContents(), 'Response body must be empty on request method HEAD.');
     }
