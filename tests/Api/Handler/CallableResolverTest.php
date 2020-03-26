@@ -24,7 +24,7 @@ class CallableResolverTest extends TestCase
         $this->assertInstanceOf(Testing\HomeController::class, $handler[CallableResolver::INSTANCE]);
         $this->assertEquals('__invoke', $handler[CallableResolver::METHOD]);
 
-        $handler = $callable->resolve(sprintf('%s:%s', Testing\HomeController::class, 'home'));
+        $handler = $callable->resolve(sprintf('%s::%s', Testing\HomeController::class, 'home'));
         $this->assertInstanceOf(Testing\HomeController::class, $handler[CallableResolver::INSTANCE]);
         $this->assertEquals('home', $handler[CallableResolver::METHOD]);
 

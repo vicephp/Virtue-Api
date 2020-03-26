@@ -10,15 +10,12 @@ use function is_array;
 use function is_callable;
 use function is_object;
 use function is_string;
-use function preg_match;
 use function sprintf;
 
 final class CallableResolver implements CallableResolverInterface
 {
     const INSTANCE = 0;
     const METHOD = 1;
-
-    public static $callablePattern = '!^([^\:]+)\:{1,2}([a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*)$!';
     /** @var Locator */
     private $kernel;
 
@@ -29,22 +26,19 @@ final class CallableResolver implements CallableResolverInterface
 
     public function resolve($resolvable): callable
     {
-        if (is_callable($resolvable)) {
-            return $this->bindToContainer($resolvable);
-        }
         $resolved = $resolvable;
         if (is_string($resolvable)) {
-            $resolved = $this->resolveSlimNotation($resolvable);
-            $resolved[1] = $resolved[1] ?? '__invoke';
+            $resolved = $this->resolveStringNotation($resolvable);
         }
         $callable = $this->assertCallable($resolved, $resolvable);
+
         return $this->bindToContainer($callable);
     }
 
-    private function resolveSlimNotation(string $resolvable): array
+    private function resolveStringNotation(string $resolvable): array
     {
-        preg_match(CallableResolver::$callablePattern, $resolvable, $matches);
-        [$class, $method] = $matches ? [$matches[1], $matches[2]] : [$resolvable, null];
+        $matches = explode('::', $resolvable);
+        [$class, $method] = [$matches[self::INSTANCE], $matches[self::METHOD] ?? '__invoke'];
 
         if ($this->kernel->has($class)) {
             return [$instance = $this->kernel->get($class), $method];

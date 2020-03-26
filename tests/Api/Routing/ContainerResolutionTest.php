@@ -15,9 +15,7 @@ class ContainerResolutionTest extends TestCase
     {
         $this->container->addDefinitions(
             [
-                'HomeController' => function (Locator $kernel) {
-                    return new HomeController($kernel);
-                }
+                'HomeController' => new HomeController()
             ]
         );
 
@@ -25,7 +23,7 @@ class ContainerResolutionTest extends TestCase
         $app = $kernel->get(App::class);
         $app->add(Routing::class);
         $app->get('/', 'HomeController');
-        $app->get('/home', 'HomeController:home');
+        $app->get('/home', 'HomeController::home');
         $request = $kernel->get(ServerRequest::class);
 
         $response = $app->handle($request->withUri($request->getUri()->withPath('/'))->withMethod('GET'));
@@ -40,8 +38,8 @@ class ContainerResolutionTest extends TestCase
         $kernel = $this->container->build();
         $app = $kernel->get(App::class);
         $app->add(Routing::class);
-        $app->get('/', \Virtue\Api\Testing\HomeController::class . ':home');
-        $app->get('/contact', \Virtue\Api\Testing\HomeController::class . ':contact');
+        $app->get('/', \Virtue\Api\Testing\HomeController::class . '::home');
+        $app->get('/contact', \Virtue\Api\Testing\HomeController::class . '::contact');
         $request = $kernel->get(ServerRequest::class);
 
         $response = $app->handle($request->withUri($request->getUri()->withPath('/'))->withMethod('GET'));
