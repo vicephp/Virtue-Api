@@ -6,17 +6,17 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as ServerRequest;
 use Psr\Http\Server\MiddlewareInterface as ServerMiddleware;
 use Psr\Http\Server\RequestHandlerInterface as HandlesServerRequests;
-use Virtue\Http\Message\HeaderParser;
+use Virtue\Http\Message\RequestParser;
 
 class ErrorHandling implements ServerMiddleware
 {
-    /** @var HeaderParser */
+    /** @var RequestParser */
     private $parser;
     /** @var array|ServerMiddleware[] */
     protected $errorRenderers = [];
 
     public function __construct(
-        HeaderParser $parser,
+        RequestParser $parser,
         array $errorRenderers
     ) {
         $this->parser = $parser;
@@ -30,7 +30,7 @@ class ErrorHandling implements ServerMiddleware
 
     private function handleException(ServerRequest $request): ServerMiddleware
     {
-        $contentType = $this->parser->bestAccept(array_keys($this->errorRenderers), $request, 'text/plain');
+        $contentType = $this->parser->header($request)->bestAccept(array_keys($this->errorRenderers), 'text/plain');
         return $this->errorRenderers[$contentType];
     }
 }

@@ -6,7 +6,7 @@ use Psr\Http\Message\ResponseFactoryInterface as ResponseFactory;
 use Psr\Http\Message\ServerRequestInterface as ServerRequest;
 use Virtue\Api\Testing;
 use Virtue\Api\TestCase;
-use Virtue\Http\Message\HeaderParser;
+use Virtue\Http\Message\RequestParser;
 
 class ErrorHandlingTest extends TestCase
 {
@@ -15,7 +15,7 @@ class ErrorHandlingTest extends TestCase
         $kernel = $this->container->build();
         $request = $kernel->get(ServerRequest::class);
         $errorHandling = new ErrorHandling(
-            new HeaderParser(),
+            new RequestParser(),
             ['text/html' => $kernel->get(Testing\ErrorHandling::class)]
         );
         $response = $errorHandling->process(
