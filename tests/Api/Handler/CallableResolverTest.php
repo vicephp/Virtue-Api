@@ -14,7 +14,7 @@ class CallableResolverTest extends TestCase
         $container = new ContainerBuilder();
         $container->addDefinitions([
             'klaatu' => 'barada',
-            Testing\RequestHandler::class => new Testing\RequestHandler(new Response()),
+            Testing\RequestHandler::class => new Testing\RequestHandler([new Response()]),
         ]);
         $kernel = $container->build();
 

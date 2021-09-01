@@ -2,7 +2,7 @@
 
 namespace Virtue\Api;
 
-use Prophecy\Argument;
+use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use Psr\Container\ContainerInterface;
 use Psr\Container\ContainerInterface as Locator;
 use Psr\Http\Message\ResponseFactoryInterface as ResponseFactory;
@@ -15,15 +15,17 @@ use Virtue\Api\Testing;
 
 class AppTest extends TestCase
 {
+    use MockeryPHPUnitIntegration;
+
     public function testDoesNotUseContainerAsServiceLocator()
     {
-        $routeCollector = $this->prophesize(Routing\RouteCollector::class);
-        $kernel = $this->prophesize(ContainerInterface::class);
-        $middlewares = $this->prophesize(MiddlewareContainer::class);
-        new App($kernel->reveal(), $routeCollector->reveal(), $middlewares->reveal());
+        $routeCollector = \Mockery::mock(Routing\RouteCollector::class);
+        $kernel = \Mockery::spy(ContainerInterface::class);
+        $middlewares =\Mockery::mock(MiddlewareContainer::class);
+        new App($kernel, $routeCollector, $middlewares);
 
-        $kernel->has(Argument::type('string'))->shouldNotHaveBeenCalled();
-        $kernel->get(Argument::type('string'))->shouldNotHaveBeenCalled();
+        $kernel->shouldNotHaveReceived('has');
+        $kernel->shouldNotHaveReceived('get');
     }
 
     public function testRun()
@@ -50,7 +52,7 @@ class AppTest extends TestCase
             [
                 Routing\RouteRunner::class => function (Locator $kernel) {
                     return new Testing\RequestHandler(
-                        $kernel->get(ResponseFactory::class)->createResponse()
+                        [$kernel->get(ResponseFactory::class)->createResponse()]
                     );
                 },
             ]

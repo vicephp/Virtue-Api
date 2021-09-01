@@ -14,14 +14,14 @@ use Virtue\Api\TestCase;
 
 class RoutingTest extends TestCase
 {
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $this->container->addDefinitions(
             [
                 Routing\RouteRunner::class => function (Locator $kernel) {
                     return new Testing\RequestHandler(
-                        $kernel->get(ResponseFactory::class)->createResponse()
+                        [$kernel->get(ResponseFactory::class)->createResponse()]
                     );
                 },
             ]
@@ -40,11 +40,10 @@ class RoutingTest extends TestCase
         $request = $kernel->get(ServerRequest::class);
 
         $request = $request->withUri($request->getUri()->withPath($path));
-        $app->run($request); // run twice, application should be stateless
         $app->run($request);
         /** @var Testing\RequestHandler $handler */
         $handler = $kernel->get(Routing\RouteRunner::class);
-        $this->assertNotNull($handler->last()->getAttribute(Routing\Route::class));
+        $this->assertNotNull($handler->lastRequest()->getAttribute(Routing\Route::class));
     }
 
     public function testNotFound()

@@ -14,14 +14,14 @@ use Virtue\Api\Testing;
 
 class AuthorizationTest extends TestCase
 {
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $this->container->addDefinitions(
             [
                 Routing\RouteRunner::class => function (Locator $kernel) {
                     return new Testing\RequestHandler(
-                        $kernel->get(ResponseFactory::class)->createResponse()
+                        [$kernel->get(ResponseFactory::class)->createResponse()]
                     );
                 },
             ]

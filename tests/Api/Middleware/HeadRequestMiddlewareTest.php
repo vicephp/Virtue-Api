@@ -14,7 +14,7 @@ class HeadRequestMiddlewareTest extends TestCase
         $middleware = new HeadRequest($responseFactory);
         $request = ServerRequestCreatorFactory::create()->createServerRequestFromGlobals();
         $request = $request->withMethod('HEAD');
-        $response = $middleware->process($request, new RequestHandler($responseFactory->createResponse()));
+        $response = $middleware->process($request, new RequestHandler([$responseFactory->createResponse()]));
 
         $this->assertEmpty($response->getBody()->getContents(), 'Response body must be empty on request method HEAD.');
     }

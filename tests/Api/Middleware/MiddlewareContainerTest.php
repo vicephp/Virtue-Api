@@ -13,7 +13,7 @@ class MiddlewareContainerTest extends MockeryTestCase
 {
     private $middlewares = [];
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $this->middlewares = [
@@ -44,7 +44,7 @@ class MiddlewareContainerTest extends MockeryTestCase
     public function testMiddlewareInConstructor()
     {
         $container = new MiddlewareContainer(
-            new RequestHandler(new Response()),
+            new RequestHandler([new Response()]),
             [$this->middlewares['nikto'], $this->middlewares['barada'], $this->middlewares['klaatu']]
         );
 
@@ -54,7 +54,7 @@ class MiddlewareContainerTest extends MockeryTestCase
 
     public function testMiddlewareAdded()
     {
-        $middlewares = new MiddlewareContainer(new RequestHandler(new Response()));
+        $middlewares = new MiddlewareContainer(new RequestHandler([new Response()]));
         $middlewares->append($this->middlewares['barada']);
         $middlewares->append($this->middlewares['klaatu']);
         $middlewares->prepend($this->middlewares['nikto']);
@@ -65,10 +65,10 @@ class MiddlewareContainerTest extends MockeryTestCase
 
     public function testStack()
     {
-        $aStack = new MiddlewareContainer(new RequestHandler(new Response()));
+        $aStack = new MiddlewareContainer(new RequestHandler([new Response()]));
         $aStack->append($this->middlewares['barada']);
         $aStack->append($this->middlewares['klaatu']);
-        $bStack = new MiddlewareContainer(new RequestHandler(new Response()));
+        $bStack = new MiddlewareContainer(new RequestHandler([new Response()]));
         $bStack->append($this->middlewares['nikto']);
 
         $response = $bStack->stack($aStack)->handle(\Mockery::mock(ServerRequest::class));

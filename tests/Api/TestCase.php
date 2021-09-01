@@ -21,7 +21,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
     /** @var ContainerBuilder */
     protected $container;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->container = new \DI\ContainerBuilder();
         $this->container->addDefinitions(

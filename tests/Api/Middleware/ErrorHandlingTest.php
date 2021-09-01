@@ -21,7 +21,7 @@ class ErrorHandlingTest extends TestCase
         $response = $errorHandling->process(
             $request->withHeader('Accept', 'text/html'),
             new Testing\RequestHandler(
-                $kernel->get(ResponseFactory::class)->createResponse()
+                [$kernel->get(ResponseFactory::class)->createResponse()]
             )
         );
 
