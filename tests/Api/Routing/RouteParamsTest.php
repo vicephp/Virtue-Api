@@ -1,10 +1,9 @@
 <?php
 
-namespace Routing;
+namespace Virtue\Api\Routing;
 
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
-use Virtue\Api\Routing\RouteParams;
 
 class RouteParamsTest extends TestCase
 {
